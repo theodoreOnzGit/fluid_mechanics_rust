@@ -106,3 +106,24 @@ pub fn fLDK(ReynoldsNumber: f64,
 
     return fLDK;
 }
+
+
+#[allow(non_snake_case)]
+pub fn getBe(ReynoldsNumber: f64,
+                    roughnessRatio: f64,
+                    lengthToDiameterRatio: f64,
+                    K: f64) -> f64{
+
+    if ReynoldsNumber == 0.0 {
+        return 0.0;
+    }
+
+    let f = darcy(ReynoldsNumber, roughnessRatio);
+
+    let fLDK = f*lengthToDiameterRatio + K;
+
+    let Be = 0.5*fLDK*ReynoldsNumber.powf(2.0);
+
+    return Be;
+}
+
