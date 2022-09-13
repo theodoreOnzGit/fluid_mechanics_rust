@@ -109,7 +109,7 @@ pub fn fLDK(ReynoldsNumber: f64,
 
 
 #[allow(non_snake_case)]
-pub fn getBe(ReynoldsNumber: f64,
+pub fn getBe(mut ReynoldsNumber: f64,
                     roughnessRatio: f64,
                     lengthToDiameterRatio: f64,
                     K: f64) -> f64{
@@ -118,8 +118,11 @@ pub fn getBe(ReynoldsNumber: f64,
         return 0.0;
     }
 
+    let mut isNegative = false;
+
     if ReynoldsNumber < 0.0 {
-        panic!("Re < 0.0");
+        isNegative = true;
+        ReynoldsNumber = ReynoldsNumber * -1.0;
     }
 
     if roughnessRatio < 0.0 {
@@ -138,7 +141,12 @@ pub fn getBe(ReynoldsNumber: f64,
 
     let fLDK = f*lengthToDiameterRatio + K;
 
-    let Be = 0.5*fLDK*ReynoldsNumber.powf(2.0);
+    let mut Be = 0.5*fLDK*ReynoldsNumber.powf(2.0);
+
+    if isNegative {
+        Be = Be * -1.0;
+        return Be;
+    }
 
     return Be;
 }
