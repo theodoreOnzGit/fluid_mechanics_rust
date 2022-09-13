@@ -1,3 +1,7 @@
+extern crate peroxide;
+use peroxide::prelude::*;
+
+
 // here are the functions used for friction factor, rather messy but
 // for fast prototyping and sandboxing don't really care too much
 //
@@ -151,3 +155,93 @@ pub fn getBe(mut ReynoldsNumber: f64,
     return Be;
 }
 
+#[allow(non_snake_case)]
+pub fn getRe(mut Be_D: f64,
+             roughnessRatio: f64,
+             lengthToDiameter: f64,
+             formLossK: f64) -> f64 {
+
+    if lengthToDiameter <= 0.0 {
+        panic!("lengthToDiameterRatio<=0.0");
+    }
+
+    if roughnessRatio < 0.0 {
+        panic!("roughnessRatio<0.0");
+    }
+
+    if formLossK < 0.0 {
+        panic!("formLossK<0.0");
+    }
+
+    // this part deals with negative Be_L values
+    // invalid Be_L values
+    let mut isNegative = false;
+    if Be_D < 0.0 {
+        Be_D = Be_D * -1.0;
+        isNegative = true;
+    }
+
+    let maxRe = 1.0e12;
+
+    // i calculate the Be_D corresponding to 
+    // Re = 1e12
+    let maxBe_D = getBe(maxRe,roughnessRatio, 
+                        lengthToDiameter,formLossK);
+
+    if Be_D >= maxBe_D {
+        panic!("Be too large");
+    }
+    // the above checks for all the relevant exceptions
+    // including formLossK < 0
+    //
+    // now we are ready to do root finding
+    //
+    // the underlying equation is 
+    // Be = 0.5*fLDK*Re^2
+
+
+    let pressureDropRoot = |Re: AD| -> AD {
+        // i'm solving for
+        // Be - 0.5*fLDK*Re^2 = 0 
+        // the fLDK term can be calculated using
+        // getBe
+        //
+        // now i don't really need the interpolation
+        // term in here because when Re = 0,
+        // Be = 0 in the getBe code.
+        // so really, no need for fancy interpolation.
+        //
+        // Now in peroxide, the type taken in and out
+        // is not a f64 double
+        // but rather AD which stands for automatic 
+        // differentiation
+        // https://docs.rs/peroxide/latest/peroxide/structure/ad/index.html
+
+        let reynoldsDouble = Re.x();
+        let fLDKterm = getBe(reynoldsDouble, roughnessRatio,
+                             lengthToDiameter,
+                             formLossK);
+
+        return AD0(Be_D - fLDKterm);
+
+    };
+
+    let ReynoldsNumberResult = bisection(pressureDropRoot,
+                                         (0.0,maxRe),
+                                         100,
+                                         1e-8);
+
+
+
+    // the unwrap turns the result into f64
+    let mut ReynoldsNumber = ReynoldsNumberResult.unwrap();
+
+
+    if isNegative
+    {
+        ReynoldsNumber = ReynoldsNumber * -1.0;
+        return ReynoldsNumber;
+    }
+
+    return ReynoldsNumber;
+}

@@ -42,7 +42,13 @@ I installed
 
 ```powershell
 cargo add uom
+cargo add peroxide
 ```
+
+1. units of measure (uom) helps to provide unit safe 
+calculations.
+2. Peroxide is a numerical methods library we need for root 
+finding
 
 ## combining library and binary
 
@@ -64,3 +70,14 @@ and added the following to cargo.toml
 name = "fluid_mechanics_rust"
 path = "src/lib/lib.rs"
 ```
+
+## returning functions in rust
+
+I often use root finding algorithms in rust
+or C sharp, and for that i need a one input, one output function.
+
+I found this site useful:
+https://stackoverflow.com/questions/63967743/what-is-the-correct-syntax-to-return-a-function-in-rust
+
+
+

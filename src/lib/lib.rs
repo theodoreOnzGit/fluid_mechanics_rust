@@ -34,3 +34,15 @@ pub fn get_bejan_d(ReynoldsNumber: f64,
         getBe(ReynoldsNumber, roughnessRatio,
               lengthToDiameterRatio, K);
 }
+
+#[allow(non_snake_case)]
+pub fn get_reynolds_number(Be_D: f64,
+             roughnessRatio: f64,
+             lengthToDiameter: f64,
+             formLossK: f64) -> f64 {
+    return churchill_friction_factor::
+        getRe(Be_D, roughnessRatio,
+              lengthToDiameter, formLossK);
+
+}
+

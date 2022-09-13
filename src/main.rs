@@ -32,6 +32,13 @@ fn test_friction_factor(){
 
     println!("{}", bejan_d);
 
+    // reynolds number from Be
+    let reynolds_number = 
+        fluid_mechanics_rust::get_reynolds_number(
+            bejan_d,0.00014,10.0,5.0);
+
+    println!("{}", reynolds_number);
+
 }
 
 
