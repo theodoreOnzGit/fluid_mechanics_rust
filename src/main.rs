@@ -43,6 +43,26 @@ fn test_friction_factor(){
 
     println!("{}", reynolds_number);
 
+    fn custom_k_ctah(reynolds_number: f64) -> f64 {
+        return 400.0 + 52000.0/reynolds_number;
+    }
+
+    fn custom_f_ctah(_reynolds_number: f64,
+                     _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    // testing custom K pipe
+    let custom_k_reynolds_number = 
+        fluid_mechanics_rust::custom_fldk(
+            &custom_f_ctah,
+            100.0,
+            0.00014,
+            10.0,
+            &custom_k_ctah);
+
+    println!("{}", custom_k_reynolds_number);
+
 }
 
 
