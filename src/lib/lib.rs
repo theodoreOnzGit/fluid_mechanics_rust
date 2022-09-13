@@ -1,4 +1,5 @@
 mod churchill_friction_factor;
+mod custom_fldk;
 
 #[allow(non_snake_case)]
 pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
@@ -46,3 +47,28 @@ pub fn get_reynolds_number(Be_D: f64,
 
 }
 
+#[allow(non_snake_case)]
+pub fn custom_fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
+        ReynoldsNumber: f64,
+        roughnessRatio: f64,
+        lengthToDiameterRatio: f64,
+        customK: &dyn Fn(f64) -> f64) -> f64{
+    return custom_fldk::custom_fLDK(&customDarcy,
+                       ReynoldsNumber,
+                       roughnessRatio,
+                       lengthToDiameterRatio,
+                       &customK);
+
+}
+
+#[allow(non_snake_case)]
+pub fn custom_k_pipe(ReynoldsNumber: f64,
+                    roughnessRatio: f64,
+                    lengthToDiameterRatio: f64,
+                    customK: &dyn Fn(f64) -> f64) -> f64{
+
+    return custom_fldk::custom_Kpipe(ReynoldsNumber,
+                                     roughnessRatio,
+                                     lengthToDiameterRatio,
+                                     &customK);
+}
