@@ -14,6 +14,13 @@ fn test_friction_factor(){
         fluid_mechanics_rust::darcy(1800.0,0.0015);
 
     println!("{}", darcy_friction_factor);
+    
+    let fldk = 
+        fluid_mechanics_rust::fldk(
+            15000.0,0.00014,10.0,5.0);
+
+    println!("{}", fldk);
+
 
 }
 
