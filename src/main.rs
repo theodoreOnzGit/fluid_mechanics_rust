@@ -23,7 +23,7 @@ fn test_friction_factor(){
 
     let bejan_d = 
         fluid_mechanics_rust::get_bejan_d(
-            15000.0,0.00014,10.0,5.0);
+            0.00000000000001,0.00014,10.0,5.0);
 
     println!("{}", bejan_d);
 

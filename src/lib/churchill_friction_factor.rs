@@ -118,6 +118,22 @@ pub fn getBe(ReynoldsNumber: f64,
         return 0.0;
     }
 
+    if ReynoldsNumber < 0.0 {
+        panic!("Re < 0.0");
+    }
+
+    if roughnessRatio < 0.0 {
+        panic!("roughnessRatio<0.0");
+    }
+
+    if lengthToDiameterRatio <= 0.0 {
+        panic!("lengthToDiameterRatio<=0.0");
+    }
+
+    if K < 0.0 {
+        panic!("Form loss coefficient K < 0.0");
+    }
+
     let f = darcy(ReynoldsNumber, roughnessRatio);
 
     let fLDK = f*lengthToDiameterRatio + K;
