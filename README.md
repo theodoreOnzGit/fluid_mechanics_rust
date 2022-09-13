@@ -6,6 +6,7 @@ I use cargo watch:
 
 ```powershell
 cargo install cargo-watch
+cargo watch -x run
 ```
 
 ### vim-lsp-settings
@@ -54,4 +55,12 @@ I followed the instructions above and changed the cargo.toml:
 name = "fluid_mechanics_rust"
 path = "src/bin.rs"
 ```
+i then added a lib.rs file in the following filepath
+src/lib/lib.rs,
+and added the following to cargo.toml
 
+```toml
+[lib]
+name = "fluid_mechanics_rust"
+path = "src/lib/lib.rs"
+```
