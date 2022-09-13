@@ -42,3 +42,16 @@ I installed
 ```powershell
 cargo add uom
 ```
+
+## combining library and binary
+
+https://dev.to/yjdoc2/make-a-combined-library-and-binary-project-in-rust-d4f
+
+I followed the instructions above and changed the cargo.toml:
+
+```toml
+[[bin]]
+name = "fluid_mechanics_rust"
+path = "src/bin.rs"
+```
+

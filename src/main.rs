@@ -1,3 +1,4 @@
+use fluid_mechanics_rust;
 fn main() {
     println!("Hello, world!");
     hello2();

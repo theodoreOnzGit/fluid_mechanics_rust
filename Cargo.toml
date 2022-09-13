@@ -7,3 +7,12 @@ edition = "2021"
 
 [dependencies]
 uom = "0.33.0"
+
+# library and binary key
+[[bin]]
+name = "fluid_mechanics_rust_bin"
+path = "src/main.rs"
+
+[lib]
+name = "fluid_mechanics_rust"
+path = "src/lib/lib.rs"
