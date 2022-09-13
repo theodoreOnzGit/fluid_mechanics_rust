@@ -25,6 +25,7 @@ fn test_friction_factor(){
         fluid_mechanics_rust::get_bejan_d(
             0.00000000000001,0.00014,10.0,5.0);
 
+    // i can supply a Re of -5000 to the bejan number
     println!("{}", bejan_d);
     let bejan_d = 
         fluid_mechanics_rust::get_bejan_d(
@@ -32,6 +33,9 @@ fn test_friction_factor(){
 
     println!("{}", bejan_d);
 
+    // and i use the resulting bejan number to see
+    // if i can get back the same Re
+    //
     // reynolds number from Be
     let reynolds_number = 
         fluid_mechanics_rust::get_reynolds_number(
