@@ -7,6 +7,12 @@ pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
 }
 
 #[allow(non_snake_case)]
+pub fn moody(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
+    return churchill_friction_factor:: 
+        moody(ReynoldsNumber, roughnessRatio);
+}
+
+#[allow(non_snake_case)]
 pub fn fldk(ReynoldsNumber: f64,
                    roughnessRatio: f64,
                    lengthToDiameterRatio: f64,

@@ -71,7 +71,7 @@ pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
 }
 
 #[allow(non_snake_case)]
-fn moody(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
+pub fn moody(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
     return 4.0*fanning(ReynoldsNumber, roughnessRatio);
 }
 
