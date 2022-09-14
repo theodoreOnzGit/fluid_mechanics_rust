@@ -16,13 +16,6 @@ pub fn custom_fLDK(customDarcy: &dyn Fn(f64, f64) -> f64,
         roughnessRatio: f64,
         lengthToDiameterRatio: f64,
         customK: &dyn Fn(f64) -> f64) -> f64{
-    if ReynoldsNumber == 0.0 {
-        panic!("Re = 0");
-    }
-
-    if ReynoldsNumber < 0.0 {
-        panic!("Re < 0");
-    }
 
     if roughnessRatio < 0.0 {
         panic!("roughnessRatio<0.0");
@@ -59,6 +52,51 @@ pub fn custom_Kpipe(ReynoldsNumber: f64,
                            customK);
 
     return fLDK;
+
+}
+
+#[allow(non_snake_case)]
+pub fn custom_Kpipe_Be_D(ReynoldsNumber: f64,
+                    roughnessRatio: f64,
+                    lengthToDiameterRatio: f64,
+                    customK: &dyn Fn(f64) -> f64) -> f64{
+
+    if ReynoldsNumber == 0.0 {
+        return 0.0;
+    }
+
+    let fLDK = custom_Kpipe(ReynoldsNumber,
+                           roughnessRatio,
+                           lengthToDiameterRatio,
+                           customK);
+
+    let Be_D = 0.5*fLDK*ReynoldsNumber.powf(2.0);
+
+    return Be_D;
+
+}
+
+
+#[allow(non_snake_case)]
+pub fn custom_fLDK_Be_D(customDarcy: &dyn Fn(f64, f64) -> f64, 
+                        ReynoldsNumber: f64,
+                        roughnessRatio: f64,
+                        lengthToDiameterRatio: f64,
+                        customK: &dyn Fn(f64) -> f64) -> f64{
+
+    if ReynoldsNumber == 0.0 {
+        return 0.0;
+    }
+
+    let fLDK = custom_fLDK(customDarcy,
+                           ReynoldsNumber,
+                           roughnessRatio,
+                           lengthToDiameterRatio,
+                            customK);
+
+    let Be_D = 0.5*fLDK*ReynoldsNumber.powf(2.0);
+
+    return Be_D;
 
 }
 

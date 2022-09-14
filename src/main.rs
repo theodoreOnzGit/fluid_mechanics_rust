@@ -55,15 +55,30 @@ fn test_friction_factor(){
     // testing custom K pipe
     // now using some object oriented programming
     // structs with implementations behave a bit like static classes hah
-    let custom_k_reynolds_number = 
+    let custom_fldk = 
         fluid_mechanics_rust::CustomComponent::fldk(
             &custom_f_ctah,
-            100.0,
+            5000.0,
             0.00014,
             10.0,
             &custom_k_ctah);
 
-    println!("{}", custom_k_reynolds_number);
+    println!("{}", custom_fldk);
+
+    // now testing for bejan number for custom k 
+    //
+    let expected_bejan_custom_fldk = -0.5*custom_fldk * reynolds_number.powf(2.0);
+    println!("expected Bejan custom k pipe: {}", expected_bejan_custom_fldk);
+
+    let actual_bejan_custom_k = fluid_mechanics_rust::CustomComponent::
+        get_bejan_custom_fldk(&custom_f_ctah,
+                              5000.0,
+                              0.00014,
+                              10.0,
+                              &custom_k_ctah);
+
+    println!("actual_bejan_custom_k: {}", actual_bejan_custom_k);
+    // manual testing seems to work ok!
 
 }
 

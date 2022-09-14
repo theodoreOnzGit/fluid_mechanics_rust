@@ -54,16 +54,23 @@ pub struct CustomComponent {
 impl CustomComponent {
 
     // i allow users to define their own fldk
+    // basically i allow the user to define 
+    // the darcy(Re, roughnessRatio) 
+    // and the 
+    // formLossK(Re)
+    //
+    // fLDK is calculated by:
+    // darcy*(L/D) + K
     pub fn fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
     ReynoldsNumber: f64,
     roughnessRatio: f64,
     lengthToDiameterRatio: f64,
     customK: &dyn Fn(f64) -> f64) -> f64{
-        return custom_fldk::custom_fLDK(&customDarcy,
+        return custom_fldk::custom_fLDK(customDarcy,
                                         ReynoldsNumber,
                                         roughnessRatio,
                                         lengthToDiameterRatio,
-                                        &customK);
+                                        customK);
 
     }
 
@@ -77,6 +84,48 @@ impl CustomComponent {
         return custom_fldk::custom_Kpipe(ReynoldsNumber,
                                          roughnessRatio,
                                          lengthToDiameterRatio,
-                                         &customK);
+                                         customK);
     }
+
+    // now suppose we have a custom K type pipe, we can just return the
+    // bejan number
+    pub fn get_bejan_custom_k_pipe( ReynoldsNumber: f64, 
+                                    roughnessRatio: f64,
+                                    lengthToDiameterRatio: f64,
+                                    customK: &dyn Fn(f64) -> f64) -> f64{
+
+        return custom_fldk::custom_Kpipe_Be_D(ReynoldsNumber,
+                                              roughnessRatio,
+                                              lengthToDiameterRatio,
+                                              customK);
+
+    }
+
+    // and now do the same for a generic fldk component of any form
+    // i allow users to define their own fldk
+    // basically i allow the user to define 
+    // the darcy(Re, roughnessRatio) 
+    // and the 
+    // formLossK(Re)
+    //
+    // fLDK is calculated by:
+    // darcy*(L/D) + K
+    // the bejan number is calculated by:
+    // Be_D = 0.5*fLDK*Re^2
+    //
+
+    pub fn get_bejan_custom_fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
+                    ReynoldsNumber: f64,
+                    roughnessRatio: f64,
+                    lengthToDiameterRatio: f64,
+                    customK: &dyn Fn(f64) -> f64) -> f64{
+
+        return custom_fldk::custom_fLDK_Be_D(customDarcy,
+                                             ReynoldsNumber,
+                                             roughnessRatio,
+                                             lengthToDiameterRatio,
+                                             customK);
+
+    }
+
 }
