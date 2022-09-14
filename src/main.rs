@@ -53,8 +53,10 @@ fn test_friction_factor(){
     }
 
     // testing custom K pipe
+    // now using some object oriented programming
+    // structs with implementations behave a bit like static classes hah
     let custom_k_reynolds_number = 
-        fluid_mechanics_rust::custom_fldk(
+        fluid_mechanics_rust::CustomComponent::fldk(
             &custom_f_ctah,
             100.0,
             0.00014,
