@@ -1,4 +1,16 @@
+extern crate uom;
 use fluid_mechanics_rust;
+
+// adding units from uom
+use uom::si::mass_rate::kilogram_per_second;
+use uom::si::dynamic_viscosity::pascal_second;
+use uom::si::length::{meter,centimeter,foot,inch};
+use uom::si::area::square_meter;
+
+use uom::si::f64::*;
+use uom::typenum::P2;
+
+
 fn main() {
     println!("Hello, world!");
     hello2();
@@ -77,8 +89,24 @@ fn test_friction_factor(){
                               10.0,
                               &custom_k_ctah);
 
-    println!("actual_bejan_custom_k: {}", actual_bejan_custom_k);
+    println!("actual_bejan_custom_k: {} \n", actual_bejan_custom_k);
     // manual testing seems to work ok!
+    //
+    //
+    let fluid_massflowrate = MassRate::new::<kilogram_per_second>(0.05);
+    let pipe_diameter = Length::new::<meter>(2.79e-2);
+    let pipe_xs_area = pipe_diameter.powi(P2::new())*std::f64::consts::PI/4.0;
+    let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+
+    let reynolds_number = fluid_mechanics_rust::CalcReynolds::from_mass_rate(
+        fluid_massflowrate,
+        pipe_xs_area,
+        pipe_diameter,
+        fluid_viscosity);
+
+    println!("Reynolds number: {} ", reynolds_number);
+
+
 
 }
 

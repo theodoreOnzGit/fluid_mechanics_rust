@@ -12,7 +12,7 @@ use uom::typenum::P2;
 // this set of functions here is simply to convert to and from
 // dimensionless numbers to SI units, and back
 
-struct CalcReynolds {}
+pub struct CalcReynolds {}
 impl CalcReynolds {
     #[allow(non_snake_case)]
     pub fn from_velocity(fluidDensity: MassDensity,
@@ -63,6 +63,7 @@ impl CalcReynolds {
             crossSectionalArea*
             hydraulic_diameter/
             fluidViscosity;
+
 
         return reynolds_number.value.into();
     }

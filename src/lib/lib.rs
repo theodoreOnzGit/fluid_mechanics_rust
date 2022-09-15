@@ -1,6 +1,9 @@
+extern crate uom;
 mod churchill_friction_factor;
 mod custom_fldk;
 mod dimensionalisation;
+
+use uom::si::f64::*;
 
 #[allow(non_snake_case)]
 pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
@@ -130,3 +133,24 @@ impl CustomComponent {
     }
 
 }
+
+pub struct CalcReynolds {}
+#[allow(non_snake_case)]
+impl CalcReynolds {
+
+    #[allow(non_snake_case)]
+    pub fn from_mass_rate(fluidMassFlowrate: MassRate,
+                        crossSectionalArea: Area,
+                        hydraulic_diameter: Length,
+                        fluidViscosity: DynamicViscosity) -> f64 {
+
+
+
+        return dimensionalisation::CalcReynolds::from_mass_rate(
+            fluidMassFlowrate,
+            crossSectionalArea,
+            hydraulic_diameter,
+            fluidViscosity);
+    }
+}
+
