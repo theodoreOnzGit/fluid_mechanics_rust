@@ -180,3 +180,35 @@ impl CalcReynolds {
     }
 }
 
+pub struct CalcBejan {}
+impl CalcBejan {
+
+
+    #[allow(non_snake_case)]
+    pub fn from_pressure(fluidPressure: Pressure,
+              hydraulicDiameter: Length,
+              fluidDensity: MassDensity,
+              fluidViscosity: DynamicViscosity) -> f64 {
+
+        return dimensionalisation::CalcBejan::from_pressure(
+            fluidPressure,
+            hydraulicDiameter,
+            fluidDensity,
+            fluidViscosity);
+    }
+
+    #[allow(non_snake_case)]
+    pub fn to_pressure(Be_D: f64,
+                       hydraulicDiameter: Length,
+                       fluidDensity: MassDensity,
+                       fluidViscosity: DynamicViscosity) -> Pressure {
+        return dimensionalisation::CalcBejan::to_pressure(
+            Be_D,
+            hydraulicDiameter,
+            fluidDensity,
+            fluidViscosity);
+
+    }
+
+
+}

@@ -103,7 +103,7 @@ impl CalcReynolds {
     }
 }
 
-struct CalcBejan {}
+pub struct CalcBejan {}
 impl CalcBejan {
 
     #[allow(non_snake_case)]

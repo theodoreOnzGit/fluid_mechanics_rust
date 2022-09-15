@@ -5,7 +5,8 @@ use fluid_mechanics_rust;
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::dynamic_viscosity::pascal_second;
 use uom::si::length::{meter,centimeter,foot,inch};
-use uom::si::area::square_meter;
+use uom::si::pressure::pascal;
+use uom::si::mass_density::kilogram_per_cubic_meter;
 
 use uom::si::f64::*;
 use uom::typenum::P2;
@@ -113,6 +114,22 @@ fn test_friction_factor(){
         fluid_viscosity);
 
     println!("mass flowrate: {:?} \n", test_fluid_mass_flowrate);
+
+    // here is some testing for bejan number
+
+    let fluid_pressure = Pressure::new::<pascal>(500.0);
+    let fluid_density = MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+
+    let bejan_number = fluid_mechanics_rust::CalcBejan::from_pressure(
+        fluid_pressure,
+        pipe_diameter,
+        fluid_density,
+        fluid_viscosity);
+
+
+    println!("Bejan number: {} \n", bejan_number);
+
+
 
 
 
