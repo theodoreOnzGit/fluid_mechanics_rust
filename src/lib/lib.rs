@@ -152,5 +152,31 @@ impl CalcReynolds {
             hydraulic_diameter,
             fluidViscosity);
     }
+
+    pub fn from_velocity(fluidDensity: MassDensity,
+                     velocity: Velocity, 
+                     hydraulic_diameter: Length,
+                     fluidViscosity: DynamicViscosity) -> f64 {
+
+        return dimensionalisation::CalcReynolds::from_velocity(
+            fluidDensity,
+            velocity,
+            hydraulic_diameter,
+            fluidViscosity);
+
+    }
+
+    #[allow(non_snake_case)]
+    pub fn to_mass_rate(crossSectionalArea: Area,
+                        Re: f64,
+                        hydraulicDiameter: Length,
+                        fluidViscosity: DynamicViscosity) -> MassRate {
+
+        return dimensionalisation::CalcReynolds::to_mass_rate(
+            crossSectionalArea,
+            Re,
+            hydraulicDiameter,
+            fluidViscosity);
+    }
 }
 

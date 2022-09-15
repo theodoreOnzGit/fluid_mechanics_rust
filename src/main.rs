@@ -104,7 +104,15 @@ fn test_friction_factor(){
         pipe_diameter,
         fluid_viscosity);
 
-    println!("Reynolds number: {} ", reynolds_number);
+    println!("Reynolds number: {} \n", reynolds_number);
+
+    let test_fluid_mass_flowrate = fluid_mechanics_rust::CalcReynolds::to_mass_rate(
+        pipe_xs_area,
+        reynolds_number,
+        pipe_diameter,
+        fluid_viscosity);
+
+    println!("mass flowrate: {:?} \n", test_fluid_mass_flowrate);
 
 
 
