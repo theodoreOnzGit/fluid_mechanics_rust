@@ -66,8 +66,19 @@ fn test_dimensionless_number(){
 
     println!("{}", reynolds_number);
 
-    fn custom_k_ctah(reynolds_number: f64) -> f64 {
-        return 400.0 + 52000.0/reynolds_number;
+    fn custom_k_ctah(mut reynolds_number: f64) -> f64 {
+
+        let mut reverse_flow = false;
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+        let fldk =  400.0 + 52000.0/reynolds_number;
+
+        if reverse_flow == true {
+            return -fldk;
+        }
+        return fldk;
     }
 
     fn custom_f_ctah(_reynolds_number: f64,
@@ -81,7 +92,7 @@ fn test_dimensionless_number(){
     let custom_fldk = 
         fluid_mechanics_rust::CustomComponent::fldk(
             &custom_f_ctah,
-            5000.0,
+            -5000.0,
             0.00014,
             10.0,
             &custom_k_ctah);
@@ -89,13 +100,13 @@ fn test_dimensionless_number(){
     println!("{}", custom_fldk);
 
     // now testing for bejan number for custom k 
-    //
-    let expected_bejan_custom_fldk = -0.5*custom_fldk * reynolds_number.powf(2.0);
+    // and we are testing for reverse flow
+    let expected_bejan_custom_fldk = 0.5*custom_fldk * reynolds_number.powf(2.0);
     println!("expected Bejan custom k pipe: {}", expected_bejan_custom_fldk);
 
     let actual_bejan_custom_k = fluid_mechanics_rust::CustomComponent::
         get_bejan_custom_fldk(&custom_f_ctah,
-                              5000.0,
+                              -5000.0,
                               0.00014,
                               10.0,
                               &custom_k_ctah);
