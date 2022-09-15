@@ -6,11 +6,20 @@ use uom::si::area::square_meter;
 use uom::si::length::{meter,centimeter,foot,inch};
 use uom::si::f64::*;
 use uom::typenum::P2;
+use uom::typenum::Z0;
 
 // uom stands for unit of measure.
 //
 // this set of functions here is simply to convert to and from
 // dimensionless numbers to SI units, and back
+
+// first and most important function here,
+// this function converts a quantity into float given the correct dimensions
+// if it's not dimensionless, it will throw a compile time error
+fn convert_dimensionless_number_to_float(dimensionless_number: Ratio) -> f64 {
+    return dimensionless_number.value.into();
+}
+
 
 pub struct CalcReynolds {}
 impl CalcReynolds {
@@ -37,7 +46,9 @@ impl CalcReynolds {
             hydraulic_diameter / 
             fluidViscosity;
 
-        return reynolds_number.value.into();
+
+
+        return convert_dimensionless_number_to_float(reynolds_number);
 
     }
 
@@ -65,7 +76,7 @@ impl CalcReynolds {
             fluidViscosity;
 
 
-        return reynolds_number.value.into();
+        return convert_dimensionless_number_to_float(reynolds_number);
     }
 
     
@@ -123,7 +134,7 @@ impl CalcBejan {
             hydraulicDiameter.powi(P2::new())/
             fluidViscosity.powi(P2::new());
 
-        return Be.value.into();
+        return convert_dimensionless_number_to_float(Be);
     }
 
     #[allow(non_snake_case)]
