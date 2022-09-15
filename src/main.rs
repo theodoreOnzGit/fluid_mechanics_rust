@@ -12,6 +12,9 @@ use uom::si::area::square_meter;
 use uom::si::f64::*;
 use uom::typenum::P2;
 
+// for time tests
+// https://stackoverflow.com/questions/71515747/what-is-the-easiest-way-to-time-a-function-call-for-testing-purposes
+use std::time::SystemTime;
 
 
 fn main() {
@@ -147,6 +150,9 @@ fn test_dimensionless_number(){
 }
 
 fn test_standard_pipe_calc() {
+
+    let start = SystemTime::now();
+
     let fluid_mass_flowrate = MassRate::new::<kilogram_per_second>(0.015);
     let cross_sectional_area= Area::new::<square_meter>(4e-5);
     let hydraulic_diameter= Length::new::<inch>(3.0);
@@ -184,9 +190,12 @@ fn test_standard_pipe_calc() {
         roughness_ratio,
         form_loss_k);
 
-    println!("reference mass flowrate : {:?} (Pascals) ", fluid_mass_flowrate);
-    println!("reference mass flowrate : {:?} (Pascals) ", test_mass_rate);
+    println!("reference mass flowrate : {:?}  ", fluid_mass_flowrate);
+    println!("test mass flowrate : {:?}  ", test_mass_rate);
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
 
+    println!("bisection numerical solution for pipe took {:?}", duration);
 
 }
 
