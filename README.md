@@ -50,6 +50,12 @@ calculations.
 2. Peroxide is a numerical methods library we need for root 
 finding
 
+if you want the latest version of uom
+
+```powershell
+cargo add --git https://github.com/iliekturtles/uom uom
+```
+
 ## combining library and binary
 
 https://dev.to/yjdoc2/make-a-combined-library-and-binary-project-in-rust-d4f
