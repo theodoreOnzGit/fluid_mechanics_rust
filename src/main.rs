@@ -4,7 +4,7 @@ use fluid_mechanics_rust;
 // adding units from uom
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::dynamic_viscosity::pascal_second;
-use uom::si::length::{meter,centimeter,foot,inch};
+use uom::si::length::{meter,millimeter,foot,inch};
 use uom::si::pressure::pascal;
 use uom::si::mass_density::kilogram_per_cubic_meter;
 use uom::si::area::square_meter;
@@ -66,7 +66,7 @@ fn test_dimensionless_number(){
 
     println!("{}", reynolds_number);
 
-    fn custom_k_ctah(mut reynolds_number: f64) -> f64 {
+    fn custom_k(mut reynolds_number: f64) -> f64 {
 
         let mut reverse_flow = false;
         if reynolds_number < 0.0 {
@@ -81,7 +81,7 @@ fn test_dimensionless_number(){
         return fldk;
     }
 
-    fn custom_f_ctah(_reynolds_number: f64,
+    fn custom_f(_reynolds_number: f64,
                      _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
@@ -91,11 +91,11 @@ fn test_dimensionless_number(){
     // structs with implementations behave a bit like static classes hah
     let custom_fldk = 
         fluid_mechanics_rust::CustomComponent::fldk(
-            &custom_f_ctah,
+            &custom_f,
             -5000.0,
             0.00014,
             10.0,
-            &custom_k_ctah);
+            &custom_k);
 
     println!("{}", custom_fldk);
 
@@ -105,11 +105,11 @@ fn test_dimensionless_number(){
     println!("expected Bejan custom k pipe: {}", expected_bejan_custom_fldk);
 
     let actual_bejan_custom_k = fluid_mechanics_rust::CustomComponent::
-        get_bejan_custom_fldk(&custom_f_ctah,
+        get_bejan_custom_fldk(&custom_f,
                               -5000.0,
                               0.00014,
                               10.0,
-                              &custom_k_ctah);
+                              &custom_k);
 
     println!("actual_bejan_custom_k: {} \n", actual_bejan_custom_k);
     // manual testing seems to work ok!
@@ -170,7 +170,7 @@ fn test_standard_pipe_calc() {
     let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.001);
     let fluid_density= MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
     let pipe_length= Length::new::<foot>(6.0);
-    let roughness_ratio= 0.0001;
+    let absolute_roughness= Length::new::<millimeter>(0.001);
     let form_loss_k= 5.0;
 
     // first import crate for CalcPressureLoss functions
@@ -185,7 +185,7 @@ fn test_standard_pipe_calc() {
             fluid_viscosity,
             fluid_density,
             pipe_length,
-            roughness_ratio,
+            absolute_roughness,
             form_loss_k);
 
     println!("reference pressure loss : {:?} (Pascals) ", pressure_loss);
@@ -198,7 +198,7 @@ fn test_standard_pipe_calc() {
         fluid_viscosity,
         fluid_density,
         pipe_length,
-        roughness_ratio,
+        absolute_roughness,
         form_loss_k);
 
     println!("reference mass flowrate : {:?}  ", fluid_mass_flowrate);
@@ -207,6 +207,31 @@ fn test_standard_pipe_calc() {
     let duration = end.duration_since(start).unwrap();
 
     println!("bisection numerical solution for pipe took {:?}", duration);
+
+}
+
+
+fn test_custom_fldk_component(){
+
+    fn custom_k(mut reynolds_number: f64) -> f64 {
+
+        let mut reverse_flow = false;
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+        let fldk =  400.0 + 52000.0/reynolds_number;
+
+        if reverse_flow == true {
+            return -fldk;
+        }
+        return fldk;
+    }
+
+    fn custom_f(_reynolds_number: f64,
+                     _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
 
 }
 

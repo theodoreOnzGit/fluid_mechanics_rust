@@ -14,24 +14,23 @@ impl CalcPressureLoss {
                           fluidViscosity: DynamicViscosity,
                           fluidDensity: MassDensity,
                           pipeLength: Length,
-                          roughnessRatio: f64,
+                          absolute_roughness: Length,
                           formLossK: f64) -> Pressure {
+        // first let's calculate roughness ratio
 
-        // let's first initiate the nondimensionalPipeObj
-        // and also our objects to nondimensionalise fluid mass flowrate
+        let roughnessRatioQuantity = absolute_roughness/hydraulicDiameter;
 
-        // now before i calculate Re, i want to make sure that
-        // reverse flow is accounted for
-        // this is true when fluidMassFlowrate is less than 0
+        let roughnessRatio = 
+            dimensionalisation::convert_dimensionless_number_to_float(
+                roughnessRatioQuantity);
+
+        // second i want to take care of reverse flow
+
         let mut reverseFlow = false;
         if fluidMassFlowrate.value < 0.0 {
             reverseFlow = true;
         }
 
-        // so if i have reverse flow, i will make the fluidMassFlowrate
-        // positive
-        // and return the negative value
-        // of pressureLoss
         if reverseFlow {
             fluidMassFlowrate = fluidMassFlowrate * -1.0;
         }
@@ -82,16 +81,21 @@ impl CalcPressureLoss {
                         fluidViscosity: DynamicViscosity,
                         fluidDensity: MassDensity,
                         pipeLength: Length,
-                        roughnessRatio: f64,
+                        absolute_roughness: Length,
                         formLossK: f64) -> MassRate {
-        // let's first initiate the nondimensionalPipeObj
-        // and also our objects to nondimensionalise fluid mass flowrate
-        // and let's get the Be_D and L/D
 
+        // first let's get our relevant ratios:
+        let roughnessRatioQuantity = absolute_roughness/hydraulicDiameter;
+
+        let roughnessRatio = 
+            dimensionalisation::convert_dimensionless_number_to_float(
+                roughnessRatioQuantity);
 
         let lengthToDiameterRatio 
             = dimensionalisation::convert_dimensionless_number_to_float(
                 pipeLength/hydraulicDiameter);
+
+        // then get Bejan number:
 
         let Be_D = dimensionalisation::CalcBejan::from_pressure(
             pressureLoss, hydraulicDiameter, 
