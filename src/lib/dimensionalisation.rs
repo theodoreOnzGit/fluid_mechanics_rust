@@ -12,7 +12,7 @@ use uom::typenum::P2;
 // first and most important function here,
 // this function converts a quantity into float given the correct dimensions
 // if it's not dimensionless, it will throw a compile time error
-fn convert_dimensionless_number_to_float(dimensionless_number: Ratio) -> f64 {
+pub fn convert_dimensionless_number_to_float(dimensionless_number: Ratio) -> f64 {
     return dimensionless_number.value.into();
 }
 

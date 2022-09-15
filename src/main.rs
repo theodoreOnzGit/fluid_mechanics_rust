@@ -7,15 +7,19 @@ use uom::si::dynamic_viscosity::pascal_second;
 use uom::si::length::{meter,centimeter,foot,inch};
 use uom::si::pressure::pascal;
 use uom::si::mass_density::kilogram_per_cubic_meter;
+use uom::si::area::square_meter;
 
 use uom::si::f64::*;
 use uom::typenum::P2;
+
 
 
 fn main() {
     println!("Hello, world!");
     hello2();
     test_friction_factor();
+    test_dimensionless_number();
+    test_standard_pipe_calc();
 }
 
 fn hello2(){
@@ -34,6 +38,9 @@ fn test_friction_factor(){
 
     println!("{}", fldk);
 
+}
+
+fn test_dimensionless_number(){
     let bejan_d = 
         fluid_mechanics_rust::get_bejan_d(
             0.00000000000001,0.00014,10.0,5.0);
@@ -137,13 +144,50 @@ fn test_friction_factor(){
 
     println!("reference pressure : {:?} ", fluid_pressure);
     println!("test fluid pressure : {:?} \n", test_fluid_pressure);
+}
+
+fn test_standard_pipe_calc() {
+    let fluid_mass_flowrate = MassRate::new::<kilogram_per_second>(0.015);
+    let cross_sectional_area= Area::new::<square_meter>(4e-5);
+    let hydraulic_diameter= Length::new::<inch>(3.0);
+    let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.001);
+    let fluid_density= MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    let pipe_length= Length::new::<foot>(6.0);
+    let roughness_ratio= 0.0001;
+    let form_loss_k= 5.0;
+
+    // first import crate for CalcPressureLoss functions
+    use crate::fluid_mechanics_rust::
+        fluid_component_calculation::
+        standard_pipe_calc::CalcPressureLoss;
+
+    let pressure_loss = CalcPressureLoss::from_mass_rate(
+            fluid_mass_flowrate,
+            cross_sectional_area,
+            hydraulic_diameter,
+            fluid_viscosity,
+            fluid_density,
+            pipe_length,
+            roughness_ratio,
+            form_loss_k);
+
+    println!("reference pressure loss : {:?} (Pascals) ", pressure_loss);
 
 
+    let test_mass_rate = CalcPressureLoss::to_mass_rate(
+        pressure_loss,
+        cross_sectional_area,
+        hydraulic_diameter,
+        fluid_viscosity,
+        fluid_density,
+        pipe_length,
+        roughness_ratio,
+        form_loss_k);
 
+    println!("reference mass flowrate : {:?} (Pascals) ", fluid_mass_flowrate);
+    println!("reference mass flowrate : {:?} (Pascals) ", test_mass_rate);
 
 
 }
-
-
 
 

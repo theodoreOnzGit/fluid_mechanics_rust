@@ -2,6 +2,7 @@ extern crate uom;
 mod churchill_friction_factor;
 mod custom_fldk;
 mod dimensionalisation;
+pub mod fluid_component_calculation;
 
 use uom::si::f64::*;
 
