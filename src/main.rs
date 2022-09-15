@@ -23,6 +23,7 @@ fn main() {
     test_friction_factor();
     test_dimensionless_number();
     test_standard_pipe_calc();
+    test_custom_fldk_component();
 }
 
 fn hello2(){
@@ -232,7 +233,46 @@ fn test_custom_fldk_component(){
                      _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
+    let start = SystemTime::now();
 
+    let fluid_mass_flowrate = MassRate::new::<kilogram_per_second>(0.18);
+    let cross_sectional_area= Area::new::<square_meter>(6.11e-4);
+    let hydraulic_diameter= Length::new::<meter>(2.79e-2);
+    let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.005);
+    let fluid_density= MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    let pipe_length= Length::new::<foot>(6.0);
+    let absolute_roughness= Length::new::<millimeter>(0.001);
+
+    // first import crate for CalcPressureLoss functions
+    use crate::fluid_mechanics_rust::
+        fluid_component_calculation::
+        custom_component_calc::CalcPressureLoss;
+
+    let reynolds_number = fluid_mass_flowrate/
+        cross_sectional_area*
+        hydraulic_diameter/
+        fluid_viscosity;
+
+    println!("\n reynolds_number = {:?}", reynolds_number);
+
+    let pressure_loss = 
+        CalcPressureLoss::from_mass_rate(fluid_mass_flowrate,
+                                         cross_sectional_area,
+                                         hydraulic_diameter,
+                                         fluid_viscosity,
+                                         fluid_density,
+                                         pipe_length,
+                                         absolute_roughness,
+                                         &custom_f,
+                                         &custom_k);
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
+
+
+
+    println!("pressure loss calculated as {:?}", pressure_loss);
+
+    println!("custom component calc pressure loss took {:?}", duration);
 }
 
 
