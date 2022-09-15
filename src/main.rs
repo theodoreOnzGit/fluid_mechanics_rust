@@ -129,6 +129,15 @@ fn test_friction_factor(){
 
     println!("Bejan number: {} \n", bejan_number);
 
+    let test_fluid_pressure = fluid_mechanics_rust::CalcBejan::to_pressure(
+        bejan_number,
+        pipe_diameter,
+        fluid_density,
+        fluid_viscosity);
+
+    println!("reference pressure : {:?} ", fluid_pressure);
+    println!("test fluid pressure : {:?} \n", test_fluid_pressure);
+
 
 
 
