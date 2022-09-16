@@ -5,6 +5,9 @@ use uom::si::dynamic_viscosity::pascal_second;
 use uom::si::heat_capacity::joule_per_kelvin;
 use uom::si::thermal_conductivity::watt_per_meter_kelvin;
 use uom::si::available_energy::joule_per_kilogram;
+// this is for the root finding algorithms
+extern crate peroxide;
+use peroxide::prelude::*;
 
 #[allow(non_snake_case)]
 pub fn getDowthermADensity(
@@ -89,6 +92,50 @@ pub fn getDowthermAEnthalpy(
 
     return AvailableEnergy::new::<joule_per_kilogram>(
         enthalpy_value_joule_per_kg);
+}
+
+// this functions enables us to get temperature from enthalpy using
+// a root finding method
+pub fn get_temperature_from_enthalpy(
+    fluid_enthalpy: AvailableEnergy) -> ThermodynamicTemperature {
+
+    // first let's convert enthalpy to a double (f64)
+    let enthalpy_value_joule_per_kg = 
+        fluid_enthalpy.get::<joule_per_kilogram>();
+
+    // second let's define a function 
+    // or actually a closure or anonymous function that
+    // is aware of the variables declared
+    // enthalpy value = 1518*T +2.82/2.0 T^2 - 30924
+    // LHS is actual enthalpy value
+
+    let enthalpy_root = |temp_degrees_c_value : AD| -> AD {
+        let lhs_value = enthalpy_value_joule_per_kg;
+        // convert AD type into double
+        let temp_degrees_c_value_double = temp_degrees_c_value.x();
+
+        let fluid_temperature = 
+            ThermodynamicTemperature::new::<degree_celsius>(
+                temp_degrees_c_value_double);
+        let rhs = getDowthermAEnthalpy(fluid_temperature);
+        let rhs_value = rhs.get::<joule_per_kilogram>();
+
+        return AD0(lhs_value-rhs_value);
+    };
+    
+    // now solve using bisection
+    
+    let fluid_temperature_degrees_cresult 
+        = bisection(enthalpy_root,
+                    (20.0,180.0),
+                    100,
+                    1e-8);
+
+    let fluid_temperature_degrees_c = fluid_temperature_degrees_cresult.unwrap();
+
+    return ThermodynamicTemperature::
+        new::<degree_celsius>(fluid_temperature_degrees_c);
+
 }
 
 
