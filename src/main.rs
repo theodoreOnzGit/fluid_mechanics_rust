@@ -13,6 +13,7 @@ fn main() {
     test_custom_fldk_component();
     test_temperature_conversion();
     test_therminol_pipe();
+    test_therminol_fldk_custom_component();
 }
 
 

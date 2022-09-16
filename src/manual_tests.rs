@@ -20,9 +20,14 @@ use std::time::SystemTime;
 
 /// here are tests (manual) that i didn't use assert equal or anything
 
+pub fn test_therminol_fldk_custom_component(){
+
+    let start = SystemTime::now();
+}
+
 pub fn test_therminol_pipe(){
     let start = SystemTime::now();
-    use fluid_mechanics_rust::therminol_component::custom_therminol_pipe::
+    use fluid_mechanics_rust::therminol_component::therminol_pipe::
         DowthermAPipe;
 
     use crate::fluid_mechanics_rust::therminol_component::
