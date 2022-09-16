@@ -23,6 +23,83 @@ use std::time::SystemTime;
 pub fn test_therminol_fldk_custom_component(){
 
     let start = SystemTime::now();
+
+    // let's import everything necessary:
+
+    use fluid_mechanics_rust::therminol_component::custom_therminol_component::
+        DowthermACustomComponent;
+
+    use crate::fluid_mechanics_rust::therminol_component::
+        CustomComponentProperties;
+
+    // now lets define the functions
+    //
+    fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+    // now we have constructed our fldk functions, let's construct the 
+    // component
+    use crate::fluid_mechanics_rust::therminol_component::
+        StandardCustomComponentProperties;
+
+    let flowmeter_40_14a: DowthermACustomComponent 
+        = StandardCustomComponentProperties::new(
+        "flowmeter_40_14a".to_string(),
+        2.79e-2, // component diameter in meters
+        0.36, // component length in meters
+        0.015, // estimated component wall roughness (doesn't matter here,
+               // but i need to fill in
+        90.0, //incline angle in degrees
+        &custom_darcy,
+        &custom_k);
+
+    // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+    let fluid_temp = ThermodynamicTemperature::new::<
+        degree_celsius>(21.0);
+    let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+
+    // now let's use the calc pressure change object
+    use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+
+    let pressure_change = CalcPressureChange::from_mass_rate(
+        &flowmeter_40_14a,
+        mass_flow_expected,
+        fluid_temp);
+
+    println!("calculated pressure_change: {:?} \n", pressure_change);
+
+    let test_mass_flow = flowmeter_40_14a.
+        to_mass_rate(pressure_change,
+                     fluid_temp);
+
+    println!("expected_mass_rate: {:?}\n", mass_flow_expected);
+    println!("actual_mass_rate: {:?} \n", test_mass_flow);
+
+
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
+    println!("\n custom fldk component for dowtherm A / therinol took {:?}", duration);
 }
 
 pub fn test_therminol_pipe(){
@@ -56,6 +133,8 @@ pub fn test_therminol_pipe(){
     // now let's use the calc pressure change object
     use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
 
+    // this is an alternative syntax available to calcualte pressure
+    // change, but it may seem confusing to the user
     let pressure_change = static_mixer_pipe_6a.
         from_mass_rate(mass_flow_expected,
                        fluid_temp);
@@ -71,7 +150,7 @@ pub fn test_therminol_pipe(){
 
     let end = SystemTime::now();
     let duration = end.duration_since(start).unwrap();
-    println!("pipe  {:?}", duration);
+    println!("therminol/dowtherm A pipe calculations took {:?}", duration);
 
 
 }
