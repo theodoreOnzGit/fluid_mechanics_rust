@@ -51,16 +51,14 @@ pub fn test_therminol_pipe(){
     // now let's use the calc pressure change object
     use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
 
-    let pressure_change = CalcPressureChange::
-        from_mass_rate(&static_mixer_pipe_6a,
-                       mass_flow_expected,
+    let pressure_change = static_mixer_pipe_6a.
+        from_mass_rate(mass_flow_expected,
                        fluid_temp);
 
     println!("calculated pressure_change: {:?} \n", pressure_change);
 
-    let test_mass_flow = CalcPressureChange::
-        to_mass_rate(&static_mixer_pipe_6a,
-                     pressure_change,
+    let test_mass_flow = static_mixer_pipe_6a.
+        to_mass_rate(pressure_change,
                      fluid_temp);
 
     println!("expected_mass_rate: {:?}\n", mass_flow_expected);
