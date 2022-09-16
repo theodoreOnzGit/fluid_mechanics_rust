@@ -9,8 +9,8 @@ DowthermACustomComponent;
 use crate::therminol_component::
 StandardCustomComponentProperties;
 
-pub struct Flowmeter40 {}
-impl Flowmeter40 {
+pub struct FlowmeterCoriolis {}
+impl FlowmeterCoriolis {
 
     // let's import everything necessary:
 
@@ -41,18 +41,18 @@ impl Flowmeter40 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let flowmeter_40_14a: DowthermACustomComponent 
+        let flowmeter_coriolis_14a: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "flowmeter_40_14a".to_string(),
+                "flowmeter_coriolis_14a".to_string(),
                 2.79e-2, // component diameter in meters
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
                 90.0, //incline angle in degrees
-                &Flowmeter40::custom_darcy,
-                &Flowmeter40::custom_k);
+                &FlowmeterCoriolis::custom_darcy,
+                &FlowmeterCoriolis::custom_k);
 
-        return flowmeter_40_14a;
+        return flowmeter_coriolis_14a;
     }
 }
 

@@ -27,7 +27,7 @@ pub fn factory_test(){
     let start = SystemTime::now();
     use fluid_mechanics_rust::therminol_component::factory;
 
-    let flowmeter_40 = factory::Flowmeter40::get();
+    let flowmeter_40 = factory::FlowmeterCoriolis::get();
 
     // now let's have a temperature of 21C and mass flow of 0.15 kg/s
     let fluid_temp = ThermodynamicTemperature::new::<
