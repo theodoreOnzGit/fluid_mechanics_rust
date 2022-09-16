@@ -2,9 +2,10 @@ use uom::si::f64::*;
 use uom::si::thermodynamic_temperature::degree_celsius;
 use uom::si::mass_density::kilogram_per_cubic_meter;
 use uom::si::dynamic_viscosity::pascal_second;
-use uom::si::heat_capacity::joule_per_kelvin;
 use uom::si::thermal_conductivity::watt_per_meter_kelvin;
+use uom::si::specific_heat_capacity::joule_per_kilogram_kelvin;
 use uom::si::available_energy::joule_per_kilogram;
+
 // this is for the root finding algorithms
 extern crate peroxide;
 use peroxide::prelude::*;
@@ -35,15 +36,16 @@ pub fn  getDowthermAViscosity(
 }
 
 #[allow(non_snake_case)]
-pub fn getDowthermAConstantPressureHeatCapacity(
-    fluidTemp: ThermodynamicTemperature) -> HeatCapacity{
+pub fn getDowthermAConstantPressureSpecificHeatCapacity(
+    fluidTemp: ThermodynamicTemperature) -> SpecificHeatCapacity{
 
     rangeCheck(fluidTemp);
     // note, specific entropy and heat capcity are the same unit...
     //
     let cp_value_joule_per_kg = 1518.0 + 2.82*fluidTemp.get::<degree_celsius>();
 
-    return HeatCapacity::new::<joule_per_kelvin>(cp_value_joule_per_kg);
+    return SpecificHeatCapacity::new::<joule_per_kilogram_kelvin>(
+        cp_value_joule_per_kg);
 }
 
 #[allow(non_snake_case)]
