@@ -14,8 +14,12 @@ use peroxide::prelude::*;
 pub fn getDowthermADensity(
     fluidTemp: ThermodynamicTemperature) -> MassDensity {
 
+    // first we check if fluid temp is between 20-180C (range of validity)
+    // panic otherwise
     rangeCheck(fluidTemp);
 
+    //then convert the fluidTemp object into a f64
+    // and plug it into the correlation
     let densityValueKgPerM3 = 1078.0 - 0.85*fluidTemp
        .get::<degree_celsius>();
 
