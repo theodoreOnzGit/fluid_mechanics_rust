@@ -6,10 +6,9 @@ pub mod custom_therminol_pipe;
 use uom::si::f64::*;
 
 /// A generic base class or struct for therminol vp 1 
-/// or dowtherm A components
+/// or dowtherm A pipe like components
 // i want to create an interface for a generic 
 // component, which could be a pipe or a custom component
-#[allow(non_snake_case)]
 pub struct PipeProperties {
     pub _name: String,
     pub hydraulic_diameter: Length,
@@ -23,6 +22,39 @@ pub struct PipeProperties {
     // for pipes, we specify a fixed form loss k term
     // not a custom one
     pub form_loss_k: f64,
+
+    // internal pressure term, in case you want to have
+    // a pump or something
+
+    pub internal_pressure: Pressure,
+
+}
+
+/// A generic base class for therminol or dowtherm A
+/// components with user defined fldk terms
+pub struct CustomComponentProperties{
+    pub _name: String,
+    pub hydraulic_diameter: Length,
+    pub component_length: Length,
+    pub absolute_roughness: Length,
+
+    // also we should have incline angle in degrees
+    // in case of dealing with elevation
+    pub incline_angle: Angle,
+
+    // for custom fldk component, i have a custom 
+    // form loss term which is essentially a function
+    // i put it as static because i want it to live through the
+    // duration of the program
+    pub custom_k: &'static dyn Fn(f64) -> f64,
+
+    // the 'a thing i'm not really sure what it is
+    // but the compiler says it is an explicit lifetime thingy
+    // i'll just follow suit
+    // it's supposed to be on stack memory (local variables)
+    // rather than heap memory (global variables)
+
+    pub custom_darcy: &'static dyn Fn(f64,f64) -> f64,
 
     // internal pressure term, in case you want to have
     // a pump or something
@@ -86,5 +118,17 @@ pub trait StandardPipeProperties : FluidProperties {
 }
 
 
+pub trait StandardCustomComponentProperties : FluidProperties {
+    fn new(name: String,
+           hydraulic_diameter_meters: f64,
+           component_length_meters: f64,
+           absolute_roughness_millimeters: f64,
+           incline_angle_degrees: f64,
+           custom_darcy: &'static dyn Fn(f64,f64) -> f64,
+           custom_k: &'static dyn Fn(f64) -> f64) -> Self;
 
+    fn get_cross_sectional_area(&self) -> Area;
+    fn get_internal_pressure_term(&self) -> Pressure;
+    fn set_internal_pressure_term(&mut self, pressure_pascals: f64);
 
+}

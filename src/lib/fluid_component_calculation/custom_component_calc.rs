@@ -69,6 +69,52 @@ impl CalcPressureLoss {
         return pressureLoss;
     }
 
+    #[allow(non_snake_case)]
+    pub fn to_mass_rate(pressureLoss: Pressure,
+                        crossSectionalArea: Area,
+                        hydraulicDiameter: Length,
+                        fluidViscosity: DynamicViscosity,
+                        fluidDensity: MassDensity,
+                        pipeLength: Length,
+                        absolute_roughness: Length,
+                        customDarcy: &dyn Fn(f64, f64) -> f64,
+                        customK: &dyn Fn(f64) -> f64) -> MassRate {
+
+
+        // first let's get our relevant ratios:
+        let roughnessRatioQuantity = absolute_roughness/hydraulicDiameter;
+
+        let roughnessRatio = 
+            dimensionalisation::convert_dimensionless_number_to_float(
+                roughnessRatioQuantity);
+
+        let lengthToDiameterRatio 
+            = dimensionalisation::convert_dimensionless_number_to_float(
+                pipeLength/hydraulicDiameter);
+
+        // then get Bejan number:
+        let Be_D = dimensionalisation::CalcBejan::from_pressure(
+            pressureLoss, hydraulicDiameter, 
+            fluidDensity, fluidViscosity);
+
+        // let's get Re
+        let Re_D = custom_fldk::getRe(customDarcy,
+                                      Be_D,
+                                      roughnessRatio,
+                                      lengthToDiameterRatio,
+                                      customK);
+
+
+        // and finally return mass flowrate
+        //
+        let fluidMassFlowrate = 
+            dimensionalisation::CalcReynolds::to_mass_rate(crossSectionalArea,
+                                                           Re_D,
+                                                           hydraulicDiameter,
+                                                           fluidViscosity);
+
+        return fluidMassFlowrate;
+    }
 }
 
 
