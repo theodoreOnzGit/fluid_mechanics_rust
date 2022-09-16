@@ -11,7 +11,7 @@ use uom::typenum::P2;
 // this is simliar in composition to therminol VP 1 so 
 // i class them as the same
 pub struct DowthermAPipe {
-    dowtherm_pipe_properties: PipeProperties,
+    pub dowtherm_pipe_properties: PipeProperties,
 }
 
 impl FluidProperties for DowthermAPipe {
@@ -88,6 +88,7 @@ impl StandardPipeProperties for DowthermAPipe {
             pipe_diameter.powi(P2::new())*
             std::f64::consts::PI/
             4.0;
+        
 
         return pipe_xs_area;
     }

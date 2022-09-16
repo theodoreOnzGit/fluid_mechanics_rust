@@ -10,12 +10,85 @@ use uom::si::mass_density::kilogram_per_cubic_meter;
 use uom::si::area::square_meter;
 use uom::si::thermodynamic_temperature::kelvin;
 use uom::si::thermodynamic_temperature::degree_celsius;
+use uom::si::angle::degree;
 
 use uom::si::f64::*;
 use uom::typenum::P2;
 
 // for timed tests
 use std::time::SystemTime;
+
+
+/// here are tests (manual) that i didn't use assert equal or anything
+
+pub fn test_therminol_pipe(){
+    let start = SystemTime::now();
+    use fluid_mechanics_rust::therminol_component;
+    use fluid_mechanics_rust::therminol_component::custom_therminol_pipe::
+        DowthermAPipe;
+
+    use crate::fluid_mechanics_rust::therminol_component::
+        StandardPipeProperties;
+
+
+    // it's kind of tedious to construct a new pipe
+    // i might consider making a component factory class to instantiate 
+    // everything
+
+    let generic_pipe_properties = therminol_component::PipeProperties {
+        _name: "generic".to_string(),
+        hydraulic_diameter: Length::new::<meter>(0.0),
+        component_length: Length::new::<meter>(0.0),
+        absolute_roughness: Length::new::<meter>(0.0),
+        incline_angle: Angle::new::<degree>(0.0),
+        form_loss_k: 0.0,
+        internal_pressure: Pressure::new::<pascal>(0.0),
+    };
+
+    let generic_dowtherm_a_component = 
+        DowthermAPipe { 
+            dowtherm_pipe_properties: generic_pipe_properties
+        };
+
+    let static_mixer_pipe_6a = 
+        StandardPipeProperties::new(&generic_dowtherm_a_component,
+            "static_mixer_pipe_6a".to_string(),
+            2.79e-02, // pipe diameter 2.79e-02m
+            0.1526, // pipe length 0.1526m
+            0.015, // wall roughness for stainless steel 0.015mm
+            51.526384, // incline angle 51.526384 degrees
+            5.05); // form loss k = 5.05 dimensionless
+
+    // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+    let fluid_temp = ThermodynamicTemperature::new::<
+        degree_celsius>(21.0);
+    let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+
+    // now let's use the calc pressure change object
+    use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+
+    let pressure_change = CalcPressureChange::
+        from_mass_rate(&static_mixer_pipe_6a,
+                       mass_flow_expected,
+                       fluid_temp);
+
+    println!("calculated pressure_change: {:?} \n", pressure_change);
+
+    let test_mass_flow = CalcPressureChange::
+        to_mass_rate(&static_mixer_pipe_6a,
+                     pressure_change,
+                     fluid_temp);
+
+    println!("expected_mass_rate: {:?}\n", mass_flow_expected);
+    println!("actual_mass_rate: {:?} \n", test_mass_flow);
+
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
+    println!("therminol pipe calc to and from mass rate took: {:?}", duration);
+
+
+}
+
 
 pub fn test_dimensionless_number(){
     let bejan_d = 

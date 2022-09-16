@@ -11,23 +11,23 @@ use uom::si::f64::*;
 // component, which could be a pipe or a custom component
 #[allow(non_snake_case)]
 pub struct PipeProperties {
-    _name: String,
-    hydraulic_diameter: Length,
-    component_length: Length,
-    absolute_roughness: Length,
+    pub _name: String,
+    pub hydraulic_diameter: Length,
+    pub component_length: Length,
+    pub absolute_roughness: Length,
 
     // also we should have incline angle in degrees
     // in case of dealing with elevation
-    incline_angle: Angle,
+    pub incline_angle: Angle,
 
     // for pipes, we specify a fixed form loss k term
     // not a custom one
-    form_loss_k: f64,
+    pub form_loss_k: f64,
 
     // internal pressure term, in case you want to have
     // a pump or something
 
-    internal_pressure: Pressure,
+    pub internal_pressure: Pressure,
 
 }
 
