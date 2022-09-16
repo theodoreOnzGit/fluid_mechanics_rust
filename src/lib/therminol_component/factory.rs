@@ -11,7 +11,7 @@ StandardCustomComponentProperties;
 
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
-    // label 14a on diagram
+    // label 14a on simulation diagram
 }
 impl Flowmeter40 {
 
@@ -114,7 +114,7 @@ impl Flowmeter30 {
 pub struct Flowmeter20 {
     // DHX flow flowmeter 20
     // natural convection heat exchanger in primary loop
-    // diagram TBC
+    // diagram label is 21a
     // we use the convention of top of bypass branch to bottom
     // hence degree is -90
 }
@@ -151,7 +151,7 @@ impl Flowmeter20 {
 
         let flowmeter_20: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "flowmeter_20".to_string(),
+                "flowmeter_20_label_21a".to_string(),
                 2.79e-2, // component diameter in meters
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
@@ -170,7 +170,7 @@ pub struct Flowmeter60 {
     // this is the secondary loop equivalent for
     // decay heat removal
     //
-    // diagram TBC
+    // diagram label 37a on simulation model
     // we use the convention of top of bypass branch to bottom (Tank 2)
     // hence degree is -90
 }
@@ -207,7 +207,7 @@ impl Flowmeter60 {
 
         let flowmeter_60: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "flowmeter_60".to_string(),
+                "flowmeter_60_label_37a".to_string(),
                 2.79e-2, // component diameter in meters
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
@@ -218,4 +218,109 @@ impl Flowmeter60 {
 
         return flowmeter_60;
     }
+}
+
+/// static mixers are here
+///
+///
+
+pub struct StaticMixer40 {
+    // static mixer 40 (MX-40) on CIET diagram
+    // just before CTAH (AKA IHX)
+    // from top to bottom
+    //
+}
+impl StaticMixer40 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_40: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_40_label_37a".to_string(),
+                2.79e-2, // component diameter in meters
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &StaticMixer40::custom_darcy,
+                &StaticMixer40::custom_k);
+
+        return static_mixer_40;
+    }
+}
+
+pub struct StaticMixer41 {
+    // static mixer 41 (MX-41) on CIET diagram
+    // in the pump and CTAH branch
+    // just after CTAH (AKA IHX)
+    // from top to bottom
+    //
+}
+
+pub struct StaticMixer10 {
+    // static mixer 10 (MX-10) on CIET diagram
+    // just before the heater in the heater branch
+    // from top to bottom
+    //
+    // though in reality flow goes from bottom to
+    // top in forced convection
+    // so from a flow perspective it is before the 
+    // heater
+    //
+}
+
+pub struct StaticMixer20 {
+    // static mixer 20 (MX-20) on CIET diagram
+    // in the DRACS branch in primary loop
+    // just after the DRACS heat exchanger
+    // from top to bottom
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // also in the DRACS
+    // loop there are flow diodes to make 
+    // it such that flow going from bottom to top
+    // encounters more resistance
+    //
+}
+
+pub struct StaticMixer21 {
+    // static mixer 21 (MX-21) on CIET diagram
+    // in the DRACS branch in primary loop
+    // just before the DRACS heat exchanger
+    // from top to bottom
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // also in the DRACS
+    // loop there are flow diodes to make 
+    // it such that flow going from bottom to top
+    // encounters more resistance
+    //
 }
