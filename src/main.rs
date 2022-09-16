@@ -8,6 +8,8 @@ use uom::si::length::{meter,millimeter,foot,inch};
 use uom::si::pressure::pascal;
 use uom::si::mass_density::kilogram_per_cubic_meter;
 use uom::si::area::square_meter;
+use uom::si::thermodynamic_temperature::kelvin;
+use uom::si::thermodynamic_temperature::degree_celsius;
 
 use uom::si::f64::*;
 use uom::typenum::P2;
@@ -24,6 +26,7 @@ fn main() {
     test_dimensionless_number();
     test_standard_pipe_calc();
     test_custom_fldk_component();
+    test_temperature_conversion();
 }
 
 fn hello2(){
@@ -273,6 +276,15 @@ fn test_custom_fldk_component(){
     println!("pressure loss calculated as {:?}", pressure_loss);
 
     println!("custom component calc pressure loss took {:?}", duration);
+}
+
+fn test_temperature_conversion(){
+
+    let kelvin_temp = ThermodynamicTemperature::new::<kelvin>(293.0);
+    let celsius_temp = kelvin_temp.get::<degree_celsius>();
+
+    println!("\n {:?} = {:?} C", kelvin_temp, celsius_temp);
+
 }
 
 
