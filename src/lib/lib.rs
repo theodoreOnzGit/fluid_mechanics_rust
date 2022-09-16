@@ -3,6 +3,7 @@ mod churchill_friction_factor;
 mod custom_fldk;
 mod dimensionalisation;
 pub mod fluid_component_calculation;
+pub mod therminol_component;
 
 use uom::si::f64::*;
 

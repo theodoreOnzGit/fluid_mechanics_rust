@@ -238,7 +238,7 @@ fn test_custom_fldk_component(){
     let fluid_mass_flowrate = MassRate::new::<kilogram_per_second>(0.18);
     let cross_sectional_area= Area::new::<square_meter>(6.11e-4);
     let hydraulic_diameter= Length::new::<meter>(2.79e-2);
-    let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.005);
+    let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.0044);
     let fluid_density= MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
     let pipe_length= Length::new::<foot>(6.0);
     let absolute_roughness= Length::new::<millimeter>(0.001);
