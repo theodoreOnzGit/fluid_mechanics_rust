@@ -73,7 +73,7 @@ pub trait CalcPressureChange {
 // from the above properties, 
 // also, constructor will need to be given
 pub trait StandardPipeProperties : FluidProperties {
-    fn new(&self, name: String,
+    fn new(name: String,
            hydraulic_diameter_meters: f64,
            component_length_meters: f64,
            absolute_roughness_millimeters: f64,

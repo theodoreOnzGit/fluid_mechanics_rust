@@ -10,7 +10,6 @@ use uom::si::mass_density::kilogram_per_cubic_meter;
 use uom::si::area::square_meter;
 use uom::si::thermodynamic_temperature::kelvin;
 use uom::si::thermodynamic_temperature::degree_celsius;
-use uom::si::angle::degree;
 
 use uom::si::f64::*;
 use uom::typenum::P2;
@@ -23,7 +22,6 @@ use std::time::SystemTime;
 
 pub fn test_therminol_pipe(){
     let start = SystemTime::now();
-    use fluid_mechanics_rust::therminol_component;
     use fluid_mechanics_rust::therminol_component::custom_therminol_pipe::
         DowthermAPipe;
 
@@ -35,23 +33,9 @@ pub fn test_therminol_pipe(){
     // i might consider making a component factory class to instantiate 
     // everything
 
-    let generic_pipe_properties = therminol_component::PipeProperties {
-        _name: "generic".to_string(),
-        hydraulic_diameter: Length::new::<meter>(0.0),
-        component_length: Length::new::<meter>(0.0),
-        absolute_roughness: Length::new::<meter>(0.0),
-        incline_angle: Angle::new::<degree>(0.0),
-        form_loss_k: 0.0,
-        internal_pressure: Pressure::new::<pascal>(0.0),
-    };
 
-    let generic_dowtherm_a_component = 
-        DowthermAPipe { 
-            dowtherm_pipe_properties: generic_pipe_properties
-        };
-
-    let static_mixer_pipe_6a = 
-        StandardPipeProperties::new(&generic_dowtherm_a_component,
+    let static_mixer_pipe_6a: DowthermAPipe = 
+        StandardPipeProperties::new(
             "static_mixer_pipe_6a".to_string(),
             2.79e-02, // pipe diameter 2.79e-02m
             0.1526, // pipe length 0.1526m
@@ -84,7 +68,7 @@ pub fn test_therminol_pipe(){
 
     let end = SystemTime::now();
     let duration = end.duration_since(start).unwrap();
-    println!("therminol pipe calc to and from mass rate took: {:?}", duration);
+    println!("pipe  {:?}", duration);
 
 
 }

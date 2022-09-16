@@ -51,7 +51,7 @@ impl FluidProperties for DowthermAPipe {
 
 impl StandardPipeProperties for DowthermAPipe {
     // constructor
-    fn new(&self, name: String,
+    fn new(name: String,
            hydraulic_diameter_meters: f64,
            component_length_meters: f64,
            absolute_roughness_millimeters: f64,
