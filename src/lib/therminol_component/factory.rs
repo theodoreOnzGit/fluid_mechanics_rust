@@ -324,3 +324,29 @@ pub struct StaticMixer21 {
     // encounters more resistance
     //
 }
+
+pub struct StaticMixer60 {
+    // static mixer 60 (MX-60) on CIET diagram
+    // in the NDHX branch in secondary DRACS loop
+    // just after the NDHX heat exchanger
+    // from top to bottom
+    // ie this is where hot fluid gets cooled by a fan
+    //
+    // in reality flow goes from top to
+    // bottom in natural convection
+    //
+}
+
+pub struct StaticMixer61 {
+    // static mixer 61 (MX-61) on CIET diagram
+    // in the DHX branch in secondary DRACS loop
+    // just before the DHX heat exchanger
+    // from top to bottom
+    // ie this is where cool fluid gets heated by the 
+    // primary loop heat exchanger
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // so it is actually after the DHX from perspective of flow
+    //
+}
