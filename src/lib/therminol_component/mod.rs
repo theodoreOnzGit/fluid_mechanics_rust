@@ -1,6 +1,7 @@
 pub mod custom_therminol_component;
 pub mod dowtherm_a_properties;
 pub mod therminol_pipe;
+pub mod factory;
 
 // this allows for units
 use uom::si::f64::*;

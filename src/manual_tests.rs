@@ -20,6 +20,44 @@ use std::time::SystemTime;
 
 /// here are tests (manual) that i didn't use assert equal or anything
 
+pub fn factory_test(){
+
+    // the factory test ensures that we do all the hard coding behind the scenes
+    //
+    let start = SystemTime::now();
+    use fluid_mechanics_rust::therminol_component::factory;
+
+    let flowmeter_40 = factory::Flowmeter40::get();
+
+    // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+    let fluid_temp = ThermodynamicTemperature::new::<
+        degree_celsius>(21.0);
+    let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+
+    // now let's use the calc pressure change object
+    use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+
+    let pressure_change = CalcPressureChange::from_mass_rate(
+        &flowmeter_40,
+        mass_flow_expected,
+        fluid_temp);
+
+    println!("calculated pressure_change: {:?} \n", pressure_change);
+
+    // if you don't want to type all the pressure change stuff out,
+    // you can also use this syntax
+    let test_mass_flow = flowmeter_40.
+        to_mass_rate(pressure_change,
+                     fluid_temp);
+
+    println!("expected_mass_rate: {:?}\n", mass_flow_expected);
+    println!("actual_mass_rate: {:?} \n", test_mass_flow);
+
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
+    println!("therminol/dowtherm A factory calculations took {:?}", duration);
+}
+
 pub fn test_therminol_fldk_custom_component(){
 
     let start = SystemTime::now();
@@ -29,8 +67,6 @@ pub fn test_therminol_fldk_custom_component(){
     use fluid_mechanics_rust::therminol_component::custom_therminol_component::
         DowthermACustomComponent;
 
-    use crate::fluid_mechanics_rust::therminol_component::
-        CustomComponentProperties;
 
     // now lets define the functions
     //
@@ -89,6 +125,8 @@ pub fn test_therminol_fldk_custom_component(){
 
     println!("calculated pressure_change: {:?} \n", pressure_change);
 
+    // if you don't want to type all the pressure change stuff out,
+    // you can also use this syntax
     let test_mass_flow = flowmeter_40_14a.
         to_mass_rate(pressure_change,
                      fluid_temp);

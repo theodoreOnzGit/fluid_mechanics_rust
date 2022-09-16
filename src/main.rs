@@ -14,6 +14,7 @@ fn main() {
     test_temperature_conversion();
     test_therminol_pipe();
     test_therminol_fldk_custom_component();
+    factory_test();
 }
 
 
