@@ -110,3 +110,112 @@ impl Flowmeter30 {
         return flowmeter_30;
     }
 }
+
+pub struct Flowmeter20 {
+    // DHX flow flowmeter 20
+    // natural convection heat exchanger in primary loop
+    // diagram TBC
+    // we use the convention of top of bypass branch to bottom
+    // hence degree is -90
+}
+impl Flowmeter20 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let flowmeter_20: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "flowmeter_20".to_string(),
+                2.79e-2, // component diameter in meters
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &Flowmeter20::custom_darcy,
+                &Flowmeter20::custom_k);
+
+        return flowmeter_20;
+    }
+}
+
+pub struct Flowmeter60 {
+    // DHX flow flowmeter 60
+    // natural convection heat exchanger in DRACS loop
+    // this is the secondary loop equivalent for
+    // decay heat removal
+    //
+    // diagram TBC
+    // we use the convention of top of bypass branch to bottom (Tank 2)
+    // hence degree is -90
+}
+impl Flowmeter60 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let flowmeter_60: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "flowmeter_60".to_string(),
+                2.79e-2, // component diameter in meters
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &Flowmeter60::custom_darcy,
+                &Flowmeter60::custom_k);
+
+        return flowmeter_60;
+    }
+}
