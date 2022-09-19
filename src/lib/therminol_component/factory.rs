@@ -63,7 +63,7 @@ pub struct Flowmeter30 {
     // bypass flow flowmeter FM30 
     // not labelled on diagram
     // we use the convention of top of bypass branch to bottom
-    // hence degree is -90
+    // hence degree is a 180-90 degrees = -90 degrees
 }
 impl Flowmeter30 {
 
@@ -103,7 +103,7 @@ impl Flowmeter30 {
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
-                -90.0, //incline angle in degrees
+                180.0-90.0, //incline angle in degrees
                 &Flowmeter30::custom_darcy,
                 &Flowmeter30::custom_k);
 
