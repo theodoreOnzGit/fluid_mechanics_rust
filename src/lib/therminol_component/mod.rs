@@ -36,6 +36,7 @@ pub struct PipeProperties {
 pub struct CustomComponentProperties{
     pub _name: String,
     pub hydraulic_diameter: Length,
+    pub xs_area: Area,
     pub component_length: Length,
     pub absolute_roughness: Length,
 
@@ -122,6 +123,7 @@ pub trait StandardPipeProperties : FluidProperties {
 pub trait StandardCustomComponentProperties : FluidProperties {
     fn new(name: String,
            hydraulic_diameter_meters: f64,
+           cross_sectional_area_meters_sq: f64,
            component_length_meters: f64,
            absolute_roughness_millimeters: f64,
            incline_angle_degrees: f64,

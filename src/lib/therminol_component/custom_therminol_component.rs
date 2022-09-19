@@ -6,7 +6,7 @@ use uom::si::length::{meter,millimeter};
 use uom::si::pressure::pascal;
 use uom::si::angle::degree;
 use uom::si::acceleration::meter_per_second_squared;
-use uom::typenum::P2;
+use uom::si::area::square_meter;
 
 
 // the 'a notation states that
@@ -55,46 +55,44 @@ impl StandardCustomComponentProperties for DowthermACustomComponent {
     // constructor
     fn new(name: String,
            hydraulic_diameter_meters: f64,
+           cross_sectional_area_meters_sq: f64,
            component_length_meters: f64,
            absolute_roughness_millimeters: f64,
            incline_angle_degrees: f64,
            custom_darcy: &'static dyn Fn(f64,f64) -> f64,
            custom_k: &'static dyn Fn(f64) -> f64) -> Self {
 
-        let calculated_hydraulic_diameter = Length::new::<meter>(
+        let input_hydraulic_diameter = Length::new::<meter>(
             hydraulic_diameter_meters);
-        let calculated_component_length = Length::new::<meter>(
+        let input_xs_area = Area::new::<square_meter>(cross_sectional_area_meters_sq);
+        let input_component_length = Length::new::<meter>(
             component_length_meters);
-        let calculated_absolute_roughness = Length::new::<millimeter>(
+        let input_absolute_roughness = Length::new::<millimeter>(
             absolute_roughness_millimeters);
-        let calculated_incline_angle = Angle::new::<degree>(
+        let input_incline_angle = Angle::new::<degree>(
             incline_angle_degrees);
-        let calculated_internal_pressure = Pressure::new::<pascal>(
+        let input_internal_pressure = Pressure::new::<pascal>(
             0.0);
 
         let custom_pipe_properties = CustomComponentProperties {
             _name: name,
-            hydraulic_diameter: calculated_hydraulic_diameter,
-            component_length: calculated_component_length,
-            absolute_roughness: calculated_absolute_roughness,
-            incline_angle: calculated_incline_angle,
+            hydraulic_diameter: input_hydraulic_diameter,
+            xs_area: input_xs_area,
+            component_length: input_component_length,
+            absolute_roughness: input_absolute_roughness,
+            incline_angle: input_incline_angle,
             custom_darcy: custom_darcy,
             custom_k: custom_k,
-            internal_pressure: calculated_internal_pressure,
+            internal_pressure: input_internal_pressure,
         };
 
         return Self { dowtherm_custom_component_properties : custom_pipe_properties };
     }
 
     fn get_cross_sectional_area(&self) -> Area {
-        let pipe_diameter = self.dowtherm_custom_component_properties.hydraulic_diameter;
-        let pipe_xs_area = 
-            pipe_diameter.powi(P2::new())*
-            std::f64::consts::PI/
-            4.0;
-        
 
-        return pipe_xs_area;
+        return self.dowtherm_custom_component_properties.
+            xs_area;
     }
 
 

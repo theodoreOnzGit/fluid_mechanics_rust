@@ -12,6 +12,7 @@ StandardCustomComponentProperties;
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
+    // fldk = 18.0+93000/Re
 }
 impl Flowmeter40 {
 
@@ -48,6 +49,7 @@ impl Flowmeter40 {
             = StandardCustomComponentProperties::new(
                 "flowmeter_40_14a".to_string(),
                 2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
@@ -100,10 +102,11 @@ impl Flowmeter30 {
             = StandardCustomComponentProperties::new(
                 "flowmeter_30".to_string(),
                 2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
-                180.0-90.0, //incline angle in degrees
+                90.0 -180.0, //incline angle in degrees
                 &Flowmeter30::custom_darcy,
                 &Flowmeter30::custom_k);
 
@@ -151,12 +154,13 @@ impl Flowmeter20 {
 
         let flowmeter_20: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "flowmeter_20_label_21a".to_string(),
+                "flowmeter_20_21a".to_string(),
                 2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
-                -90.0, //incline angle in degrees
+                90.0 - 180.0, //incline angle in degrees
                 &Flowmeter20::custom_darcy,
                 &Flowmeter20::custom_k);
 
@@ -207,8 +211,9 @@ impl Flowmeter60 {
 
         let flowmeter_60: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "flowmeter_60_label_37a".to_string(),
+                "flowmeter_60_37a".to_string(),
                 2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
@@ -226,9 +231,13 @@ impl Flowmeter60 {
 
 pub struct StaticMixer40 {
     // static mixer 40 (MX-40) on CIET diagram
-    // just before CTAH (AKA IHX)
+    // just after CTAH (AKA IHX)
     // from top to bottom
+    // label 8 on diagram
     //
+    // forced convection flow direction is same as top to bottom
+    //
+    // has a fldk of 21+4000/Re
 }
 impl StaticMixer40 {
 
@@ -248,7 +257,7 @@ impl StaticMixer40 {
         }
 
         let custom_k_value = 
-            18.0 + 93000.0/reynolds_number.powf(1.35);
+            21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
             return -custom_k_value;
@@ -262,9 +271,10 @@ impl StaticMixer40 {
 
         let static_mixer_40: DowthermACustomComponent 
             = StandardCustomComponentProperties::new(
-                "static_mixer_40_label_37a".to_string(),
+                "static_mixer_40_label_8".to_string(),
                 2.79e-2, // component diameter in meters
-                0.36, // component length in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
                 -90.0, //incline angle in degrees
@@ -278,15 +288,63 @@ impl StaticMixer40 {
 pub struct StaticMixer41 {
     // static mixer 41 (MX-41) on CIET diagram
     // in the pump and CTAH branch
-    // just after CTAH (AKA IHX)
+    // just before CTAH (AKA IHX)
     // from top to bottom
     //
+    // label 6 on diagram
+}
+
+impl StaticMixer41 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_41: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_41_label_6".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                51.526384, //incline angle in degrees
+                &StaticMixer41::custom_darcy,
+                &StaticMixer41::custom_k);
+
+        return static_mixer_41;
+    }
 }
 
 pub struct StaticMixer10 {
     // static mixer 10 (MX-10) on CIET diagram
     // just before the heater in the heater branch
     // from top to bottom
+    // label 2 on diagram (fig A-1 on Nico Zweibaum thesis)
+    // pg 125 on pdf viewer, pg 110 on printed page number on bottom right
     //
     // though in reality flow goes from bottom to
     // top in forced convection
@@ -294,12 +352,119 @@ pub struct StaticMixer10 {
     // heater
     //
 }
+impl StaticMixer10 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_10: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_41_label_2".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer10::custom_darcy,
+                &StaticMixer10::custom_k);
+
+        return static_mixer_10;
+    }
+}
 
 pub struct StaticMixer20 {
     // static mixer 20 (MX-20) on CIET diagram
     // in the DRACS branch in primary loop
     // just after the DRACS heat exchanger
     // from top to bottom
+    // label 23
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // also in the DRACS
+    // loop there are flow diodes to make 
+    // it such that flow going from bottom to top
+    // encounters more resistance
+    //
+    // original angle is is 90 degrees 
+    // but i orientate from top to bottom
+}
+impl StaticMixer20 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_20: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_20_label_23".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer20::custom_darcy,
+                &StaticMixer20::custom_k);
+
+        return static_mixer_20;
+    }
+}
+
+pub struct StaticMixer21 {
+    // static mixer 21 (MX-21) on CIET diagram
+    // in the DRACS branch in primary loop
+    // just before the DRACS heat exchanger
+    // from top to bottom
+    // label 25
     //
     // in reality flow goes from bottom to
     // top in natural convection
@@ -309,20 +474,49 @@ pub struct StaticMixer20 {
     // encounters more resistance
     //
 }
+impl StaticMixer21 {
 
-pub struct StaticMixer21 {
-    // static mixer 21 (MX-21) on CIET diagram
-    // in the DRACS branch in primary loop
-    // just before the DRACS heat exchanger
-    // from top to bottom
-    //
-    // in reality flow goes from bottom to
-    // top in natural convection
-    // also in the DRACS
-    // loop there are flow diodes to make 
-    // it such that flow going from bottom to top
-    // encounters more resistance
-    //
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_21: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_21_label_25".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer21::custom_darcy,
+                &StaticMixer21::custom_k);
+
+        return static_mixer_21;
+    }
 }
 
 pub struct StaticMixer60 {
@@ -331,10 +525,55 @@ pub struct StaticMixer60 {
     // just after the NDHX heat exchanger
     // from top to bottom
     // ie this is where hot fluid gets cooled by a fan
+    // label 36
     //
     // in reality flow goes from top to
     // bottom in natural convection
     //
+}
+impl StaticMixer60 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_60: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_60_label_36".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -58.99728, //incline angle in degrees
+                &StaticMixer60::custom_darcy,
+                &StaticMixer60::custom_k);
+
+        return static_mixer_60;
+    }
 }
 
 pub struct StaticMixer61 {
@@ -344,9 +583,191 @@ pub struct StaticMixer61 {
     // from top to bottom
     // ie this is where cool fluid gets heated by the 
     // primary loop heat exchanger
+    // label 31
     //
     // in reality flow goes from bottom to
     // top in natural convection
     // so it is actually after the DHX from perspective of flow
     //
 }
+impl StaticMixer61 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_61: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_61_label_31".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 - 180.0, //incline angle in degrees
+                &StaticMixer61::custom_darcy,
+                &StaticMixer61::custom_k);
+
+        return static_mixer_61;
+    }
+}
+
+pub struct CTAHHorizontal {
+
+    // coiled tube air heater
+    // has fldk = 400 + 52,000/Re
+    // 
+    // label is 7b
+    // empirical data in page 48 on pdf viewer in Dr
+    // Zweibaum thesis shows reverse flow has same
+    // pressure drop characteristics as forward flow
+}
+
+impl CTAHHorizontal {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            400.0 + 52000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let ctah_horizontal: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_horizontal_label_7b".to_string(),
+                1.19e-2, // component diameter in meters
+                1.33e-3, //component area in sq meters
+                1.2342, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                0.0, //incline angle in degrees
+                &CTAHHorizontal::custom_darcy,
+                &CTAHHorizontal::custom_k);
+
+        return ctah_horizontal;
+    }
+}
+
+pub struct CTAHVertical {
+
+    // coiled tube air heater,
+    // uses pipe friction factors but has a constant K value
+    // also pipe isn't circular 
+    // so we'll have to use custom fldk to help
+    // label 7b
+}
+
+impl CTAHVertical {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 3.9;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let ctah_vertical: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_vertical_label_7a".to_string(),
+                1.19e-2, // component diameter in meters
+                1.33e-3, //component area in sq meters
+                0.3302, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &CTAHVertical::custom_darcy,
+                &CTAHVertical::custom_k);
+
+        return ctah_vertical;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

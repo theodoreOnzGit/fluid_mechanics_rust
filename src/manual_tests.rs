@@ -103,6 +103,7 @@ pub fn test_therminol_fldk_custom_component(){
         = StandardCustomComponentProperties::new(
         "flowmeter_40_14a".to_string(),
         2.79e-2, // component diameter in meters
+        6.11e-4, // component area in square meters
         0.36, // component length in meters
         0.015, // estimated component wall roughness (doesn't matter here,
                // but i need to fill in
