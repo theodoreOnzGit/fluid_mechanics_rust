@@ -117,6 +117,8 @@ pub trait StandardPipeProperties : FluidProperties {
     fn get_cross_sectional_area(&self) -> Area;
     fn get_internal_pressure_term(&self) -> Pressure;
     fn set_internal_pressure_term(&mut self, pressure_pascals: f64);
+    fn get_hydrostatic_pressure_change(
+        &self, fluid_temp: ThermodynamicTemperature) -> Pressure;
 }
 
 
@@ -133,5 +135,7 @@ pub trait StandardCustomComponentProperties : FluidProperties {
     fn get_cross_sectional_area(&self) -> Area;
     fn get_internal_pressure_term(&self) -> Pressure;
     fn set_internal_pressure_term(&mut self, pressure_pascals: f64);
+    fn get_hydrostatic_pressure_change(
+        &self, fluid_temp: ThermodynamicTemperature) -> Pressure;
 
 }

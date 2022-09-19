@@ -102,6 +102,23 @@ impl StandardPipeProperties for DowthermAPipe {
         self.dowtherm_pipe_properties.internal_pressure =
             Pressure::new::<pascal>(pressure_pascals);
     }
+
+    fn get_hydrostatic_pressure_change(
+        &self, fluid_temp: ThermodynamicTemperature) -> Pressure {
+
+        let pipe_length = self.dowtherm_pipe_properties.component_length;
+        let incline_angle = self.dowtherm_pipe_properties.incline_angle;
+        let fluid_density = DowthermAPipe::density(fluid_temp);
+
+        let g: Acceleration = 
+            Acceleration::new::<meter_per_second_squared>(-9.81);
+        let delta_h: Length = pipe_length*incline_angle.sin();
+
+        let hydrostatic_pressure_increase: Pressure =
+            fluid_density * g * delta_h;
+
+        return hydrostatic_pressure_increase;
+    }
 }
 
 impl CalcPressureChange for DowthermAPipe {
@@ -113,7 +130,6 @@ impl CalcPressureChange for DowthermAPipe {
         let hydraulic_diameter = self.dowtherm_pipe_properties.hydraulic_diameter;
         let pipe_length = self.dowtherm_pipe_properties.component_length;
         let absolute_roughness = self.dowtherm_pipe_properties.absolute_roughness;
-        let incline_angle = self.dowtherm_pipe_properties.incline_angle;
         let xs_area = self.get_cross_sectional_area();
 
         let fluid_viscosity = DowthermAPipe::viscosity(fluid_temp);
@@ -144,12 +160,10 @@ impl CalcPressureChange for DowthermAPipe {
         // for hydrostatic pressure gain
         // g is earth gravity at 9.81
         // delta H is positive upwards
-        let g: Acceleration = 
-            Acceleration::new::<meter_per_second_squared>(9.81);
-        let delta_h: Length = pipe_length*incline_angle.sin();
 
         let hydrostatic_pressure_increase: Pressure =
-            fluid_density * g * delta_h;
+            self.get_hydrostatic_pressure_change(
+                fluid_temp);
         // last but not least we need our source pressure
 
         let source_pressure: Pressure = self.dowtherm_pipe_properties.
@@ -171,7 +185,6 @@ impl CalcPressureChange for DowthermAPipe {
         let hydraulic_diameter = self.dowtherm_pipe_properties.hydraulic_diameter;
         let pipe_length = self.dowtherm_pipe_properties.component_length;
         let absolute_roughness = self.dowtherm_pipe_properties.absolute_roughness;
-        let incline_angle = self.dowtherm_pipe_properties.incline_angle;
         let xs_area = self.get_cross_sectional_area();
 
         let fluid_viscosity = DowthermAPipe::viscosity(fluid_temp);
@@ -192,12 +205,9 @@ impl CalcPressureChange for DowthermAPipe {
         // for hydrostatic pressure gain
         // g is earth gravity at 9.81
         // delta H is positive upwards
-        let g: Acceleration = 
-            Acceleration::new::<meter_per_second_squared>(9.81);
-        let delta_h: Length = pipe_length*incline_angle.sin();
-
         let hydrostatic_pressure_increase: Pressure =
-            fluid_density * g * delta_h;
+            self.get_hydrostatic_pressure_change(
+                fluid_temp);
         // last but not least we need our source pressure
 
         let source_pressure: Pressure = self.dowtherm_pipe_properties.
