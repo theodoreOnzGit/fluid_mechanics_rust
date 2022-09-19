@@ -151,9 +151,6 @@ pub fn get_ctah_pressure_change_empirical(
 
     // now to get density
     //import necessary things...
-    use fluid_mechanics_rust;
-    use uom::si::mass_rate::kilogram_per_second;
-    use uom::si::thermodynamic_temperature::degree_celsius;
     use fluid_mechanics_rust::therminol_component::
         custom_therminol_component::DowthermACustomComponent;
 
@@ -163,7 +160,6 @@ pub fn get_ctah_pressure_change_empirical(
 
     use uom::si::f64::*;
 
-    let expected_pressure_loss = 0.0;
 
     // let's get the component for ctah
 
