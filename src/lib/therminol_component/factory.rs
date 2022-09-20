@@ -16,6 +16,88 @@ use super::StandardPipeProperties;
 
 /// CTAH branch items 
 /// I'm still in the midst of rearranging things though...
+
+pub struct Pipe6a {
+    // pipe 6a 
+    // otherwise known as the static mixer pipe 6a
+}
+
+impl Pipe6a {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_6a: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "static_mixer_pipe_6a".to_string(),
+                2.79e-2, // component diameter in meters
+                0.1526, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                51.526384, // angle in degrees
+                5.05 // form loss K value
+                );
+
+        return pipe_6a;
+    }
+
+}
+
+pub struct StaticMixer41 {
+    // static mixer 41 (MX-41) on CIET diagram
+    // in the pump and CTAH branch
+    // just before CTAH (AKA IHX)
+    // from top to bottom
+    //
+    // label 6 on diagram
+}
+
+impl StaticMixer41 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_41: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_41_label_6".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                51.526384, //incline angle in degrees
+                &StaticMixer41::custom_darcy,
+                &StaticMixer41::custom_k);
+
+        return static_mixer_41;
+    }
+}
+
+
+
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
@@ -407,59 +489,6 @@ impl StaticMixer40 {
     }
 }
 
-pub struct StaticMixer41 {
-    // static mixer 41 (MX-41) on CIET diagram
-    // in the pump and CTAH branch
-    // just before CTAH (AKA IHX)
-    // from top to bottom
-    //
-    // label 6 on diagram
-}
-
-impl StaticMixer41 {
-
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            21.0 + 4000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let static_mixer_41: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "static_mixer_41_label_6".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, //component area in sq meters
-                0.33, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                51.526384, //incline angle in degrees
-                &StaticMixer41::custom_darcy,
-                &StaticMixer41::custom_k);
-
-        return static_mixer_41;
-    }
-}
 
 pub struct StaticMixer10 {
     // static mixer 10 (MX-10) on CIET diagram
