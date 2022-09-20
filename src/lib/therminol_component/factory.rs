@@ -60,6 +60,7 @@ impl Flowmeter40 {
                 0.36, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
+                       // in millimeters
                 90.0, //incline angle in degrees
                 &Flowmeter40::custom_darcy,
                 &Flowmeter40::custom_k);
@@ -84,8 +85,9 @@ impl Pipe13 {
                 1.273175, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
+                       // in millimeters
                 0.0, // angle in degrees
-                12.95
+                12.95 // form loss K value
                 );
 
         return pipe_13;
@@ -114,14 +116,71 @@ impl Pipe14 {
                 0.6687, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
+                       // in millimeters
                 90.0, // angle in degrees
-                2.4
+                2.4 // form loss K value
                 );
 
         return pipe_14;
     }
 }
 
+pub struct Pipe15 {
+    // pipe 15 on the diagram in Nico Zweibaum nodalisation
+    // probably corresponds of F30 on CIET's P&ID
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // -49.36983 degrees
+}
+
+impl Pipe15 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_15: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_15".to_string(),
+                2.79e-2, // component diameter in meters
+                0.3556, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                -49.36983, // angle in degrees
+                0.8 // form loss K value
+                );
+
+        return pipe_15;
+    }
+}
+
+pub struct Pipe16 {
+    // pipe 16 on the diagram in Nico Zweibaum nodalisation
+    // probably corresponds of F30 on CIET's P&ID
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // -49.36983 degrees
+}
+
+impl Pipe16 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_16: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_16".to_string(),
+                2.79e-2, // component diameter in meters
+                0.644525, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                -90.0, // angle in degrees
+                1.9 // form loss K value
+                );
+
+        return pipe_16;
+    }
+}
 /// bypass line times in ciet,
 /// tbd, still organising
 pub struct Flowmeter30 {
