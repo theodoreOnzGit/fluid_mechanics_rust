@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate approx;
 use uom::si::f64::*;
 
 #[test]
@@ -140,7 +142,7 @@ pub fn when_ctah_pressure_change_expect_correct_value_non_zero_flow(){
 }
 
 #[test]
-pub fn when_mx10_pressure_change_expect_correct_value_non_zero_flow(){
+pub fn when_mx10_pressure_change_expect_correct_value_zero_flow(){
     //import necessary things...
     use fluid_mechanics_rust;
     use fluid_mechanics_rust::therminol_component::factory;
@@ -156,7 +158,8 @@ pub fn when_mx10_pressure_change_expect_correct_value_non_zero_flow(){
     // now let's have a temperature of 21C and mass flow of 0.15 kg/s
     let fluid_temp = ThermodynamicTemperature::new::<
         degree_celsius>(20.0);
-    let mass_flow_expected = MassRate::new::<kilogram_per_second>(-0.18);
+    let mass_flow_expected = MassRate::new::
+        <kilogram_per_second>(0.00);
 
     // let's get the pressure changes
     use fluid_mechanics_rust::therminol_component::CalcPressureChange;
@@ -192,6 +195,75 @@ pub fn when_mx10_pressure_change_expect_correct_value_non_zero_flow(){
         mx10_hydrostatic_pressure_change.value);
 
     assert_eq!(expected_pressure_loss,actual_pressure_loss);
+}
+
+#[test]
+pub fn when_mx10_pressure_change_expect_correct_value_non_zero_flow(){
+    //import necessary things...
+    use fluid_mechanics_rust;
+    use fluid_mechanics_rust::therminol_component::factory;
+    use uom::si::mass_rate::kilogram_per_second;
+    use uom::si::thermodynamic_temperature::degree_celsius;
+
+    use uom::si::f64::*;
+
+    // Setup
+    //
+
+
+    // let's get the component for ctah
+    let mx10 = factory::StaticMixer10::get();
+
+    // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+    let fluid_temp = ThermodynamicTemperature::new::<
+        degree_celsius>(20.0);
+    let mass_flow_expected = MassRate::new::<kilogram_per_second>(-0.18);
+
+    // let's get expected pressure changes
+    let mx10_reference_pressure_change = 
+        get_mx10_pressure_change_empirical(
+            mass_flow_expected,
+            fluid_temp);
+
+    let expected_pressure_loss = -(mx10_reference_pressure_change.
+        value);
+
+    // Act
+    // let's get the test pressure changes
+    // here im getting the total pressure change and
+    // need to subtract out the hydrostatic part
+    use fluid_mechanics_rust::therminol_component::
+        CalcPressureChange;
+
+    let mx10_pressure_change = 
+        CalcPressureChange::from_mass_rate(
+            &mx10,
+            mass_flow_expected,
+            fluid_temp);
+
+
+    // let's subtract out the pressure change due to hydrostatic pressure
+    //
+    use fluid_mechanics_rust::therminol_component::
+        StandardCustomComponentProperties;
+
+
+    let mx10_hydrostatic_pressure_change = 
+        mx10.get_hydrostatic_pressure_change(
+            fluid_temp) ;
+
+
+
+
+    let actual_pressure_loss = -(mx10_pressure_change.value -
+        mx10_hydrostatic_pressure_change.value);
+
+    // Assert
+    // here i am allowing for max 7% difference between empirical
+    // and actual value
+    assert_relative_eq!(expected_pressure_loss,
+                        actual_pressure_loss,
+                        max_relative=0.07);
 }
 
 pub fn get_ctah_pressure_change_empirical(
