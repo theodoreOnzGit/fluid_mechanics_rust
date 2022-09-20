@@ -71,7 +71,7 @@ impl Flowmeter40 {
 pub struct Pipe13 {
     // pipe 13 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42, 
-    // F-40 and F-41 on CIEt diagram
+    // F-40 and F-41 on CIET diagram
 }
 
 impl Pipe13 {
@@ -91,6 +91,35 @@ impl Pipe13 {
         return pipe_13;
     }
 
+}
+
+pub struct Pipe14 {
+    // pipe 14 on the diagram in Nico Zweibaum nodalisation
+    // probably some combination of V-42, 
+    // F-40 and F-41 on CIET diagram
+    // it is inclined 90 degrees upwards in direction
+    // of flow
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 90 degrees
+}
+
+impl Pipe14 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_14: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_14".to_string(),
+                2.79e-2, // component diameter in meters
+                0.6687, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0, // angle in degrees
+                2.4
+                );
+
+        return pipe_14;
+    }
 }
 
 /// bypass line times in ciet,
