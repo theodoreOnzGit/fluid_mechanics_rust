@@ -142,14 +142,6 @@ pub fn when_ctah_pressure_change_expect_correct_value_non_zero_flow(){
                             actual_pressure_loss,
                             max_relative = 0.04);
     }
-
-
-
-
-
-
-
-
 }
 
 #[test]
@@ -197,8 +189,8 @@ pub fn when_mx10_pressure_change_expect_correct_value_zero_flow(){
             mass_flow_expected,
             fluid_temp);
 
-    let expected_pressure_loss = -(mx10_reference_pressure_change.
-        value);
+    let expected_pressure_loss = -(
+        mx10_reference_pressure_change.value);
 
 
 
@@ -407,3 +399,34 @@ pub fn get_m12_value(mass_flow_rate: MassRate) -> Length {
 
 }
 
+pub fn get_m43_value(mass_flow_rate: MassRate) -> Length {
+    use uom::si::mass_rate::kilogram_per_second;
+    use uom::si::length::meter;
+
+    let mass_rate_kg_per_s: f64 = mass_flow_rate.
+        get::<kilogram_per_second>();
+
+    let length_meter = 10.157 * mass_rate_kg_per_s.powf(2.0) +
+        2.3368 * mass_rate_kg_per_s + 
+        1.0;
+
+    return Length::new::<meter>(length_meter);
+
+}
+
+pub fn get_m40_value(mass_flow_rate: MassRate) -> Length {
+    use uom::si::mass_rate::kilogram_per_second;
+    use uom::si::length::meter;
+
+    let mass_rate_kg_per_s: f64 = mass_flow_rate.
+        get::<kilogram_per_second>();
+
+    // m40
+    //y = 7.846 x^2 + 1.9096x + 1
+    let length_meter = 7.846 * mass_rate_kg_per_s.powf(2.0) +
+        1.9096 * mass_rate_kg_per_s + 
+        1.0;
+
+    return Length::new::<meter>(length_meter);
+
+}
