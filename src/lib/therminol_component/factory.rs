@@ -9,6 +9,13 @@ DowthermACustomComponent;
 use crate::therminol_component::
 StandardCustomComponentProperties;
 
+use crate::therminol_component::therminol_pipe::
+DowthermAPipe;
+
+use super::StandardPipeProperties;
+
+/// CTAH branch items 
+/// I'm still in the midst of rearranging things though...
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
@@ -61,6 +68,33 @@ impl Flowmeter40 {
     }
 }
 
+pub struct Pipe13 {
+    // pipe 13 on the diagram in Nico Zweibaum nodalisation
+    // probably some combination of V-42, 
+    // F-40 and F-41 on CIEt diagram
+}
+
+impl Pipe13 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_13: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_13".to_string(),
+                2.79e-2, // component diameter in meters
+                1.273175, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                0.0, // angle in degrees
+                12.95
+                );
+
+        return pipe_13;
+    }
+
+}
+
+/// bypass line times in ciet,
+/// tbd, still organising
 pub struct Flowmeter30 {
     // bypass flow flowmeter FM30 
     // not labelled on diagram
