@@ -97,6 +97,128 @@ impl StaticMixer41 {
 }
 
 
+pub struct CTAHHorizontal {
+
+    // coiled tube air heater
+    // has fldk = 400 + 52,000/Re
+    // 
+    // label is 7b
+    // empirical data in page 48 on pdf viewer in Dr
+    // Zweibaum thesis shows reverse flow has same
+    // pressure drop characteristics as forward flow
+}
+
+impl CTAHHorizontal {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            400.0 + 52000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let ctah_horizontal: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_horizontal_label_7b".to_string(),
+                1.19e-2, // component diameter in meters
+                1.33e-3, //component area in sq meters
+                1.2342, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                0.0, //incline angle in degrees
+                &CTAHHorizontal::custom_darcy,
+                &CTAHHorizontal::custom_k);
+
+        return ctah_horizontal;
+    }
+}
+
+pub struct CTAHVertical {
+
+    // coiled tube air heater,
+    // uses pipe friction factors but has a constant K value
+    // also pipe isn't circular 
+    // so we'll have to use custom fldk to help
+    // label 7b
+}
+
+impl CTAHVertical {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 3.9;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let ctah_vertical: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_vertical_label_7a".to_string(),
+                1.19e-2, // component diameter in meters
+                1.33e-3, //component area in sq meters
+                0.3302, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &CTAHVertical::custom_darcy,
+                &CTAHVertical::custom_k);
+
+        return ctah_vertical;
+    }
+}
 
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
@@ -786,128 +908,6 @@ impl StaticMixer61 {
     }
 }
 
-pub struct CTAHHorizontal {
-
-    // coiled tube air heater
-    // has fldk = 400 + 52,000/Re
-    // 
-    // label is 7b
-    // empirical data in page 48 on pdf viewer in Dr
-    // Zweibaum thesis shows reverse flow has same
-    // pressure drop characteristics as forward flow
-}
-
-impl CTAHHorizontal {
-
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            400.0 + 52000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let ctah_horizontal: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "ctah_horizontal_label_7b".to_string(),
-                1.19e-2, // component diameter in meters
-                1.33e-3, //component area in sq meters
-                1.2342, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                0.0, //incline angle in degrees
-                &CTAHHorizontal::custom_darcy,
-                &CTAHHorizontal::custom_k);
-
-        return ctah_horizontal;
-    }
-}
-
-pub struct CTAHVertical {
-
-    // coiled tube air heater,
-    // uses pipe friction factors but has a constant K value
-    // also pipe isn't circular 
-    // so we'll have to use custom fldk to help
-    // label 7b
-}
-
-impl CTAHVertical {
-
-
-    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
-
-        if roughness_ratio < 0.0 {
-            panic!("roughness_ratio < 0.0");
-        }
-
-        use crate::churchill_friction_factor;
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let darcy = churchill_friction_factor::darcy(reynolds_number,
-                                                     roughness_ratio);
-
-        if reverse_flow {
-            return -darcy;
-        }
-        return darcy;
-    }
-
-    pub fn custom_k(reynolds_number: f64) -> f64 {
-
-        let custom_k_value = 3.9;
-
-        if reynolds_number < 0.0 {
-            return -custom_k_value
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let ctah_vertical: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "ctah_vertical_label_7a".to_string(),
-                1.19e-2, // component diameter in meters
-                1.33e-3, //component area in sq meters
-                0.3302, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                -90.0, //incline angle in degrees
-                &CTAHVertical::custom_darcy,
-                &CTAHVertical::custom_k);
-
-        return ctah_vertical;
-    }
-}
 
 
 
