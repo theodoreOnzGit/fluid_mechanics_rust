@@ -372,6 +372,30 @@ impl Pipe11 {
 
 }
 
+pub struct Pipe12 {
+    // pipe 12 
+}
+
+impl Pipe12 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_12: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_12".to_string(),
+                2.79e-2, // component diameter in meters
+                0.333375, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                0.0, // angle in degrees
+                21.65 // form loss K value
+                );
+
+        return pipe_12;
+    }
+
+}
+
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
