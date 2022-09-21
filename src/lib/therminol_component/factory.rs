@@ -568,8 +568,8 @@ pub struct Branch17 {
     // probably corresponds of F30 on CIET's P&ID
     // 
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
-    // -49.36983 degrees
+    // to pipe 17, the incline angle is 0 degrees
+    //
 }
 
 impl Branch17 {
@@ -579,16 +579,425 @@ impl Branch17 {
             = StandardPipeProperties::new( 
                 "branch_17".to_string(),
                 2.79e-2, // component diameter in meters
-                0.644525, // component length in meters
+                0.473075, // component length in meters
                 0.015, // estimated component wall roughness 
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
-                -90.0, // angle in degrees
-                1.9 // form loss K value
+                0.0, // angle in degrees
+                0.0 // form loss K value
                 );
 
         return pipe_17;
+    }
+}
+
+/// Heater Branch (top to bottom)
+// this is reverse order compared to table A-1 in
+// the Zweibaum nodalised relap model
+
+
+pub struct Branch5 {
+    // pipe 5 on the diagram in Nico Zweibaum nodalisation
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 5, the incline angle is also 
+    // 0 degrees
+    // i add 180 degrees so that it is 
+    // properly reversed in 
+    // inclination angle from top to bottom
+}
+
+impl Branch5 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_5: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "branch_5".to_string(),
+                2.79e-2, // component diameter in meters
+                0.7493, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                0.0 + 180.0, // angle in degrees
+                0.0 // form loss K value
+                );
+
+        return pipe_5;
+    }
+}
+
+
+pub struct Pipe4 {
+    // pipe 4 on the diagram in Nico Zweibaum nodalisation
+    // probably corresponds of V11 and F12
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // 49.743387 +180.0 degrees
+}
+
+impl Pipe4 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_4: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_4".to_string(),
+                2.79e-2, // component diameter in meters
+                0.2413, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                49.743387 + 180.0, // angle in degrees
+                2.4 // form loss K value
+                );
+
+        return pipe_4;
+    }
+}
+
+pub struct Pipe3 {
+    // pipe 3 on the diagram in Nico Zweibaum nodalisation
+    // probably corresponds of V11 and F12
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // 90.0 +180.0 degrees
+}
+
+impl Pipe3 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_3: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_3".to_string(),
+                2.79e-2, // component diameter in meters
+                1.2827, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                90.0 + 180.0, // angle in degrees
+                3.15 // form loss K value
+                );
+
+        return pipe_3;
+    }
+}
+
+pub struct StaticMixer10 {
+    // static mixer 10 (MX-10) on CIET diagram
+    // just before the heater in the heater branch
+    // from top to bottom
+    // label 2 on diagram (fig A-1 on Nico Zweibaum thesis)
+    // pg 125 on pdf viewer, pg 110 on printed page number on bottom right
+    //
+    // though in reality flow goes from bottom to
+    // top in forced convection
+    // so from a flow perspective it is before the 
+    // heater
+    //
+}
+impl StaticMixer10 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_10: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_41_label_2".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer10::custom_darcy,
+                &StaticMixer10::custom_k);
+
+        return static_mixer_10;
+    }
+}
+
+pub struct Pipe2a {
+    // pipe 2a on the diagram in Nico Zweibaum nodalisation
+    // probably corresponds of V11 and F12
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // 90.0 +180.0 degrees
+}
+
+impl Pipe2a {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_2a: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_2a_static_mixer".to_string(),
+                2.79e-2, // component diameter in meters
+                0.149425, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                90.0 + 180.0, // angle in degrees
+                1.8 // form loss K value
+                );
+
+        return pipe_2a;
+    }
+}
+
+pub struct HeaterTopHead1a {
+
+    // heater top head
+    // diagram label 1a
+    //
+    // inclined at 90 degrees bottom to top
+    // or 90 degrees + 180 top to bottom orientation
+}
+
+impl HeaterTopHead1a {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 3.75;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let heater_top_head: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "heater_top_head_label_1a".to_string(),
+                6.60e-3, // component diameter in meters
+                3.64e-4, //component area in sq meters
+                0.0889, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 + 180.0, //incline angle in degrees
+                &HeaterTopHead1a::custom_darcy,
+                &HeaterTopHead1a::custom_k);
+
+        return heater_top_head;
+    }
+}
+
+pub struct CietHeaterVersion1 {
+
+    // this is the first version of the ciet heater
+    // without any insert within the heater
+    // the heater behaves like a pipe
+    //
+    // inclined at 90 degrees bottom to top
+    // or 90 degrees + 180 top to bottom orientation
+}
+
+impl CietHeaterVersion1 {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 0.0;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let heater_version_1_label_1: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "heater_version_1_label_1_label_1a".to_string(),
+                6.60e-3, // component diameter in meters
+                3.64e-4, //component area in sq meters
+                1.6383, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 + 180.0, //incline angle in degrees
+                &CietHeaterVersion1::custom_darcy,
+                &CietHeaterVersion1::custom_k);
+
+        return heater_version_1_label_1;
+    }
+}
+
+pub struct HeaterBottomHead1b {
+
+    // heater top head
+    // diagram label 1b
+    //
+    // inclined at 90 degrees bottom to top
+    // or 90 degrees + 180 top to bottom orientation
+}
+
+impl HeaterBottomHead1b {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 3.95;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let heater_bottom_head: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "heater_bottom_head_label_1b".to_string(),
+                6.60e-3, // component diameter in meters
+                3.64e-4, //component area in sq meters
+                0.19685, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 + 180.0, //incline angle in degrees
+                &HeaterBottomHead1b::custom_darcy,
+                &HeaterBottomHead1b::custom_k);
+
+        return heater_bottom_head;
+    }
+}
+
+pub struct Pipe18 {
+    // pipe 18 on the diagram in Nico Zweibaum nodalisation
+    // 
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also 
+    // -40.00520 +180.0 degrees
+}
+
+impl Pipe18 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_18: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_18".to_string(),
+                2.79e-2, // component diameter in meters
+                0.1778, // component length in meters
+                0.015, // estimated component wall roughness 
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                -40.00520 + 180.0, // angle in degrees
+                5.15 // form loss K value
+                );
+
+        return pipe_18;
     }
 }
 
@@ -758,69 +1167,13 @@ impl Flowmeter60 {
     }
 }
 
+
 /// static mixers are here
 ///
 ///
 
 
 
-pub struct StaticMixer10 {
-    // static mixer 10 (MX-10) on CIET diagram
-    // just before the heater in the heater branch
-    // from top to bottom
-    // label 2 on diagram (fig A-1 on Nico Zweibaum thesis)
-    // pg 125 on pdf viewer, pg 110 on printed page number on bottom right
-    //
-    // though in reality flow goes from bottom to
-    // top in forced convection
-    // so from a flow perspective it is before the 
-    // heater
-    //
-}
-impl StaticMixer10 {
-
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            21.0 + 4000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let static_mixer_10: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "static_mixer_41_label_2".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, //component area in sq meters
-                0.33, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                90.0-180.0, //incline angle in degrees
-                &StaticMixer10::custom_darcy,
-                &StaticMixer10::custom_k);
-
-        return static_mixer_10;
-    }
-}
 
 pub struct StaticMixer20 {
     // static mixer 20 (MX-20) on CIET diagram
