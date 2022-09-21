@@ -14,6 +14,106 @@ pub fn my_test(){
     assert_eq!(2.0,2.0);
 }
 
+#[test]
+pub fn when_pump_with_resistance_pressure_set_expect_correct_value(){
+
+    // this test checks if i can set 
+    // a pump compoennt combined with some resistance
+    // to have a certain pressure
+    //
+    // get the flowrate from that (ie pressure dif = 0.0)
+    // this is when you consider that the pump and
+    // flow value or resistor is one complete loop
+    //
+    // but you can set the pressure to a certian value
+    // and obtain a non zero mass flowrate
+    //
+    // and when you substitute that non zero mass flowrate
+    // back, you should get a zero pressure as well
+
+    // Setup
+    //import necessary things...
+    use fluid_mechanics_rust;
+    use fluid_mechanics_rust::therminol_component::factory;
+    use fluid_mechanics_rust::therminol_component::
+        StandardCustomComponentProperties;
+    use uom::si::mass_rate::kilogram_per_second;
+    use uom::si::pressure::pascal;
+    use uom::si::thermodynamic_temperature::degree_celsius;
+
+    use uom::si::f64::*;
+    use fluid_mechanics_rust::therminol_component::
+        CalcPressureChange;
+
+
+    let expected_pump_pressure = 1600.0;
+
+    // create pump object
+    let pump_with_resistance = factory::PumpWithResistance::get(
+        expected_pump_pressure);
+
+    let fluid_temp = ThermodynamicTemperature::new::<
+        degree_celsius>(20.0);
+
+    let pump_pressure = Pressure::new::<pascal>(
+        0.0);
+    // Act
+    let result_mass_flowrate = 
+        CalcPressureChange::to_mass_rate(
+            &pump_with_resistance,
+            pump_pressure,
+            fluid_temp);
+
+    // if i take this result mass flowrate and feed it
+    // back in
+    // i should then get zero pressure change
+
+    let result_pressure_change = 
+        CalcPressureChange::from_mass_rate(
+            &pump_with_resistance,
+            result_mass_flowrate,
+            fluid_temp);
+
+
+    // Assert
+    // max error = 1.0e-5 kg/s absolute
+    // based on flowmeter reading instrument error
+    assert_abs_diff_eq!(0.0, result_pressure_change.value
+                        , epsilon = 1e-5);
+
+
+
+}
+
+#[test]
+pub fn when_ctah_pump_pressure_set_expect_correct_value(){
+
+    // Setup
+    //import necessary things...
+    use fluid_mechanics_rust;
+    use fluid_mechanics_rust::therminol_component::factory;
+    use fluid_mechanics_rust::therminol_component::
+        StandardCustomComponentProperties;
+
+
+    let expected_pump_pressure = 1600.0;
+
+    // create pump object
+    let ctah_pump = factory::CTAHPump::get(
+        expected_pump_pressure);
+
+    // Act
+    let internal_pressure_pascals = 
+        ctah_pump.get_internal_pressure_term();
+
+    // Assert
+
+    assert_eq!(expected_pump_pressure,
+               internal_pressure_pascals.value);
+
+
+}
+
 // now let's import a test for CTAH
 // CTAH has a characteristic pressure loss
 // which is measured by M-44 and M-45

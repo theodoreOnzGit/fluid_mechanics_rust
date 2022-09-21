@@ -396,6 +396,45 @@ impl Pipe12 {
 
 }
 
+pub struct CTAHPump {
+    // ctah pump is an empty component
+    // ie no friction factor losses
+    // but it provides a source pressure
+}
+impl CTAHPump {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(_reynolds_number: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn get(pressure_pascals: f64
+               ) -> DowthermACustomComponent {
+
+        let mut ctah_pump: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_pump".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                0.0, //incline angle in degrees
+                &CTAHPump::custom_darcy,
+                &CTAHPump::custom_k);
+
+        ctah_pump.set_internal_pressure_term(pressure_pascals);
+
+        return ctah_pump;
+    }
+}
+
 pub struct Pipe13 {
     // pipe 13 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42, 
@@ -1415,7 +1454,51 @@ impl StaticMixer61 {
 
 
 
+/// test components
+// pump and pipe combination
 
+
+pub struct PumpWithResistance {
+    // this is a pump with resistance
+    // i can set the internal pressure term to some value
+    // and i ensure that the pressure change between
+    // the two ends is zero
+    // i should see some flowrate
+}
+impl PumpWithResistance {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 64.0/_reynolds_number;
+    }
+
+    pub fn custom_k(_reynolds_number: f64) -> f64 {
+        return 5.25;
+    }
+
+    pub fn get(pressure_pascals: f64
+               ) -> DowthermACustomComponent {
+
+        let mut pump_with_resistance: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "pump_with_resistance".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                0.0, //incline angle in degrees
+                &PumpWithResistance::custom_darcy,
+                &PumpWithResistance::custom_k);
+
+        pump_with_resistance.set_internal_pressure_term(
+            pressure_pascals);
+
+        return pump_with_resistance;
+    }
+}
 
 
 
