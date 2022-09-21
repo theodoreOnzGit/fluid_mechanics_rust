@@ -302,7 +302,6 @@ impl StaticMixer40 {
 
 pub struct Pipe9 {
     // pipe 9 
-    // otherwise known as the static mixer pipe 9
 }
 
 impl Pipe9 {
@@ -310,7 +309,7 @@ impl Pipe9 {
     pub fn get() -> DowthermAPipe {
         let pipe_9: DowthermAPipe 
             = StandardPipeProperties::new( 
-                "static_mixer_pipe_9".to_string(),
+                "pipe_9".to_string(),
                 2.79e-2, // component diameter in meters
                 0.7112, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
@@ -321,6 +320,30 @@ impl Pipe9 {
                 );
 
         return pipe_9;
+    }
+
+}
+
+pub struct Pipe10 {
+    // pipe 10 
+}
+
+impl Pipe10 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_10: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "pipe_10".to_string(),
+                2.79e-2, // component diameter in meters
+                2.4511, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                -90.0, // angle in degrees
+                0.45 // form loss K value
+                );
+
+        return pipe_10;
     }
 
 }
