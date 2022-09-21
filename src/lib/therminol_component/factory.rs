@@ -244,6 +244,87 @@ impl Pipe8a {
 
 }
 
+pub struct StaticMixer40 {
+    // static mixer 40 (MX-40) on CIET diagram
+    // just after CTAH (AKA IHX)
+    // from top to bottom
+    // label 8 on diagram
+    //
+    // forced convection flow direction is same as top to bottom
+    //
+    // has a fldk of 21+4000/Re
+}
+impl StaticMixer40 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value = 
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_40: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "static_mixer_40_label_8".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &StaticMixer40::custom_darcy,
+                &StaticMixer40::custom_k);
+
+        return static_mixer_40;
+    }
+}
+
+pub struct Pipe9 {
+    // pipe 9 
+    // otherwise known as the static mixer pipe 9
+}
+
+impl Pipe9 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_9: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "static_mixer_pipe_9".to_string(),
+                2.79e-2, // component diameter in meters
+                0.7112, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                -42.73211, // angle in degrees
+                0.8 // form loss K value
+                );
+
+        return pipe_9;
+    }
+
+}
+
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
@@ -579,61 +660,6 @@ impl Flowmeter60 {
 ///
 ///
 
-pub struct StaticMixer40 {
-    // static mixer 40 (MX-40) on CIET diagram
-    // just after CTAH (AKA IHX)
-    // from top to bottom
-    // label 8 on diagram
-    //
-    // forced convection flow direction is same as top to bottom
-    //
-    // has a fldk of 21+4000/Re
-}
-impl StaticMixer40 {
-
-    // let's import everything necessary:
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            21.0 + 4000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let static_mixer_40: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "static_mixer_40_label_8".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, //component area in sq meters
-                0.33, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                -90.0, //incline angle in degrees
-                &StaticMixer40::custom_darcy,
-                &StaticMixer40::custom_k);
-
-        return static_mixer_40;
-    }
-}
 
 
 pub struct StaticMixer10 {
