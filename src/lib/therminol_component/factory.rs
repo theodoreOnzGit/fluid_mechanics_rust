@@ -96,6 +96,71 @@ impl StaticMixer41 {
     }
 }
 
+pub struct CTAHVertical {
+
+    // coiled tube air heater,
+    // uses pipe friction factors but has a constant K value
+    // also pipe isn't circular 
+    // so we'll have to use custom fldk to help
+    // label 7a
+}
+
+impl CTAHVertical {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 3.9;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let ctah_vertical: DowthermACustomComponent 
+            = StandardCustomComponentProperties::new(
+                "ctah_vertical_label_7a".to_string(),
+                1.19e-2, // component diameter in meters
+                1.33e-3, //component area in sq meters
+                0.3302, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                -90.0, //incline angle in degrees
+                &CTAHVertical::custom_darcy,
+                &CTAHVertical::custom_k);
+
+        return ctah_vertical;
+    }
+}
 
 pub struct CTAHHorizontal {
 
@@ -154,70 +219,29 @@ impl CTAHHorizontal {
     }
 }
 
-pub struct CTAHVertical {
-
-    // coiled tube air heater,
-    // uses pipe friction factors but has a constant K value
-    // also pipe isn't circular 
-    // so we'll have to use custom fldk to help
-    // label 7b
+pub struct Pipe8a {
+    // pipe 8a 
+    // otherwise known as the static mixer pipe 8a
 }
 
-impl CTAHVertical {
+impl Pipe8a {
 
-
-    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
-
-        if roughness_ratio < 0.0 {
-            panic!("roughness_ratio < 0.0");
-        }
-
-        use crate::churchill_friction_factor;
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let darcy = churchill_friction_factor::darcy(reynolds_number,
-                                                     roughness_ratio);
-
-        if reverse_flow {
-            return -darcy;
-        }
-        return darcy;
-    }
-
-    pub fn custom_k(reynolds_number: f64) -> f64 {
-
-        let custom_k_value = 3.9;
-
-        if reynolds_number < 0.0 {
-            return -custom_k_value
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let ctah_vertical: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "ctah_vertical_label_7a".to_string(),
-                1.19e-2, // component diameter in meters
-                1.33e-3, //component area in sq meters
-                0.3302, // component length in meters
+    pub fn get() -> DowthermAPipe {
+        let pipe_8a: DowthermAPipe 
+            = StandardPipeProperties::new( 
+                "static_mixer_pipe_8a".to_string(),
+                2.79e-2, // component diameter in meters
+                0.22245, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
-                -90.0, //incline angle in degrees
-                &CTAHVertical::custom_darcy,
-                &CTAHVertical::custom_k);
+                       // in millimeters
+                -90.0, // angle in degrees
+                3.75 // form loss K value
+                );
 
-        return ctah_vertical;
+        return pipe_8a;
     }
+
 }
 
 pub struct Flowmeter40 {
