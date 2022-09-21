@@ -35,9 +35,6 @@ pub fn when_pump_with_resistance_pressure_set_expect_correct_value(){
     //import necessary things...
     use fluid_mechanics_rust;
     use fluid_mechanics_rust::therminol_component::factory;
-    use fluid_mechanics_rust::therminol_component::
-        StandardCustomComponentProperties;
-    use uom::si::mass_rate::kilogram_per_second;
     use uom::si::pressure::pascal;
     use uom::si::thermodynamic_temperature::degree_celsius;
 
