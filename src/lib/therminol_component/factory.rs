@@ -1336,6 +1336,132 @@ impl Pipe22 {
 
 }
 
+pub struct Flowmeter20 {
+    // DHX flow flowmeter 20
+    // natural convection heat exchanger in primary loop
+    // diagram label is 21a
+    // we use the convention of top of bypass branch to bottom
+    // hence degree is -90
+}
+impl Flowmeter20 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value =
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let flowmeter_20: DowthermACustomComponent
+            = StandardCustomComponentProperties::new(
+                "flowmeter_20_21a".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 - 180.0, //incline angle in degrees
+                &Flowmeter20::custom_darcy,
+                &Flowmeter20::custom_k);
+
+        return flowmeter_20;
+    }
+}
+
+pub struct Pipe21 {
+    // pipe 21
+}
+
+impl Pipe21 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_21: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_21".to_string(),
+                2.79e-2, // component diameter in meters
+                0.487725, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                90.0-180.0, // angle in degrees
+                4.4 // form loss K value
+                );
+
+        return pipe_21;
+    }
+
+}
+
+pub struct Pipe20 {
+    // pipe 20
+}
+
+impl Pipe20 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_20: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_20".to_string(),
+                2.79e-2, // component diameter in meters
+                0.33655, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                0.0 - 180.0, // angle in degrees
+                0.0 // form loss K value
+                );
+
+        return pipe_20;
+    }
+
+}
+
+pub struct Pipe19 {
+    // pipe 19
+}
+
+impl Pipe19 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_19: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_19".to_string(),
+                2.79e-2, // component diameter in meters
+                0.219075, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                -31.44898 - 180.0, // angle in degrees
+                7.5 // form loss K value
+                );
+
+        return pipe_19;
+    }
+
+}
+
 /// bypass line times in ciet,
 /// tbd, still organising
 pub struct Flowmeter30 {
@@ -1391,59 +1517,6 @@ impl Flowmeter30 {
     }
 }
 
-pub struct Flowmeter20 {
-    // DHX flow flowmeter 20
-    // natural convection heat exchanger in primary loop
-    // diagram label is 21a
-    // we use the convention of top of bypass branch to bottom
-    // hence degree is -90
-}
-impl Flowmeter20 {
-
-    // let's import everything necessary:
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value =
-            18.0 + 93000.0/reynolds_number.powf(1.35);
-        // coriolis flowmeter
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let flowmeter_20: DowthermACustomComponent
-            = StandardCustomComponentProperties::new(
-                "flowmeter_20_21a".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, // cross sectional area in meters sq
-                0.36, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                90.0 - 180.0, //incline angle in degrees
-                &Flowmeter20::custom_darcy,
-                &Flowmeter20::custom_k);
-
-        return flowmeter_20;
-    }
-}
 
 pub struct Flowmeter60 {
     // DHX flow flowmeter 60
