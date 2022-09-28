@@ -638,7 +638,6 @@ impl Branch17 {
 
 pub struct Branch5 {
     // pipe 5 on the diagram in Nico Zweibaum nodalisation
-    //
     // and from a top to bottom direction from pipe 5
     // to pipe 5, the incline angle is also
     // 0 degrees
