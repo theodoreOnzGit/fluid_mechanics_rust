@@ -1341,6 +1341,12 @@ pub struct Flowmeter20 {
     // diagram label is 21a
     // we use the convention of top of bypass branch to bottom
     // hence degree is -90
+    //
+    // However in DHX, i also expect there to be
+    // a check valve which only allows flow from top to bottom
+    //
+    // That is the forward direction of flow for FM20,
+    //
 }
 impl Flowmeter20 {
 
@@ -1364,7 +1370,7 @@ impl Flowmeter20 {
         // coriolis flowmeter
 
         if reverse_flow {
-            return -custom_k_value;
+            return -1.0e10/reynolds_number - 1.0e10;
         }
 
         return custom_k_value;
