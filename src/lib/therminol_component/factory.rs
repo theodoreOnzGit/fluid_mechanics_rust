@@ -1062,7 +1062,7 @@ impl Pipe26 {
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
-                -52.571994 + 180.0, // angle in degrees
+                52.571994 + 180.0, // angle in degrees
                 1.75 // form loss K value
                 );
 
