@@ -14,19 +14,19 @@ DowthermAPipe;
 
 use super::StandardPipeProperties;
 
-/// CTAH branch items 
+/// CTAH branch items
 /// I'm still in the midst of rearranging things though...
 
 pub struct Pipe6a {
-    // pipe 6a 
+    // pipe 6a
     // otherwise known as the static mixer pipe 6a
 }
 
 impl Pipe6a {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_6a: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_6a: DowthermAPipe
+            = StandardPipeProperties::new(
                 "static_mixer_pipe_6a".to_string(),
                 2.79e-2, // component diameter in meters
                 0.1526, // component length in meters
@@ -67,7 +67,7 @@ impl StaticMixer41 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
@@ -80,7 +80,7 @@ impl StaticMixer41 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let static_mixer_41: DowthermACustomComponent 
+        let static_mixer_41: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "static_mixer_41_label_6".to_string(),
                 2.79e-2, // component diameter in meters
@@ -100,7 +100,7 @@ pub struct CTAHVertical {
 
     // coiled tube air heater,
     // uses pipe friction factors but has a constant K value
-    // also pipe isn't circular 
+    // also pipe isn't circular
     // so we'll have to use custom fldk to help
     // label 7a
 }
@@ -146,7 +146,7 @@ impl CTAHVertical {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let ctah_vertical: DowthermACustomComponent 
+        let ctah_vertical: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "ctah_vertical_label_7a".to_string(),
                 1.19e-2, // component diameter in meters
@@ -166,7 +166,7 @@ pub struct CTAHHorizontal {
 
     // coiled tube air heater
     // has fldk = 400 + 52,000/Re
-    // 
+    //
     // label is 7b
     // empirical data in page 48 on pdf viewer in Dr
     // Zweibaum thesis shows reverse flow has same
@@ -181,7 +181,7 @@ impl CTAHHorizontal {
     }
 
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        
+
         let mut reverse_flow = false;
 
         // the user account for reverse flow scenarios...
@@ -190,7 +190,7 @@ impl CTAHHorizontal {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             400.0 + 52000.0/reynolds_number;
 
         if reverse_flow {
@@ -203,7 +203,7 @@ impl CTAHHorizontal {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let ctah_horizontal: DowthermACustomComponent 
+        let ctah_horizontal: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "ctah_horizontal_label_7b".to_string(),
                 1.19e-2, // component diameter in meters
@@ -220,15 +220,15 @@ impl CTAHHorizontal {
 }
 
 pub struct Pipe8a {
-    // pipe 8a 
+    // pipe 8a
     // otherwise known as the static mixer pipe 8a
 }
 
 impl Pipe8a {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_8a: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_8a: DowthermAPipe
+            = StandardPipeProperties::new(
                 "static_mixer_pipe_8a".to_string(),
                 2.79e-2, // component diameter in meters
                 0.22245, // component length in meters
@@ -271,7 +271,7 @@ impl StaticMixer40 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
@@ -284,7 +284,7 @@ impl StaticMixer40 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let static_mixer_40: DowthermACustomComponent 
+        let static_mixer_40: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "static_mixer_40_label_8".to_string(),
                 2.79e-2, // component diameter in meters
@@ -301,14 +301,14 @@ impl StaticMixer40 {
 }
 
 pub struct Pipe9 {
-    // pipe 9 
+    // pipe 9
 }
 
 impl Pipe9 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_9: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_9: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_9".to_string(),
                 2.79e-2, // component diameter in meters
                 0.7112, // component length in meters
@@ -325,14 +325,14 @@ impl Pipe9 {
 }
 
 pub struct Pipe10 {
-    // pipe 10 
+    // pipe 10
 }
 
 impl Pipe10 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_10: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_10: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_10".to_string(),
                 2.79e-2, // component diameter in meters
                 2.4511, // component length in meters
@@ -349,14 +349,14 @@ impl Pipe10 {
 }
 
 pub struct Pipe11 {
-    // pipe 11 
+    // pipe 11
 }
 
 impl Pipe11 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_11: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_11: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_11".to_string(),
                 2.79e-2, // component diameter in meters
                 0.4826, // component length in meters
@@ -373,14 +373,14 @@ impl Pipe11 {
 }
 
 pub struct Pipe12 {
-    // pipe 12 
+    // pipe 12
 }
 
 impl Pipe12 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_12: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_12: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_12".to_string(),
                 2.79e-2, // component diameter in meters
                 0.333375, // component length in meters
@@ -416,7 +416,7 @@ impl CTAHPump {
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 
-        let mut ctah_pump: DowthermACustomComponent 
+        let mut ctah_pump: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "ctah_pump".to_string(),
                 2.79e-2, // component diameter in meters
@@ -437,15 +437,15 @@ impl CTAHPump {
 
 pub struct Pipe13 {
     // pipe 13 on the diagram in Nico Zweibaum nodalisation
-    // probably some combination of V-42, 
+    // probably some combination of V-42,
     // F-40 and F-41 on CIET diagram
 }
 
 impl Pipe13 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_13: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_13: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_13".to_string(),
                 2.79e-2, // component diameter in meters
                 1.273175, // component length in meters
@@ -463,11 +463,11 @@ impl Pipe13 {
 
 pub struct Pipe14 {
     // pipe 14 on the diagram in Nico Zweibaum nodalisation
-    // probably some combination of V-42, 
+    // probably some combination of V-42,
     // F-40 and F-41 on CIET diagram
     // it is inclined 90 degrees upwards in direction
     // of flow
-    // 
+    //
     // and from a top to bottom direction from pipe 5
     // to pipe 17, the incline angle is also 90 degrees
 }
@@ -475,8 +475,8 @@ pub struct Pipe14 {
 impl Pipe14 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_14: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_14: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_14".to_string(),
                 2.79e-2, // component diameter in meters
                 0.6687, // component length in meters
@@ -513,7 +513,7 @@ impl Flowmeter40 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             18.0 + 93000.0/reynolds_number.powf(1.35);
         // coriolis flowmeter
 
@@ -527,7 +527,7 @@ impl Flowmeter40 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let flowmeter_40_14a: DowthermACustomComponent 
+        let flowmeter_40_14a: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "flowmeter_40_14a".to_string(),
                 2.79e-2, // component diameter in meters
@@ -548,17 +548,17 @@ impl Flowmeter40 {
 pub struct Pipe15 {
     // pipe 15 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // -49.36983 degrees
 }
 
 impl Pipe15 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_15: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_15: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_15".to_string(),
                 2.79e-2, // component diameter in meters
                 0.3556, // component length in meters
@@ -576,21 +576,21 @@ impl Pipe15 {
 pub struct Pipe16 {
     // pipe 16 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // -49.36983 degrees
 }
 
 impl Pipe16 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_16: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_16: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_16".to_string(),
                 2.79e-2, // component diameter in meters
                 0.644525, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -605,7 +605,7 @@ impl Pipe16 {
 pub struct Branch17 {
     // pipe 17 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
-    // 
+    //
     // and from a top to bottom direction from pipe 5
     // to pipe 17, the incline angle is 0 degrees
     //
@@ -614,12 +614,12 @@ pub struct Branch17 {
 impl Branch17 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_17: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_17: DowthermAPipe
+            = StandardPipeProperties::new(
                 "branch_17".to_string(),
                 2.79e-2, // component diameter in meters
                 0.473075, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -638,24 +638,23 @@ impl Branch17 {
 
 pub struct Branch5 {
     // pipe 5 on the diagram in Nico Zweibaum nodalisation
-    // 
     // and from a top to bottom direction from pipe 5
-    // to pipe 5, the incline angle is also 
+    // to pipe 5, the incline angle is also
     // 0 degrees
-    // i add 180 degrees so that it is 
-    // properly reversed in 
+    // i add 180 degrees so that it is
+    // properly reversed in
     // inclination angle from top to bottom
 }
 
 impl Branch5 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_5: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_5: DowthermAPipe
+            = StandardPipeProperties::new(
                 "branch_5".to_string(),
                 2.79e-2, // component diameter in meters
                 0.7493, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -671,21 +670,21 @@ impl Branch5 {
 pub struct Pipe4 {
     // pipe 4 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // 49.743387 +180.0 degrees
 }
 
 impl Pipe4 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_4: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_4: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_4".to_string(),
                 2.79e-2, // component diameter in meters
                 0.2413, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -700,21 +699,21 @@ impl Pipe4 {
 pub struct Pipe3 {
     // pipe 3 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // 90.0 +180.0 degrees
 }
 
 impl Pipe3 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_3: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_3: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_3".to_string(),
                 2.79e-2, // component diameter in meters
                 1.2827, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -735,7 +734,7 @@ pub struct StaticMixer10 {
     //
     // though in reality flow goes from bottom to
     // top in forced convection
-    // so from a flow perspective it is before the 
+    // so from a flow perspective it is before the
     // heater
     //
 }
@@ -755,7 +754,7 @@ impl StaticMixer10 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
@@ -768,7 +767,7 @@ impl StaticMixer10 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let static_mixer_10: DowthermACustomComponent 
+        let static_mixer_10: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "static_mixer_41_label_2".to_string(),
                 2.79e-2, // component diameter in meters
@@ -787,21 +786,21 @@ impl StaticMixer10 {
 pub struct Pipe2a {
     // pipe 2a on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // 90.0 +180.0 degrees
 }
 
 impl Pipe2a {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_2a: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_2a: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_2a_static_mixer".to_string(),
                 2.79e-2, // component diameter in meters
                 0.149425, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -863,7 +862,7 @@ impl HeaterTopHead1a {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let heater_top_head: DowthermACustomComponent 
+        let heater_top_head: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "heater_top_head_label_1a".to_string(),
                 6.60e-3, // component diameter in meters
@@ -930,7 +929,7 @@ impl CietHeaterVersion1 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let heater_version_1_label_1: DowthermACustomComponent 
+        let heater_version_1_label_1: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "heater_version_1_label_1_label_1a".to_string(),
                 6.60e-3, // component diameter in meters
@@ -996,7 +995,7 @@ impl HeaterBottomHead1b {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let heater_bottom_head: DowthermACustomComponent 
+        let heater_bottom_head: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "heater_bottom_head_label_1b".to_string(),
                 6.60e-3, // component diameter in meters
@@ -1014,21 +1013,21 @@ impl HeaterBottomHead1b {
 
 pub struct Pipe18 {
     // pipe 18 on the diagram in Nico Zweibaum nodalisation
-    // 
+    //
     // and from a top to bottom direction from pipe 5
-    // to pipe 17, the incline angle is also 
+    // to pipe 17, the incline angle is also
     // -40.00520 +180.0 degrees
 }
 
 impl Pipe18 {
 
     pub fn get() -> DowthermAPipe {
-        let pipe_18: DowthermAPipe 
-            = StandardPipeProperties::new( 
+        let pipe_18: DowthermAPipe
+            = StandardPipeProperties::new(
                 "pipe_18".to_string(),
                 2.79e-2, // component diameter in meters
                 0.1778, // component length in meters
-                0.015, // estimated component wall roughness 
+                0.015, // estimated component wall roughness
                        // (doesn't matter here,
                        // but i need to fill in
                        // millimeters
@@ -1040,17 +1039,54 @@ impl Pipe18 {
     }
 }
 
-/// bypass line times in ciet,
-/// tbd, still organising
-pub struct Flowmeter30 {
-    // bypass flow flowmeter FM30 
-    // not labelled on diagram
-    // we use the convention of top of bypass branch to bottom
-    // hence degree is a 180-90 degrees = -90 degrees
-}
-impl Flowmeter30 {
+/// DHX Branch from Top to Bottom
+/// this is volume
 
-    // let's import everything necessary:
+pub struct Pipe26 {
+    // pipe 26 on the diagram in Nico Zweibaum nodalisation
+    //
+    // and from a top to bottom direction from pipe 5
+    // to pipe 17, the incline angle is also
+    // -40.00520 +180.0 degrees
+}
+
+impl Pipe26 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_26: DowthermAPipe
+            = StandardPipeProperties::new(
+                "pipe_26".to_string(),
+                2.79e-2, // component diameter in meters
+                0.2159, // component length in meters
+                0.015, // estimated component wall roughness
+                       // (doesn't matter here,
+                       // but i need to fill in
+                       // millimeters
+                -52.571994 + 180.0, // angle in degrees
+                1.75 // form loss K value
+                );
+
+        return pipe_26;
+    }
+}
+
+pub struct StaticMixer21 {
+    // static mixer 21 (MX-21) on CIET diagram
+    // in the DRACS branch in primary loop
+    // just before the DRACS heat exchanger
+    // from top to bottom
+    // label 25
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // also in the DRACS
+    // loop there are flow diodes to make
+    // it such that flow going from bottom to top
+    // encounters more resistance
+    //
+}
+impl StaticMixer21 {
+
 
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
@@ -1065,9 +1101,8 @@ impl Flowmeter30 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
-            18.0 + 93000.0/reynolds_number.powf(1.35);
-        // coriolis flowmeter
+        let custom_k_value =
+            21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
             return -custom_k_value;
@@ -1079,20 +1114,225 @@ impl Flowmeter30 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let flowmeter_30: DowthermACustomComponent 
+        let static_mixer_21: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
-                "flowmeter_30".to_string(),
+                "static_mixer_21_label_25".to_string(),
                 2.79e-2, // component diameter in meters
-                6.11e-4, // cross sectional area in meters sq
-                0.36, // component length in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
                 0.015, // estimated component wall roughness (doesn't matter here,
                        // but i need to fill in
-                90.0 -180.0, //incline angle in degrees
-                &Flowmeter30::custom_darcy,
-                &Flowmeter30::custom_k);
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer21::custom_darcy,
+                &StaticMixer21::custom_k);
 
-        return flowmeter_30;
+        return static_mixer_21;
     }
+}
+
+
+pub struct Pipe25a {
+    // pipe 25a
+    // otherwise known as the static mixer pipe 25a
+}
+
+impl Pipe25a {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_25a: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_25a".to_string(),
+                2.79e-2, // component diameter in meters
+                0.22245, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                90.0-180.0, // angle in degrees
+                1.35 // form loss K value
+                );
+
+        return pipe_25a;
+    }
+
+}
+
+pub struct DHXShellSideHeatExchanger {
+
+    // this is the DRACS DHX shell side heat exchanger
+    // in the DHX branch
+    // inclined at 90 degrees bottom to top
+    // or 90 degrees + 180 top to bottom orientation
+    //
+    // label 24
+}
+
+impl DHXShellSideHeatExchanger {
+
+
+    pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
+
+        if roughness_ratio < 0.0 {
+            panic!("roughness_ratio < 0.0");
+        }
+
+        use crate::churchill_friction_factor;
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let darcy = churchill_friction_factor::darcy(reynolds_number,
+                                                     roughness_ratio);
+
+        if reverse_flow {
+            return -darcy;
+        }
+        return darcy;
+    }
+
+    pub fn custom_k(reynolds_number: f64) -> f64 {
+
+        let custom_k_value = 23.9;
+
+        if reynolds_number < 0.0 {
+            return -custom_k_value
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let dhx_shell_side: DowthermACustomComponent
+            = StandardCustomComponentProperties::new(
+                "dhx_shell_side_label_24".to_string(),
+                5.65e-3, // component diameter in meters
+                9.43e-4, //component area in sq meters
+                1.18745, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 + 180.0, //incline angle in degrees
+                &DHXShellSideHeatExchanger::custom_darcy,
+                &DHXShellSideHeatExchanger::custom_k);
+
+        return dhx_shell_side;
+    }
+}
+
+pub struct StaticMixer20 {
+    // static mixer 20 (MX-20) on CIET diagram
+    // in the DRACS branch in primary loop
+    // just after the DRACS heat exchanger
+    // from top to bottom
+    // label 23
+    //
+    // in reality flow goes from bottom to
+    // top in natural convection
+    // also in the DRACS
+    // loop there are flow diodes to make
+    // it such that flow going from bottom to top
+    // encounters more resistance
+    //
+    // original angle is is 90 degrees
+    // but i orientate from top to bottom
+}
+impl StaticMixer20 {
+
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value =
+            21.0 + 4000.0/reynolds_number;
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let static_mixer_20: DowthermACustomComponent
+            = StandardCustomComponentProperties::new(
+                "static_mixer_20_label_23".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, //component area in sq meters
+                0.33, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0-180.0, //incline angle in degrees
+                &StaticMixer20::custom_darcy,
+                &StaticMixer20::custom_k);
+
+        return static_mixer_20;
+    }
+}
+
+pub struct Pipe23a {
+    // pipe 23a
+    // otherwise known as the static mixer pipe 23a
+}
+
+impl Pipe23a {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_23a: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_23a".to_string(),
+                2.79e-2, // component diameter in meters
+                0.0891, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                90.0-180.0, // angle in degrees
+                1.35 // form loss K value
+                );
+
+        return pipe_23a;
+    }
+
+}
+
+pub struct Pipe22 {
+    // pipe 22
+    // otherwise known as the static mixer pipe 22
+}
+
+impl Pipe22 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_22: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_22".to_string(),
+                2.79e-2, // component diameter in meters
+                0.69215, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                90.0-180.0, // angle in degrees
+                9.95 // form loss K value
+                );
+
+        return pipe_22;
+    }
+
 }
 
 pub struct Flowmeter20 {
@@ -1119,7 +1359,7 @@ impl Flowmeter20 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             18.0 + 93000.0/reynolds_number.powf(1.35);
         // coriolis flowmeter
 
@@ -1133,7 +1373,7 @@ impl Flowmeter20 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let flowmeter_20: DowthermACustomComponent 
+        let flowmeter_20: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "flowmeter_20_21a".to_string(),
                 2.79e-2, // component diameter in meters
@@ -1148,6 +1388,134 @@ impl Flowmeter20 {
         return flowmeter_20;
     }
 }
+
+pub struct Pipe21 {
+    // pipe 21
+}
+
+impl Pipe21 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_21: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_21".to_string(),
+                2.79e-2, // component diameter in meters
+                0.487725, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                90.0-180.0, // angle in degrees
+                4.4 // form loss K value
+                );
+
+        return pipe_21;
+    }
+
+}
+
+pub struct Pipe20 {
+    // pipe 20
+}
+
+impl Pipe20 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_20: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_20".to_string(),
+                2.79e-2, // component diameter in meters
+                0.33655, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                0.0 - 180.0, // angle in degrees
+                0.0 // form loss K value
+                );
+
+        return pipe_20;
+    }
+
+}
+
+pub struct Pipe19 {
+    // pipe 19
+}
+
+impl Pipe19 {
+
+    pub fn get() -> DowthermAPipe {
+        let pipe_19: DowthermAPipe
+            = StandardPipeProperties::new(
+                "static_mixer_pipe_19".to_string(),
+                2.79e-2, // component diameter in meters
+                0.219075, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                       // in millimeters
+                -31.44898 - 180.0, // angle in degrees
+                7.5 // form loss K value
+                );
+
+        return pipe_19;
+    }
+
+}
+
+/// bypass line times in ciet,
+/// tbd, still organising
+pub struct Flowmeter30 {
+    // bypass flow flowmeter FM30
+    // not labelled on diagram
+    // we use the convention of top of bypass branch to bottom
+    // hence degree is a 180-90 degrees = -90 degrees
+}
+impl Flowmeter30 {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value =
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -custom_k_value;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let flowmeter_30: DowthermACustomComponent
+            = StandardCustomComponentProperties::new(
+                "flowmeter_30".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 -180.0, //incline angle in degrees
+                &Flowmeter30::custom_darcy,
+                &Flowmeter30::custom_k);
+
+        return flowmeter_30;
+    }
+}
+
 
 pub struct Flowmeter60 {
     // DHX flow flowmeter 60
@@ -1176,7 +1544,7 @@ impl Flowmeter60 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             18.0 + 93000.0/reynolds_number.powf(1.35);
         // coriolis flowmeter
 
@@ -1190,7 +1558,7 @@ impl Flowmeter60 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let flowmeter_60: DowthermACustomComponent 
+        let flowmeter_60: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "flowmeter_60_37a".to_string(),
                 2.79e-2, // component diameter in meters
@@ -1214,127 +1582,7 @@ impl Flowmeter60 {
 
 
 
-pub struct StaticMixer20 {
-    // static mixer 20 (MX-20) on CIET diagram
-    // in the DRACS branch in primary loop
-    // just after the DRACS heat exchanger
-    // from top to bottom
-    // label 23
-    //
-    // in reality flow goes from bottom to
-    // top in natural convection
-    // also in the DRACS
-    // loop there are flow diodes to make 
-    // it such that flow going from bottom to top
-    // encounters more resistance
-    //
-    // original angle is is 90 degrees 
-    // but i orientate from top to bottom
-}
-impl StaticMixer20 {
 
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            21.0 + 4000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let static_mixer_20: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "static_mixer_20_label_23".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, //component area in sq meters
-                0.33, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                90.0-180.0, //incline angle in degrees
-                &StaticMixer20::custom_darcy,
-                &StaticMixer20::custom_k);
-
-        return static_mixer_20;
-    }
-}
-
-pub struct StaticMixer21 {
-    // static mixer 21 (MX-21) on CIET diagram
-    // in the DRACS branch in primary loop
-    // just before the DRACS heat exchanger
-    // from top to bottom
-    // label 25
-    //
-    // in reality flow goes from bottom to
-    // top in natural convection
-    // also in the DRACS
-    // loop there are flow diodes to make 
-    // it such that flow going from bottom to top
-    // encounters more resistance
-    //
-}
-impl StaticMixer21 {
-
-
-    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
-        return 0.0;
-    }
-
-    pub fn custom_k(mut reynolds_number: f64) -> f64 {
-        let mut reverse_flow = false;
-
-        // the user account for reverse flow scenarios...
-        if reynolds_number < 0.0 {
-            reverse_flow = true;
-            reynolds_number = reynolds_number * -1.0;
-        }
-
-        let custom_k_value = 
-            21.0 + 4000.0/reynolds_number;
-
-        if reverse_flow {
-            return -custom_k_value;
-        }
-
-        return custom_k_value;
-
-    }
-
-    pub fn get() -> DowthermACustomComponent {
-
-        let static_mixer_21: DowthermACustomComponent 
-            = StandardCustomComponentProperties::new(
-                "static_mixer_21_label_25".to_string(),
-                2.79e-2, // component diameter in meters
-                6.11e-4, //component area in sq meters
-                0.33, // component length in meters
-                0.015, // estimated component wall roughness (doesn't matter here,
-                       // but i need to fill in
-                90.0-180.0, //incline angle in degrees
-                &StaticMixer21::custom_darcy,
-                &StaticMixer21::custom_k);
-
-        return static_mixer_21;
-    }
-}
 
 pub struct StaticMixer60 {
     // static mixer 60 (MX-60) on CIET diagram
@@ -1364,7 +1612,7 @@ impl StaticMixer60 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
@@ -1377,7 +1625,7 @@ impl StaticMixer60 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let static_mixer_60: DowthermACustomComponent 
+        let static_mixer_60: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "static_mixer_60_label_36".to_string(),
                 2.79e-2, // component diameter in meters
@@ -1398,7 +1646,7 @@ pub struct StaticMixer61 {
     // in the DHX branch in secondary DRACS loop
     // just before the DHX heat exchanger
     // from top to bottom
-    // ie this is where cool fluid gets heated by the 
+    // ie this is where cool fluid gets heated by the
     // primary loop heat exchanger
     // label 31
     //
@@ -1423,7 +1671,7 @@ impl StaticMixer61 {
             reynolds_number = reynolds_number * -1.0;
         }
 
-        let custom_k_value = 
+        let custom_k_value =
             21.0 + 4000.0/reynolds_number;
 
         if reverse_flow {
@@ -1436,7 +1684,7 @@ impl StaticMixer61 {
 
     pub fn get() -> DowthermACustomComponent {
 
-        let static_mixer_61: DowthermACustomComponent 
+        let static_mixer_61: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "static_mixer_61_label_31".to_string(),
                 2.79e-2, // component diameter in meters
@@ -1480,7 +1728,7 @@ impl PumpWithResistance {
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 
-        let mut pump_with_resistance: DowthermACustomComponent 
+        let mut pump_with_resistance: DowthermACustomComponent
             = StandardCustomComponentProperties::new(
                 "pump_with_resistance".to_string(),
                 2.79e-2, // component diameter in meters
@@ -1499,14 +1747,3 @@ impl PumpWithResistance {
         return pump_with_resistance;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
