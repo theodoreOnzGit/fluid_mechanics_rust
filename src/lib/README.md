@@ -15,8 +15,9 @@ $$f_{fanning} = 2 \left[ \left(\frac{8}{Re}\right)^{12} +
 
 Where:
 
-$$A = \left[ 2.457 * \ln (\frac{1}{\left(7/Re\right)^{0.9}+0.27 \frac{\epsilon}{D}}
-)\right]^{16}$$
+$$A = \left[ 2.457 * \ln \left(
+\frac{1}{\left(7/Re\right)^{0.9}+0.27 \frac{\epsilon}{D}}
+\right)\right]^{16}$$
 
 
 $$B = \left( \frac{37530}{Re}\right)^{16}$$
@@ -24,5 +25,10 @@ $$B = \left( \frac{37530}{Re}\right)^{16}$$
 The darcy or moody friction factor is calculated with:
 
 $$f_{darcy} = 4 f_{fanning}$$
+
+The code is designed to throw an error in case of:
+1. Re = 0
+2. Re < 0
+3. $\frac{\epsilon}{D}$ < 0
 
 
