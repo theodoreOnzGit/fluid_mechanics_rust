@@ -1370,7 +1370,7 @@ impl Flowmeter20 {
         // coriolis flowmeter
 
         if reverse_flow {
-            return -1.0e10/reynolds_number - 1.0e10;
+            return -custom_k_value;
         }
 
         return custom_k_value;
