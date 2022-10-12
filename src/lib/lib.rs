@@ -1,3 +1,12 @@
+// Note: //! indicates crate level documentation
+//
+//! A Library which calculates pressure losses to and from fluid
+//! flowrates. 
+//!
+//! For pipe flow, the library makes use of Churchill's Friction
+//! Factor Correlation in order to calculate darcy or fanning
+//! friction factor for laminar, turbulent and transitional flow.
+#![warn(missing_docs)]
 extern crate uom;
 mod churchill_friction_factor;
 mod custom_fldk;
@@ -7,6 +16,8 @@ pub mod therminol_component;
 
 use uom::si::f64::*;
 
+
+/// This function calculates darcy friction factor
 #[allow(non_snake_case)]
 pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
     return churchill_friction_factor:: 

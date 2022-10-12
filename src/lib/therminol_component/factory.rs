@@ -1395,6 +1395,66 @@ impl Flowmeter20 {
     }
 }
 
+pub struct Flowmeter20WithHighKCheckValve {
+    // DHX flow flowmeter 20
+    // natural convection heat exchanger in primary loop
+    // diagram label is 21a
+    // we use the convention of top of bypass branch to bottom
+    // hence degree is -90
+    //
+    // However in DHX, i also expect there to be
+    // a check valve which only allows flow from top to bottom
+    //
+    // That is the forward direction of flow for FM20,
+    //
+}
+impl Flowmeter20WithHighKCheckValve {
+
+    // let's import everything necessary:
+
+    pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+        return 0.0;
+    }
+
+    pub fn custom_k(mut reynolds_number: f64) -> f64 {
+        let mut reverse_flow = false;
+
+        // the user account for reverse flow scenarios...
+        if reynolds_number < 0.0 {
+            reverse_flow = true;
+            reynolds_number = reynolds_number * -1.0;
+        }
+
+        let custom_k_value =
+            18.0 + 93000.0/reynolds_number.powf(1.35);
+        // coriolis flowmeter
+
+        if reverse_flow {
+            return -1.0e10/reynolds_number - 1.0e10;
+        }
+
+        return custom_k_value;
+
+    }
+
+    pub fn get() -> DowthermACustomComponent {
+
+        let flowmeter_20: DowthermACustomComponent
+            = StandardCustomComponentProperties::new(
+                "flowmeter_20_21a".to_string(),
+                2.79e-2, // component diameter in meters
+                6.11e-4, // cross sectional area in meters sq
+                0.36, // component length in meters
+                0.015, // estimated component wall roughness (doesn't matter here,
+                       // but i need to fill in
+                90.0 - 180.0, //incline angle in degrees
+                &Flowmeter20::custom_darcy,
+                &Flowmeter20::custom_k);
+
+        return flowmeter_20;
+    }
+}
+
 pub struct Pipe21 {
     // pipe 21
 }
