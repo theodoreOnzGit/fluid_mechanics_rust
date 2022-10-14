@@ -768,6 +768,27 @@ impl CalcBejan {
     /// But for this code, i usually take:
     /// Be = (P * D^2 * rho)/(mu * mu)
     ///
+    /// The following example illustrates how to use the code
+    ///
+    /// ```rust
+    /// use uom::si::f64::*;
+    /// use uom::si::mass_density::kilogram_per_cubic_meter;
+    /// use uom::si::pressure::pascal;
+    /// use uom::si::length::{meter,millimeter,foot,inch};
+    /// use uom::si::dynamic_viscosity::pascal_second;
+    ///
+    /// let pipe_diameter = Length::new::<meter>(2.79e-2);
+    /// let fluid_pressure = Pressure::new::<pascal>(500.0);
+    /// let fluid_density = MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    /// let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+    ///
+    /// let bejan_number = fluid_mechanics_rust::CalcBejan::from_pressure(
+    ///     fluid_pressure,
+    ///     pipe_diameter,
+    ///     fluid_density,
+    ///     fluid_viscosity);
+    /// println!("Bejan number: {} \n", bejan_number);
+    /// ```
     ///
     ///
     ///
