@@ -805,6 +805,56 @@ impl CalcBejan {
             fluidViscosity);
     }
 
+    /// Calculates Bejan number to pressure loss
+    ///
+    /// Bejan number is defined here as:
+    /// Be = (P * D^2)/(mu * nu)
+    ///
+    /// But for this code, i usually take:
+    /// Be = (P * D^2 * rho)/(mu * mu)
+    ///
+    /// The following example illustrates how to use the code,
+    ///
+    /// it basically uses both the from_pressure and to_pressure function
+    /// and converts pressure loss to bejan number, and converts it back
+    ///
+    /// the approx crate is then used to assert if it is equal to within
+    /// 0.001 of the reference value, or 0.1%
+    ///
+    /// ```rust
+    /// use uom::si::f64::*;
+    /// use uom::si::mass_density::kilogram_per_cubic_meter;
+    /// use uom::si::pressure::pascal;
+    /// use uom::si::length::{meter,millimeter,foot,inch};
+    /// use uom::si::dynamic_viscosity::pascal_second;
+    ///
+    /// let pipe_diameter = Length::new::<meter>(2.79e-2);
+    /// let fluid_pressure = Pressure::new::<pascal>(500.0);
+    /// let fluid_density = MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    /// let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+    ///
+    /// let bejan_number = fluid_mechanics_rust::CalcBejan::from_pressure(
+    ///     fluid_pressure,
+    ///     pipe_diameter,
+    ///     fluid_density,
+    ///     fluid_viscosity);
+    /// println!("Bejan number: {} \n", bejan_number);
+    ///
+    /// let test_fluid_pressure = fluid_mechanics_rust::CalcBejan::to_pressure(
+    ///     bejan_number,
+    ///     pipe_diameter,
+    ///     fluid_density,
+    ///     fluid_viscosity);
+    /// println!("reference pressure : {:?} ", fluid_pressure);
+    /// println!("test fluid pressure : {:?} \n", test_fluid_pressure);
+    ///
+    /// extern crate approx;
+    /// approx::assert_relative_eq!(fluid_pressure.value, 
+    /// test_fluid_pressure.value,
+    /// max_relative = 0.001);
+    /// ```
+    ///
+    ///
     #[allow(non_snake_case)]
     pub fn to_pressure(Be_D: f64,
                        hydraulicDiameter: Length,
