@@ -259,6 +259,8 @@ impl CTAHHorizontal {
     }
 }
 
+/// Static mixer pipe 8a
+/// adjacent to MX-40 in the CTAH branch
 pub struct Pipe8a {
     // pipe 8a
     // otherwise known as the static mixer pipe 8a
@@ -266,6 +268,7 @@ pub struct Pipe8a {
 
 impl Pipe8a {
 
+    /// returns and instance of pipe 8a
     pub fn get() -> DowthermAPipe {
         let pipe_8a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -284,24 +287,26 @@ impl Pipe8a {
 
 }
 
+/// static mixer 40 (MX-40) on CIET diagram
+/// just after CTAH (AKA IHX)
+/// from top to bottom
+/// label 8 on diagram
+///
+/// forced convection flow direction is same as top to bottom
+/// has a fldk of 21+4000/Re
 pub struct StaticMixer40 {
-    // static mixer 40 (MX-40) on CIET diagram
-    // just after CTAH (AKA IHX)
-    // from top to bottom
-    // label 8 on diagram
-    //
-    // forced convection flow direction is same as top to bottom
-    //
-    // has a fldk of 21+4000/Re
 }
 impl StaticMixer40 {
 
-    // let's import everything necessary:
-
+    /// custom darcy is 0
+    /// because fldk does not depend on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    
+    /// has a fldk of 21+4000/Re
+    /// it comes from the custom_k value
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -322,6 +327,7 @@ impl StaticMixer40 {
 
     }
 
+    /// returns an instance of MX-40
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_40: DowthermACustomComponent
@@ -340,12 +346,14 @@ impl StaticMixer40 {
     }
 }
 
+/// pipe number 9 in CIET's CTAH branch
 pub struct Pipe9 {
     // pipe 9
 }
 
 impl Pipe9 {
 
+    /// returns instance of pipe 9
     pub fn get() -> DowthermAPipe {
         let pipe_9: DowthermAPipe
             = StandardPipeProperties::new(
@@ -364,12 +372,14 @@ impl Pipe9 {
 
 }
 
+/// pipe number 10 in CIET's CTAH branch
 pub struct Pipe10 {
     // pipe 10
 }
 
 impl Pipe10 {
 
+    /// returns instance of pipe 10
     pub fn get() -> DowthermAPipe {
         let pipe_10: DowthermAPipe
             = StandardPipeProperties::new(
@@ -388,12 +398,14 @@ impl Pipe10 {
 
 }
 
+/// pipe number 11 in CIET's CTAH branch
 pub struct Pipe11 {
     // pipe 11
 }
 
 impl Pipe11 {
 
+    /// returns instance of pipe 11
     pub fn get() -> DowthermAPipe {
         let pipe_11: DowthermAPipe
             = StandardPipeProperties::new(
@@ -412,12 +424,14 @@ impl Pipe11 {
 
 }
 
+/// pipe number 12 in CIET's CTAH branch
 pub struct Pipe12 {
     // pipe 12
 }
 
 impl Pipe12 {
 
+    /// returns instance of pipe 12
     pub fn get() -> DowthermAPipe {
         let pipe_12: DowthermAPipe
             = StandardPipeProperties::new(
@@ -436,23 +450,31 @@ impl Pipe12 {
 
 }
 
+/// ctah pump is a custom therminol component with
+/// ie no friction factor losses
+/// but it provides a source pressure
+///
+/// it is located between pipe 12 and 13
 pub struct CTAHPump {
-    // ctah pump is an empty component
-    // ie no friction factor losses
-    // but it provides a source pressure
 }
 impl CTAHPump {
 
     // let's import everything necessary:
 
+    /// pump has no internal pressure loss
+    /// so custom darcy friction factor is 0
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// pump has no internal pressure loss
+    /// so custom k is 0
     pub fn custom_k(_reynolds_number: f64) -> f64 {
         return 0.0;
     }
 
+    /// returns an instance of the pump with an internal
+    /// pressure term set by the user in the get method
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 
@@ -475,6 +497,8 @@ impl CTAHPump {
     }
 }
 
+/// pipe number 13 in CIET's CTAH branch
+/// just after the pump
 pub struct Pipe13 {
     // pipe 13 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42,
@@ -483,6 +507,7 @@ pub struct Pipe13 {
 
 impl Pipe13 {
 
+    /// returns an instance of pipe13
     pub fn get() -> DowthermAPipe {
         let pipe_13: DowthermAPipe
             = StandardPipeProperties::new(
@@ -501,6 +526,7 @@ impl Pipe13 {
 
 }
 
+/// pipe number 14 in CIET's CTAH branch
 pub struct Pipe14 {
     // pipe 14 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42,
@@ -514,6 +540,7 @@ pub struct Pipe14 {
 
 impl Pipe14 {
 
+    /// returns an instance of pipe14
     pub fn get() -> DowthermAPipe {
         let pipe_14: DowthermAPipe
             = StandardPipeProperties::new(
@@ -531,6 +558,8 @@ impl Pipe14 {
     }
 }
 
+/// FM-40 Coriolis Flowmeter in CIET's CTAH branch
+/// labelled 14a in simulation schmeatic
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
@@ -540,10 +569,15 @@ impl Flowmeter40 {
 
     // let's import everything necessary:
 
+    /// custom darcy is 0 because
+    /// fldk does not depend on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// fldk = 18.0+93000/Re
+    /// this is implemented by setting 
+    /// K = = 18.0+93000/Re
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -565,6 +599,7 @@ impl Flowmeter40 {
 
     }
 
+    /// returns an instance of FM-40 (14a)
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_40_14a: DowthermACustomComponent
