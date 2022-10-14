@@ -181,7 +181,7 @@ pub fn getRe(customDarcy: &dyn Fn(f64, f64) -> f64,
     };
 
     let ReynoldsNumberResult = bisection(pressureDropRoot,
-                                         (0.0,maxRe),
+                                         (-maxRe,maxRe),
                                          100,
                                          1e-8);
 
