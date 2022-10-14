@@ -58,7 +58,7 @@ pub mod therminol_pipe;
 ///
 /// // (2) calculating pressure change to mass flowrate
 /// let test_mass_flow = CalcPressureChange::to_mass_rate(
-///     &flowmeter_40.
+///     &flowmeter_40,
 ///     pressure_change,
 ///     fluid_temp);
 ///
@@ -212,7 +212,7 @@ pub trait CalcPressureChange {
     fn from_mass_rate(&self, fluid_mass_flowrate: MassRate,
                       fluid_temp: ThermodynamicTemperature) -> Pressure;
 
-    /// calculaates pressure change to mass flowrate
+    /// calculates pressure change to mass flowrate
     fn to_mass_rate(&self, pressure_change: Pressure,
                     fluid_temp: ThermodynamicTemperature) -> MassRate;
 }
