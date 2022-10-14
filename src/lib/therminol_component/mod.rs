@@ -19,6 +19,11 @@ pub mod dowtherm_a_properties;
 /// based on temperature
 /// and then obtain mass flowrate from pressure change
 /// or vice versa
+///
+/// The correlations are only valid for 20C to 180C,
+/// the code will panic otherwise (this means throw
+/// error or exception)
+///
 pub mod therminol_pipe;
 /// Contains code to initialise user specified
 /// therminol components
