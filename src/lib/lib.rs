@@ -91,6 +91,56 @@ pub fn fldk(ReynoldsNumber: f64,
 }
 
 
+/// This function calculates the bejan number
+///
+/// this is the
+///
+///
+/// Be = (P * D^2)/(mu * nu)
+/// 
+/// P is pressure loss
+/// D is hydraulic diameter
+/// mu is dynamic viscosity
+/// nu is kinematic viscosity
+///
+/// Be is the bejan number which is dimensionless
+///
+/// It is calculated using:
+/// Be = 0.5 * Re^2 * (f * (L/D) + K)
+///
+/// the f is darcy friction factor
+///
+/// and the term in the brackets is fldk
+///
+/// you are to give a K value, L/D value, Re
+/// and roughness ratio
+///
+/// Re = 0  and Re < 0 is supported,
+/// this assumes that the component is symmetrical
+/// in terms of pressure loss, which may usually
+/// be the case for pipes anyhow
+///
+/// 
+///
+/// ```rust
+/// let bejan_d = 
+///     fluid_mechanics_rust::get_bejan_d(
+///         0.00000000000001,0.00014,10.0,5.0);
+///
+/// println!("{}", bejan_d);
+///
+/// let bejan_d = 
+///     fluid_mechanics_rust::get_bejan_d(
+///         -5000.0,0.00014,10.0,5.0);
+///
+/// println!("{}", bejan_d);
+///
+/// let bejan_d = 
+///     fluid_mechanics_rust::get_bejan_d(
+///         0.0,0.00014,10.0,5.0);
+///
+/// println!("{}", bejan_d);
+/// ```
 #[allow(non_snake_case)]
 pub fn get_bejan_d(ReynoldsNumber: f64,
                    roughnessRatio: f64,
@@ -101,6 +151,60 @@ pub fn get_bejan_d(ReynoldsNumber: f64,
               lengthToDiameterRatio, K);
 }
 
+
+/// This function calculates the Reynolds number given
+/// a Bejan number.
+///
+/// Remember Bejan number is dimensionless pressure 
+/// drop
+///
+/// Be = (P * D^2)/(mu * nu)
+/// 
+/// P is pressure loss
+/// D is hydraulic diameter
+/// mu is dynamic viscosity
+/// nu is kinematic viscosity
+///
+/// We implicitly solve for Re using:
+/// Be = 0.5 * Re^2 * (f * (L/D) + K)
+///
+/// the f is darcy friction factor
+///
+/// and the term in the brackets is fldk
+///
+/// you are to give a K value, L/D value, Be
+/// and roughness ratio
+///
+/// Re = 0  and Re < 0 is supported,
+/// this assumes that the component is symmetrical
+/// in terms of pressure loss, which may usually
+/// be the case for pipes anyhow
+///
+/// 
+/// In the following example, we get a bejan number calculated
+/// first with Re = 5000.0
+/// and then using that bejan number, we try and find the Re again
+/// which should be about 5000.0
+///
+/// we use the approx package and ensure that the numbers are similar
+/// to within 0.001 or 0.1% of each other
+///
+/// ```rust
+///
+/// extern crate approx;
+/// let bejan_d = 
+///     fluid_mechanics_rust::get_bejan_d(
+///         5000.0,0.00014,10.0,5.0);
+///
+/// println!("{}", bejan_d);
+///
+/// let reynolds_number = 
+///     fluid_mechanics_rust::get_reynolds_number(
+///         bejan_d,0.00014,10.0,5.0);
+///
+/// approx::assert_relative_eq!(reynolds_number, 5000.0,
+/// max_relative = 0.001);
+/// ```
 #[allow(non_snake_case)]
 pub fn get_reynolds_number(Be_D: f64,
              roughnessRatio: f64,
