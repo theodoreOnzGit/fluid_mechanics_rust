@@ -238,12 +238,110 @@ pub fn get_reynolds_number(Be_D: f64,
 
 }
 
+
+/// Custom Component is a struct or class
+/// which contains functions to allow users
+/// to define their own custom fluid components
+/// should the regular fldk pipe structure not suffice
+///
+/// usually if one wants to use empirical correlations,
+/// the CustomComponent struct would be suitable for this
 pub struct CustomComponent {
 }
 
 #[allow(non_snake_case)]
 impl CustomComponent {
 
+
+    /// Here I allow users to implement custom functions for
+    /// fldk. Recall:
+    ///
+    /// Be = 0.5 * Re^2 * (f * (L/D) + K)
+    ///
+    /// the f is darcy friction factor
+    /// and the term in the brackets is fldk
+    ///
+    /// Here, I allow the user to specify the darcy
+    /// friction factor using the generic function input types
+    /// with any two floating point number (f64)
+    ///
+    /// and also to specify the form loss K with another
+    /// function.
+    ///
+    /// The darcy friction factor will necesarily
+    /// be multiplied by L/D while the 
+    /// custom K will be added on into the fldk term
+    ///
+    /// The following example shows what happens if we want
+    /// fldk = 400 + 52,000/Re
+    ///
+    /// In this example, we first define a custom K 
+    /// and custom f function
+    ///
+    /// the custom f function will always return 0 since
+    /// we don't want any dependence on L/D
+    /// 
+    /// While the custom K function will just return
+    /// 400+52,000/Re
+    ///
+    /// Now, we must ensure that reverse flow scenarios 
+    /// are properly taken care of, so there are if statements
+    /// that check if Re < 0.0
+    ///
+    /// if so, then the negative K value is returned
+    ///
+    /// After that, we test whether negative values and zero
+    /// values of Re are okay.
+    ///
+    /// When it comes to custom f and custom K values,
+    /// the reverse flow logic (Re<0.0) is up to you to
+    /// decide. 
+    /// By default if Re = 0.0, Be = 0.0, so you needn't worry about
+    /// that
+    /// 
+    ///
+    ///```rust
+    ///fn custom_k(mut reynolds_number: f64) -> f64 {
+    ///    let mut reverse_flow = false;
+    ///    if reynolds_number < 0.0 {
+    ///        reverse_flow = true;
+    ///        reynolds_number = reynolds_number * -1.0;
+    ///    }
+    ///    let custom_k_value =  400.0 + 52000.0/reynolds_number;
+    ///    if reverse_flow == true {
+    ///        return -custom_k_value;
+    ///    }
+    ///    return custom_k_value;
+    ///}
+    ///fn custom_f(_reynolds_number: f64,
+    ///                 _roughness_ratio: f64) -> f64 {
+    ///    return 0.0;
+    ///}
+    ///let custom_fldk = 
+    ///    fluid_mechanics_rust::CustomComponent::fldk(
+    ///        &custom_f,
+    ///        -5000.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_fldk);
+    ///
+    ///let custom_fldk = 
+    ///    fluid_mechanics_rust::CustomComponent::fldk(
+    ///        &custom_f,
+    ///        0.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_fldk);
+    ///```
+    ///
+    /// 
+    pub fn fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
+    ReynoldsNumber: f64,
+    roughnessRatio: f64,
+    lengthToDiameterRatio: f64,
+    customK: &dyn Fn(f64) -> f64) -> f64{
     // i allow users to define their own fldk
     // basically i allow the user to define 
     // the darcy(Re, roughnessRatio) 
@@ -252,11 +350,6 @@ impl CustomComponent {
     //
     // fLDK is calculated by:
     // darcy*(L/D) + K
-    pub fn fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
-    ReynoldsNumber: f64,
-    roughnessRatio: f64,
-    lengthToDiameterRatio: f64,
-    customK: &dyn Fn(f64) -> f64) -> f64{
         return custom_fldk::custom_fLDK(customDarcy,
                                         ReynoldsNumber,
                                         roughnessRatio,
