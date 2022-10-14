@@ -4,9 +4,60 @@ use crate::churchill_friction_factor;
 use crate::dimensionalisation;
 
 use uom::si::f64::*;
+/// Contains functions or methods to calculate pressure loss
+/// from mass flowrate or to mass flowrate
 pub struct CalcPressureLoss {}
 impl CalcPressureLoss {
-    // this calculates pressure loss in a pipe from mass flowrate
+    /// calculates pressure loss in a pipe from mass flowrate
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// extern crate uom;
+    /// use uom::si::mass_rate::kilogram_per_second;
+    /// use uom::si::dynamic_viscosity::pascal_second;
+    /// use uom::si::length::{meter,millimeter,foot,inch};
+    /// use uom::si::pressure::pascal;
+    /// use uom::si::mass_density::kilogram_per_cubic_meter;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::thermodynamic_temperature::kelvin;
+    /// use uom::si::thermodynamic_temperature::degree_celsius;
+    /// 
+    /// use uom::si::f64::*;
+    /// use uom::typenum::P2;
+    ///
+    /// let fluid_mass_flowrate = MassRate::new::<kilogram_per_second>(0.015);
+    /// let cross_sectional_area= Area::new::<square_meter>(4e-5);
+    /// let hydraulic_diameter= Length::new::<inch>(3.0);
+    /// let fluid_viscosity= DynamicViscosity::new::<pascal_second>(0.001);
+    /// let fluid_density= MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    /// let pipe_length= Length::new::<foot>(6.0);
+    /// let absolute_roughness= Length::new::<millimeter>(0.001);
+    /// let form_loss_k= 5.0;
+    /// // first import crate for CalcPressureLoss functions
+    /// use crate::fluid_mechanics_rust::
+    ///     fluid_component_calculation::
+    ///     standard_pipe_calc::CalcPressureLoss;
+    ///
+    /// let reynolds_number = fluid_mass_flowrate/
+    ///     cross_sectional_area*
+    ///     hydraulic_diameter/
+    ///     fluid_viscosity;
+    ///
+    /// println!("\n reynolds_number = {:?}", reynolds_number);
+    ///
+    /// let pressure_loss = CalcPressureLoss::from_mass_rate(
+    ///         fluid_mass_flowrate,
+    ///         cross_sectional_area,
+    ///         hydraulic_diameter,
+    ///         fluid_viscosity,
+    ///         fluid_density,
+    ///         pipe_length,
+    ///         absolute_roughness,
+    ///         form_loss_k);
+    ///
+    /// println!("pressure loss : {:?} (Pascals) ", pressure_loss);
+    /// ```
     #[allow(non_snake_case)]
     pub fn from_mass_rate(mut fluidMassFlowrate: MassRate,
                           crossSectionalArea: Area,

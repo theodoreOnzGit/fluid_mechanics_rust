@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 extern crate peroxide;
 use peroxide::prelude::*;
 

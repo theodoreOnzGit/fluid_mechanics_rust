@@ -11,7 +11,14 @@ extern crate uom;
 mod churchill_friction_factor;
 mod custom_fldk;
 mod dimensionalisation;
+/// Contains structs or classes which
+/// help you calculate pressure loss from mass 
+/// flowrate and vice versa for pipes and custom components
 pub mod fluid_component_calculation;
+/// Contains structs or classes which
+/// help you calculate pressure loss from mass 
+/// flowrate and vice versa for therminol VP 1 or
+/// dowtherm A components
 pub mod therminol_component;
 
 use uom::si::f64::*;
