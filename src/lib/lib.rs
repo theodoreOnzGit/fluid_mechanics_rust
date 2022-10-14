@@ -358,12 +358,60 @@ impl CustomComponent {
 
     }
 
-    // if the user only wants to change K to be a custom value
-    // then fldk_pipe is more appropriate
+    /// Calculate fldk based on a custom K value
+    ///
+    /// I included this function in case the user
+    /// wanted to just specify a custom K value
+    /// that depends on Re or some other factor
+    /// but the friction factor was left at the darcy
+    /// value
+    ///
+    /// Recall that fldK is defined:
+    /// Be = 0.5 * Re^2 * (f * (L/D) + K)
+    ///
+    /// the f is darcy friction factor
+    /// and the term in the brackets is fldk
+    ///
+    /// Here, I allow the user to specify the form 
+    /// loss K with another
+    /// function.
+    ///
+    /// For this function, Reverse flow behaviour is not 
+    /// defined, nor is Re = 0.0
+    ///
+    /// So for Re <= 0.0, this code will panic
+    ///
+    ///
+    ///```rust
+    ///fn custom_k(mut reynolds_number: f64) -> f64 {
+    ///    let mut reverse_flow = false;
+    ///    if reynolds_number < 0.0 {
+    ///        reverse_flow = true;
+    ///        reynolds_number = reynolds_number * -1.0;
+    ///    }
+    ///    let custom_k_value =  400.0 + 52000.0/reynolds_number;
+    ///    if reverse_flow == true {
+    ///        return -custom_k_value;
+    ///    }
+    ///    return custom_k_value;
+    ///}
+    ///
+    ///
+    ///let custom_fldk = 
+    ///    fluid_mechanics_rust::CustomComponent::fldk_pipe(
+    ///        1000.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_fldk);
+    ///```
+    ///
     pub fn fldk_pipe(ReynoldsNumber: f64,
                          roughnessRatio: f64,
                          lengthToDiameterRatio: f64,
                          customK: &dyn Fn(f64) -> f64) -> f64{
+    // if the user only wants to change K to be a custom value
+    // then fldk_pipe is more appropriate
 
         return custom_fldk::custom_Kpipe(ReynoldsNumber,
                                          roughnessRatio,
@@ -371,13 +419,64 @@ impl CustomComponent {
                                          customK);
     }
 
-    // now suppose we have a custom K type pipe, we can just return the
-    // bejan number
+    /// Calculate Bejan number based on a custom K value and
+    /// standard pipe darcy friction factor correlations.
+    ///
+    /// I included this function in case the user
+    /// wanted to just specify a custom K value
+    /// that depends on Re or some other factor
+    /// but the friction factor was left at the darcy
+    /// value
+    ///
+    /// Recall that fldK is defined:
+    /// Be = 0.5 * Re^2 * (f * (L/D) + K)
+    ///
+    /// the f is darcy friction factor
+    /// and the term in the brackets is fldk
+    ///
+    ///
+    /// Here, I allow the user to specify the form 
+    /// loss K with another
+    /// function.
+    ///
+    /// For this function, Reverse flow behaviour is not 
+    /// defined, nor is Re = 0.0
+    ///
+    /// So for Re <= 0.0, this code will panic
+    ///
+    ///
+    ///```rust
+    ///fn custom_k(mut reynolds_number: f64) -> f64 {
+    ///    let mut reverse_flow = false;
+    ///    if reynolds_number < 0.0 {
+    ///        reverse_flow = true;
+    ///        reynolds_number = reynolds_number * -1.0;
+    ///    }
+    ///    let custom_k_value =  400.0 + 52000.0/reynolds_number;
+    ///    if reverse_flow == true {
+    ///        return -custom_k_value;
+    ///    }
+    ///    return custom_k_value;
+    ///}
+    ///
+    ///
+    ///let custom_bejan = 
+    ///    fluid_mechanics_rust::CustomComponent::
+    ///    get_bejan_custom_k_pipe(
+    ///        1000.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_bejan);
+    ///```
+    ///
     pub fn get_bejan_custom_k_pipe( ReynoldsNumber: f64, 
                                     roughnessRatio: f64,
                                     lengthToDiameterRatio: f64,
                                     customK: &dyn Fn(f64) -> f64) -> f64{
 
+        // now suppose we have a custom K type pipe, we can just return the
+        // bejan number
         return custom_fldk::custom_Kpipe_Be_D(ReynoldsNumber,
                                               roughnessRatio,
                                               lengthToDiameterRatio,
@@ -385,25 +484,108 @@ impl CustomComponent {
 
     }
 
-    // and now do the same for a generic fldk component of any form
-    // i allow users to define their own fldk
-    // basically i allow the user to define 
-    // the darcy(Re, roughnessRatio) 
-    // and the 
-    // formLossK(Re)
-    //
-    // fLDK is calculated by:
-    // darcy*(L/D) + K
-    // the bejan number is calculated by:
-    // Be_D = 0.5*fLDK*Re^2
-    //
 
+    /// Calculates Bejan number based on user defined fldk
+    ///
+    /// Be = 0.5 * Re^2 * (f * (L/D) + K)
+    ///
+    /// the f is darcy friction factor
+    /// and the term in the brackets is fldk
+    ///
+    /// Here, I allow the user to specify the darcy
+    /// friction factor using the generic function input types
+    /// with any two floating point number (f64)
+    ///
+    /// and also to specify the form loss K with another
+    /// function.
+    ///
+    /// The darcy friction factor will necesarily
+    /// be multiplied by L/D while the 
+    /// custom K will be added on into the fldk term
+    ///
+    /// The following example shows what happens if we want
+    /// fldk = 400 + 52,000/Re
+    ///
+    /// In this example, we first define a custom K 
+    /// and custom f function
+    ///
+    /// the custom f function will always return 0 since
+    /// we don't want any dependence on L/D
+    /// 
+    /// While the custom K function will just return
+    /// 400+52,000/Re
+    ///
+    /// Now, we must ensure that reverse flow scenarios 
+    /// are properly taken care of, so there are if statements
+    /// that check if Re < 0.0
+    ///
+    /// if so, then the negative K value is returned
+    ///
+    /// After that, we test whether negative values and zero
+    /// values of Re are okay.
+    ///
+    /// When it comes to custom f and custom K values,
+    /// the reverse flow logic (Re<0.0) is up to you to
+    /// decide. 
+    /// By default if Re = 0.0, Be = 0.0, so you needn't worry about
+    /// that
+    /// 
+    ///
+    ///```rust
+    ///fn custom_k(mut reynolds_number: f64) -> f64 {
+    ///    let mut reverse_flow = false;
+    ///    if reynolds_number < 0.0 {
+    ///        reverse_flow = true;
+    ///        reynolds_number = reynolds_number * -1.0;
+    ///    }
+    ///    let custom_k_value =  400.0 + 52000.0/reynolds_number;
+    ///    if reverse_flow == true {
+    ///        return -custom_k_value;
+    ///    }
+    ///    return custom_k_value;
+    ///}
+    ///fn custom_f(_reynolds_number: f64,
+    ///                 _roughness_ratio: f64) -> f64 {
+    ///    return 0.0;
+    ///}
+    ///let custom_bejan = 
+    ///    fluid_mechanics_rust::CustomComponent::get_bejan_custom_fldk(
+    ///        &custom_f,
+    ///        -5000.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_bejan);
+    ///
+    ///let custom_bejan = 
+    ///    fluid_mechanics_rust::CustomComponent::get_bejan_custom_fldk(
+    ///        &custom_f,
+    ///        0.0,
+    ///        0.00014,
+    ///        10.0,
+    ///        &custom_k);
+    ///println!("{}", custom_bejan);
+    ///```
+    ///
+    /// 
     pub fn get_bejan_custom_fldk(customDarcy: &dyn Fn(f64, f64) -> f64,
                     ReynoldsNumber: f64,
                     roughnessRatio: f64,
                     lengthToDiameterRatio: f64,
                     customK: &dyn Fn(f64) -> f64) -> f64{
 
+        // and now do the same for a generic fldk component of any form
+        // i allow users to define their own fldk
+        // basically i allow the user to define 
+        // the darcy(Re, roughnessRatio) 
+        // and the 
+        // formLossK(Re)
+        //
+        // fLDK is calculated by:
+        // darcy*(L/D) + K
+        // the bejan number is calculated by:
+        // Be_D = 0.5*fLDK*Re^2
+        //
         return custom_fldk::custom_fLDK_Be_D(customDarcy,
                                              ReynoldsNumber,
                                              roughnessRatio,
@@ -414,10 +596,45 @@ impl CustomComponent {
 
 }
 
+/// Contains functions which Calculate Re from mass flow rate 
+/// and vice versa
 pub struct CalcReynolds {}
 #[allow(non_snake_case)]
 impl CalcReynolds {
 
+    /// Calculates Re from mass flowrate
+    ///
+    /// Note that you must use the uom (units of measure)
+    /// crate here. That ensures that you are calculating in
+    /// a unit safe fashion
+    ///
+    /// In this example, i define the fluid mass flowrate, pipe diameter
+    /// and viscosity
+    /// the cross sectional area is calculated using
+    /// A_xs = pi * D^2/4
+    ///```rust
+    ///
+    ///use uom::si::mass_rate::kilogram_per_second;
+    ///use uom::si::dynamic_viscosity::pascal_second;
+    ///use uom::si::length::{meter,millimeter,foot,inch};
+    ///
+    ///use uom::si::f64::*;
+    ///use uom::typenum::P2;
+    ///
+    ///let fluid_massflowrate = MassRate::new::<kilogram_per_second>(0.05);
+    ///let pipe_diameter = Length::new::<meter>(2.79e-2);
+    ///let pipe_xs_area = pipe_diameter.powi(P2::new())*std::f64::consts::PI/4.0;
+    ///let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+    ///
+    ///let reynolds_number = fluid_mechanics_rust::CalcReynolds::from_mass_rate(
+    ///    fluid_massflowrate,
+    ///    pipe_xs_area,
+    ///    pipe_diameter,
+    ///    fluid_viscosity);
+    ///
+    ///
+    ///println!("Reynolds number: {} \n", reynolds_number);
+    ///```
     #[allow(non_snake_case)]
     pub fn from_mass_rate(fluidMassFlowrate: MassRate,
                         crossSectionalArea: Area,
@@ -446,6 +663,45 @@ impl CalcReynolds {
 
     }
 
+    /// Calculates mass flowrate from Re
+    ///
+    /// Note that you must use the uom (units of measure)
+    /// crate here. That ensures that you are calculating in
+    /// a unit safe fashion
+    ///
+    /// Here I define a reynolds number of 4000 (as f64 type)
+    /// I define pipe diameter
+    /// the cross sectional area is calculated using
+    /// A_xs = pi * D^2/4
+    ///
+    /// and also define fluid viscosity
+    /// and then i calculate mass flowrate from these parameters
+    ///
+    ///```rust
+    ///
+    ///use uom::si::mass_rate::kilogram_per_second;
+    ///use uom::si::dynamic_viscosity::pascal_second;
+    ///use uom::si::length::{meter,millimeter,foot,inch};
+    ///
+    ///use uom::si::f64::*;
+    ///use uom::typenum::P2;
+    ///
+    ///let reynolds_number = 4000_f64;
+    ///let pipe_diameter = Length::new::<meter>(2.79e-2);
+    ///let pipe_xs_area = pipe_diameter.powi(P2::new())*std::f64::consts::PI/4.0;
+    ///let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+    ///
+    ///
+    ///println!("Reynolds number: {} \n", reynolds_number);
+    ///let test_fluid_mass_flowrate = fluid_mechanics_rust::CalcReynolds::to_mass_rate(
+    ///    pipe_xs_area,
+    ///    reynolds_number,
+    ///    pipe_diameter,
+    ///    fluid_viscosity);
+    ///    
+    ///println!("mass flowrate: {:?} \n", test_fluid_mass_flowrate);
+    ///
+    ///```
     #[allow(non_snake_case)]
     pub fn to_mass_rate(crossSectionalArea: Area,
                         Re: f64,
@@ -460,10 +716,23 @@ impl CalcReynolds {
     }
 }
 
+/// Contains functions to nondimensionalise and dimensionalise
+/// pressure loss
 pub struct CalcBejan {}
 impl CalcBejan {
 
 
+    /// Calculates Bejan number from pressure loss
+    ///
+    /// Bejan number is defined here as:
+    /// Be = (P * D^2)/(mu * nu)
+    ///
+    /// But for this code, i usually take:
+    /// Be = (P * D^2 * rho)/(mu * mu)
+    ///
+    ///
+    ///
+    ///
     #[allow(non_snake_case)]
     pub fn from_pressure(fluidPressure: Pressure,
               hydraulicDiameter: Length,
