@@ -27,6 +27,44 @@ pub mod dowtherm_a_properties;
 pub mod therminol_pipe;
 /// Contains code to initialise user specified
 /// therminol components
+/// 
+/// Example usage:
+/// ```rust
+///
+/// use fluid_mechanics_rust::therminol_component::factory;
+///
+/// let flowmeter_40 = factory::Flowmeter40::get();
+///
+/// // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+/// use uom::si::f64::*;
+/// use uom::typenum::P2;
+/// use uom::si::mass_rate::kilogram_per_second;
+/// use uom::si::thermodynamic_temperature::degree_celsius;
+///
+/// let fluid_temp = ThermodynamicTemperature::new::<
+///     degree_celsius>(21.0);
+/// let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+///
+/// // now let's use the calc pressure change object
+/// use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+///
+/// // (1) calculating pressure change from mass flowrate
+/// let pressure_change = CalcPressureChange::from_mass_rate(
+///     &flowmeter_40,
+///     mass_flow_expected,
+///     fluid_temp);
+///
+/// println!("calculated pressure_change: {:?} \n", pressure_change);
+///
+/// // (2) calculating pressure change to mass flowrate
+/// let test_mass_flow = CalcPressureChange::to_mass_rate(
+///     &flowmeter_40.
+///     pressure_change,
+///     fluid_temp);
+///
+/// println!("expected_mass_rate: {:?}\n", mass_flow_expected);
+/// println!("actual_mass_rate: {:?} \n", test_mass_flow);
+/// ```
 pub mod factory;
 
 // this allows for units

@@ -14,9 +14,10 @@ DowthermAPipe;
 
 use super::StandardPipeProperties;
 
-/// CTAH branch items
-/// I'm still in the midst of rearranging things though...
-
+/// Pipe6a in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
+/// It is a static mixer pipe
 pub struct Pipe6a {
     // pipe 6a
     // otherwise known as the static mixer pipe 6a
@@ -24,6 +25,7 @@ pub struct Pipe6a {
 
 impl Pipe6a {
 
+    /// returns an instance of Pipe 6a
     pub fn get() -> DowthermAPipe {
         let pipe_6a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -42,6 +44,11 @@ impl Pipe6a {
 
 }
 
+/// static mixer 41
+/// label component 6 
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
 pub struct StaticMixer41 {
     // static mixer 41 (MX-41) on CIET diagram
     // in the pump and CTAH branch
@@ -54,10 +61,14 @@ pub struct StaticMixer41 {
 impl StaticMixer41 {
 
 
+    /// custom darcy friction factor is 0
+    /// MX-41 does not depend on L/D
+    /// for friction factor
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K value for static mixer 41
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -78,6 +89,8 @@ impl StaticMixer41 {
 
     }
 
+    /// returns an instance of MX-41
+    /// or component no.6
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_41: DowthermACustomComponent
@@ -96,6 +109,11 @@ impl StaticMixer41 {
     }
 }
 
+/// Vertical part of Coiled Tube Air Heater (CTAH)
+/// label component 7a
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
 pub struct CTAHVertical {
 
     // coiled tube air heater,
@@ -105,9 +123,17 @@ pub struct CTAHVertical {
     // label 7a
 }
 
+/// CTAH vertical is actually an fldk type pipe
+///
+/// but because I was quickly copying templates from
+/// other fldk components, it became easy just
+/// to force the vertical CTAH to be a custom fldk component
+///
 impl CTAHVertical {
 
 
+    /// CTAH has a darcy friction factor from churchill
+    /// correlation
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -132,6 +158,7 @@ impl CTAHVertical {
         return darcy;
     }
 
+    /// CTAH has a fixed K value of 3.9 
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 3.9;
@@ -144,6 +171,7 @@ impl CTAHVertical {
 
     }
 
+    /// returns an instance of the vertical component of CTAH
     pub fn get() -> DowthermACustomComponent {
 
         let ctah_vertical: DowthermACustomComponent
@@ -162,6 +190,10 @@ impl CTAHVertical {
     }
 }
 
+/// Horizontal part of Coiled Tube Air Heater (CTAH)
+/// label component 7b
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
 pub struct CTAHHorizontal {
 
     // coiled tube air heater
@@ -176,10 +208,16 @@ pub struct CTAHHorizontal {
 impl CTAHHorizontal {
 
 
+    /// custom darcy friction factor is 0
+    /// the horizontal CTAH correlation does not depend on L/D
+    /// for friction factor
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+
+    /// coiled tube air heater (CTAH) horizontal component
+    /// has fldk = 400 + 52,000/Re
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
 
         let mut reverse_flow = false;
@@ -201,6 +239,8 @@ impl CTAHHorizontal {
 
     }
 
+    /// returns an instance of the
+    /// horizontal portion of CTAH
     pub fn get() -> DowthermACustomComponent {
 
         let ctah_horizontal: DowthermACustomComponent
