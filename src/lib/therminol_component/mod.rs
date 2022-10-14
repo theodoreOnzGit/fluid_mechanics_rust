@@ -1,8 +1,24 @@
-
+/// Contains code to specify therminol user
+/// defined components
+///
+/// Basically, we use the therminol or dowtherm A
+/// properties, calculate viscosity and density
+/// based on temperature
+/// and then obtain mass flowrate from pressure change
+/// or vice versa
+///
+/// However the user will be able to defined fldk here
 pub mod custom_therminol_component;
 /// contains correlations for dowtherm A viscosity, density,
 /// thermal conductivity and heat capacity
 pub mod dowtherm_a_properties;
+/// Contains code to specify therminol pipes
+///
+/// Basically, we use the therminol or dowtherm A
+/// properties, calculate viscosity and density
+/// based on temperature
+/// and then obtain mass flowrate from pressure change
+/// or vice versa
 pub mod therminol_pipe;
 /// Contains code to initialise user specified
 /// therminol components
@@ -119,6 +135,10 @@ pub struct CustomComponentProperties{
 /// Also, we can get temperature given fluid enthalpy
 /// this is because we may want in future to quickly
 /// obtain fluid temperature after energy balance
+///
+///
+/// Now the enthalpy, specific heat capacity and
+///
 pub trait FluidProperties {
     /// fluid density based on temperature,
     fn density(fluid_temp: ThermodynamicTemperature) -> MassDensity;
@@ -144,12 +164,12 @@ pub trait FluidProperties {
 
 /// A trait (or interface) for getting pressure change (not loss)
 /// from mass flowrate and vice versa
-// it inherits from Fluid Properties as Reynolds number always needs
-// to be calculated
 pub trait CalcPressureChange {
+    /// pressure change from mass flowrate
     fn from_mass_rate(&self, fluid_mass_flowrate: MassRate,
                       fluid_temp: ThermodynamicTemperature) -> Pressure;
 
+    /// calculaates pressure change to mass flowrate
     fn to_mass_rate(&self, pressure_change: Pressure,
                     fluid_temp: ThermodynamicTemperature) -> MassRate;
 }
@@ -157,11 +177,15 @@ pub trait CalcPressureChange {
 /// A trait (or interface) for getting pipe form losses and cross
 /// sectional areas
 /// i also force the implementation of a constructor
-// it inherits from CalcPressureChange
-// because it will need to calculate pressure changes
-// from the above properties, 
-// also, constructor will need to be given
+///
+/// it inherits from CalcPressureChange
+/// because it will need to calculate pressure changes
+/// from the pipe properties, 
+///
+/// I also have several get and set functions because
+/// I was trying to migrate properties from my C# code
 pub trait StandardPipeProperties : FluidProperties {
+    /// This is the constructor
     fn new(name: String,
            hydraulic_diameter_meters: f64,
            component_length_meters: f64,
@@ -169,15 +193,34 @@ pub trait StandardPipeProperties : FluidProperties {
            incline_angle_degrees: f64,
            form_loss_k: f64) -> Self;
 
+    /// Just a function to get cross sectional area
     fn get_cross_sectional_area(&self) -> Area;
+    /// function to get the internal pressure or
+    /// user defined driving force
     fn get_internal_pressure_term(&self) -> Pressure;
+    /// function to set the internal pressure or
+    /// user defined driving force
     fn set_internal_pressure_term(&mut self, pressure_pascals: f64);
+    /// function to obtain hydrostatic pressure change
+    /// of the pipe
     fn get_hydrostatic_pressure_change(
         &self, fluid_temp: ThermodynamicTemperature) -> Pressure;
 }
 
 
+/// A trait (or interface) for getting user defined
+/// component form losses and cross
+/// sectional areas
+/// i also force the implementation of a constructor
+///
+/// it inherits from CalcPressureChange
+/// because it will need to calculate pressure changes
+/// from the fluid component properties, 
+///
+/// I also have several get and set functions because
+/// I was trying to migrate properties from my C# code
 pub trait StandardCustomComponentProperties : FluidProperties {
+    /// This is the constructor
     fn new(name: String,
            hydraulic_diameter_meters: f64,
            cross_sectional_area_meters_sq: f64,
@@ -187,9 +230,16 @@ pub trait StandardCustomComponentProperties : FluidProperties {
            custom_darcy: &'static dyn Fn(f64,f64) -> f64,
            custom_k: &'static dyn Fn(f64) -> f64) -> Self;
 
+    /// Just a function to get cross sectional area
     fn get_cross_sectional_area(&self) -> Area;
+    /// function to get the internal pressure or
+    /// user defined driving force
     fn get_internal_pressure_term(&self) -> Pressure;
+    /// function to set the internal pressure or
+    /// user defined driving force
     fn set_internal_pressure_term(&mut self, pressure_pascals: f64);
+    /// function to obtain hydrostatic pressure change
+    /// of the user defined component
     fn get_hydrostatic_pressure_change(
         &self, fluid_temp: ThermodynamicTemperature) -> Pressure;
 
