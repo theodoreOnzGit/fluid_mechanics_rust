@@ -147,6 +147,18 @@ use uom::si::area::square_meter;
 ///
 /// ```
 pub struct DowthermACustomComponent {
+    /// the dowtherm_custom_component_properties object
+    /// or struct instance
+    /// will have pipe length, hydraulic diameter,
+    /// angle of inclilne, 
+    /// form losses and
+    /// roughness 
+    ///
+    /// as well as the 
+    /// custom f and custom K values
+    ///
+    /// all are user specified through the constructor
+    /// 
     pub dowtherm_custom_component_properties: CustomComponentProperties,
 }
 
