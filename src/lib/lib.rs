@@ -650,6 +650,44 @@ impl CalcReynolds {
             fluidViscosity);
     }
 
+    /// Calculates Re from velocity
+    ///
+    /// Note that you must use the uom (units of measure)
+    /// crate here. That ensures that you are calculating in
+    /// a unit safe fashion
+    ///
+    /// In this example, i define the fluid mass flowrate, pipe diameter
+    /// and viscosity
+    /// the cross sectional area is calculated using
+    /// A_xs = pi * D^2/4
+    /// 
+    /// As of the time of writing this doc, Oct 2022, I didn't 
+    /// implement calculating velocity from Re, as it wasn't necessary
+    /// for my project
+    /// 
+    ///```rust
+    ///
+    ///use uom::si::dynamic_viscosity::pascal_second;
+    ///use uom::si::length::{meter,millimeter,foot,inch};
+    ///use uom::si::mass_density::kilogram_per_cubic_meter;
+    ///use uom::si::velocity::meter_per_second;
+    ///
+    ///use uom::si::f64::*;
+    ///
+    ///let fluid_velocity = Velocity::new::<meter_per_second>(0.05);
+    ///let pipe_diameter = Length::new::<meter>(2.79e-2);
+    ///let fluid_viscosity = DynamicViscosity::new::<pascal_second>(0.001);
+    ///let fluid_density = MassDensity::new::<kilogram_per_cubic_meter>(1000.0);
+    ///
+    ///let reynolds_number = fluid_mechanics_rust::CalcReynolds::from_velocity(
+    ///    fluid_density,
+    ///    fluid_velocity,
+    ///    pipe_diameter,
+    ///    fluid_viscosity);
+    ///
+    ///
+    ///println!("Reynolds number: {} \n", reynolds_number);
+    ///```
     pub fn from_velocity(fluidDensity: MassDensity,
                      velocity: Velocity, 
                      hydraulic_diameter: Length,
