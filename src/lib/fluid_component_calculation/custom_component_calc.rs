@@ -14,6 +14,9 @@ impl CalcPressureLoss {
     /// calculates pressure loss in a user specified
     /// component from mass flowrate
     ///
+    /// Note that it is the user's responsibility to
+    /// code in the behaviour for reverse flow
+    ///
     /// Example:
     ///
     /// ```rust
@@ -146,6 +149,9 @@ impl CalcPressureLoss {
 
     /// calculates mass flowrate in a user specified 
     /// component from pressure loss
+    ///
+    /// Note that it is the user's responsibility to
+    /// code in the behaviour for reverse flow
     ///
     /// Example:
     ///
