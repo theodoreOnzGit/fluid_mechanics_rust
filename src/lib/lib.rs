@@ -18,18 +18,66 @@ use uom::si::f64::*;
 
 
 /// This function calculates darcy friction factor
+/// It takes in a Reynold's number and roughness ratio
+///
+/// and gives the darcy friction factor for laminar 
+/// turbulent, and transition regimes. 
+///
+/// However, Re = 0 will not work!
+/// ```rust
+/// let darcy_friction_factor = 
+///     fluid_mechanics_rust::darcy(1800.0,0.0015);
+///
+/// println!("{}", darcy_friction_factor);
+/// ```
 #[allow(non_snake_case)]
 pub fn darcy(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
     return churchill_friction_factor:: 
         darcy(ReynoldsNumber, roughnessRatio);
 }
 
+/// This function calculates moody friction factor
+/// It takes in a Reynold's number and roughness ratio
+///
+/// and gives the darcy friction factor for laminar 
+/// turbulent, and transition regimes. 
+///
+/// It's basically the same as darcy friction factor
+///
+/// However, Re = 0 will not work!
+/// ```rust
+/// let moody_friction_factor = 
+///     fluid_mechanics_rust::moody(1800.0,0.0015);
+///
+/// println!("{}", moody_friction_factor);
+/// ```
 #[allow(non_snake_case)]
 pub fn moody(ReynoldsNumber: f64, roughnessRatio: f64) -> f64 {
     return churchill_friction_factor:: 
         moody(ReynoldsNumber, roughnessRatio);
 }
 
+/// This function calculates the fldk
+///
+/// this is the
+///
+/// Be = 0.5 * Re^2 * (f * (L/D) + K)
+///
+/// the f is darcy friction factor
+///
+/// and the term in the brackets is fldk
+///
+/// you are to give a K value, L/D value, Re
+/// and roughness ratio
+///
+/// However, Re = 0 will not work!
+/// ```rust
+///    let fldk = 
+///        fluid_mechanics_rust::fldk(
+///            15000.0,0.00014,10.0,5.0);
+///
+///    println!("{}", fldk);
+/// ```
 #[allow(non_snake_case)]
 pub fn fldk(ReynoldsNumber: f64,
                    roughnessRatio: f64,
