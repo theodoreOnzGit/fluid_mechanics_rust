@@ -1775,10 +1775,11 @@ impl Pipe19 {
 
 }
 
-/// bypass line times in ciet,
-/// tbd, still organising
+/// bypass flow flowmeter FM-30
+///
+/// no data given, so it's just a placeholder
+/// with same stats as FM-20 and FM-40
 pub struct Flowmeter30 {
-    // bypass flow flowmeter FM30
     // not labelled on diagram
     // we use the convention of top of bypass branch to bottom
     // hence degree is a 180-90 degrees = -90 degrees
@@ -1787,10 +1788,18 @@ impl Flowmeter30 {
 
     // let's import everything necessary:
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 18 + 93000/(Re^1.35)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1812,6 +1821,7 @@ impl Flowmeter30 {
 
     }
 
+    /// returns an instance of FM-30
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_30: DowthermACustomComponent
@@ -1831,13 +1841,13 @@ impl Flowmeter30 {
 }
 
 
+/// DHX flow flowmeter 60
+/// natural convection heat exchanger in DRACS loop
+/// this is the secondary loop equivalent for
+/// decay heat removal
+///
+/// diagram label 37a on simulation model
 pub struct Flowmeter60 {
-    // DHX flow flowmeter 60
-    // natural convection heat exchanger in DRACS loop
-    // this is the secondary loop equivalent for
-    // decay heat removal
-    //
-    // diagram label 37a on simulation model
     // we use the convention of top of bypass branch to bottom (Tank 2)
     // hence degree is -90
 }
@@ -1845,10 +1855,18 @@ impl Flowmeter60 {
 
     // let's import everything necessary:
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 18 + 93000/(Re^1.35)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1870,6 +1888,7 @@ impl Flowmeter60 {
 
     }
 
+    /// returns an instance of FM-60 within DRACS loop
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_60: DowthermACustomComponent
@@ -1889,15 +1908,9 @@ impl Flowmeter60 {
 }
 
 
-/// static mixers are here
+/// static mixer MX-60 within DRACS loop
 ///
-///
-
-
-
-
-
-
+/// label 36 on diagram
 pub struct StaticMixer60 {
     // static mixer 60 (MX-60) on CIET diagram
     // in the NDHX branch in secondary DRACS loop
@@ -1913,10 +1926,18 @@ pub struct StaticMixer60 {
 impl StaticMixer60 {
 
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1937,6 +1958,8 @@ impl StaticMixer60 {
 
     }
 
+    /// returns an instance of MX-60
+    /// static mixer 
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_60: DowthermACustomComponent
@@ -1955,6 +1978,7 @@ impl StaticMixer60 {
     }
 }
 
+/// static mixer MX-60 within DRACS loop
 pub struct StaticMixer61 {
     // static mixer 61 (MX-61) on CIET diagram
     // in the DHX branch in secondary DRACS loop
@@ -1972,10 +1996,18 @@ pub struct StaticMixer61 {
 impl StaticMixer61 {
 
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1996,6 +2028,7 @@ impl StaticMixer61 {
 
     }
 
+    /// returns an instance of static mixer 61
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_61: DowthermACustomComponent
@@ -2016,10 +2049,11 @@ impl StaticMixer61 {
 
 
 
-/// test components
-// pump and pipe combination
-
-
+/// here is a pump with some internal resistance
+/// part of test components
+///
+///
+/// just a sandbox for me
 pub struct PumpWithResistance {
     // this is a pump with resistance
     // i can set the internal pressure term to some value
@@ -2031,14 +2065,25 @@ impl PumpWithResistance {
 
     // let's import everything necessary:
 
+    /// custom darcy = 64/Re
+    ///
+    /// no reverse flow logic given
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 64.0/_reynolds_number;
     }
 
+    /// custom K = 5.25
+    ///
+    /// no reverse flow logic given
     pub fn custom_k(_reynolds_number: f64) -> f64 {
         return 5.25;
     }
 
+    /// returns an instance of a pump with
+    /// resistance,
+    ///
+    /// It's not used though, just a piece of code developed during
+    /// sandboxing and development
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 
