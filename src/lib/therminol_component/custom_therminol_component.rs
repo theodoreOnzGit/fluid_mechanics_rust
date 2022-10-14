@@ -115,6 +115,15 @@ use uom::si::area::square_meter;
 ///
 /// println!("calculated pressure_change: {:?} \n", pressure_change);
 ///
+/// let mass_flow_expected = MassRate::new::<kilogram_per_second>(-0.15);
+///
+/// let pressure_change = CalcPressureChange::from_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     mass_flow_expected,
+///                                     fluid_temp);
+///
+/// println!("calculated pressure_change: {:?} \n", pressure_change);
+///
 /// use uom::si::pressure::pascal;
 /// // (2) if you want to calculate mass flowrate
 ///
@@ -152,10 +161,7 @@ pub struct DowthermACustomComponent {
     /// will have pipe length, hydraulic diameter,
     /// angle of inclilne, 
     /// form losses and
-    /// roughness 
-    ///
-    /// as well as the 
-    /// custom f and custom K values
+    /// roughness
     ///
     /// all are user specified through the constructor
     /// 
