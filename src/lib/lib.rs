@@ -205,6 +205,28 @@ pub fn get_bejan_d(ReynoldsNumber: f64,
 /// approx::assert_relative_eq!(reynolds_number, 5000.0,
 /// max_relative = 0.001);
 /// ```
+///
+///
+/// Note: why can't we just find Reynold's number from friction factor?
+///
+/// Note that in the laminar and turbulent region, a single Reynold's
+/// number can have two different friction factor values.
+/// Even in the transition region, there's probably a range of friction
+/// factors where Re can have a third or fourth value
+/// That's not good
+///
+/// Hence Reynold's number is not a function of friction factor unless
+/// you restrict Re to a certain range
+///
+/// To get around this, we assume that pressure losses are a function
+/// of Re and vice versa, 
+///
+/// meaning to say each pressure loss value maps to a single Re
+/// and therefore dimensionless pressure losses (Be) should also
+/// map to a single Re.
+///
+/// Therefore, we must supply a Bejan number to get an Re value.
+///
 #[allow(non_snake_case)]
 pub fn get_reynolds_number(Be_D: f64,
              roughnessRatio: f64,
