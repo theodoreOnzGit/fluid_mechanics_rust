@@ -7,13 +7,106 @@ use uom::si::pressure::pascal;
 use uom::si::angle::degree;
 use uom::si::acceleration::meter_per_second_squared;
 use uom::typenum::P2;
+
+/// This structure contains methods to calculate 
+/// pressure losses for a dowtherm A pipe
+///
+/// The user only needs to follow this code example
+/// and use the constructor (or the "new" method)
+/// in order to create a pipe to user specifications:
+/// 
+/// ```rust
+/// // first you need to use the DowthermAPipe
+/// // struct and the 
+/// // StandardPipeProperties struct
+///
+/// use fluid_mechanics_rust::therminol_component::therminol_pipe::
+///     DowthermAPipe;
+///
+/// use crate::fluid_mechanics_rust::therminol_component::
+///     StandardPipeProperties;
+///
+/// // to make a new pipe object, in this case
+/// // the static_mixer_pipe_6a object,
+/// // you need to make sure it is of the type
+/// // DowthermAPipe, using the type annotation
+///
+/// // after that, use the new method within
+/// // StandardPipeProperties
+/// // to construct it according to the template
+/// // make sure the name is of the type string
+/// // using the to_string() method
+///
+/// let static_mixer_pipe_6a: DowthermAPipe = 
+///     StandardPipeProperties::new(
+///         "static_mixer_pipe_6a".to_string(),
+///         2.79e-02, // pipe diameter 2.79e-02m
+///         0.1526, // pipe length 0.1526m
+///         0.015, // wall roughness for stainless steel 0.015mm
+///         51.526384, // incline angle 51.526384 degrees
+///         5.05); // form loss k = 5.05 dimensionless
+///
+/// 
+/// // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+/// // that's if you want to calculate pressure change
+/// // to and from mass flowrate:
+///
+/// use uom::si::thermodynamic_temperature::kelvin;
+/// use uom::si::thermodynamic_temperature::degree_celsius;
+/// 
+/// use uom::si::f64::*;
+/// use uom::typenum::P2;
+/// use uom::si::mass_rate::kilogram_per_second;
+///
+/// let fluid_temp = ThermodynamicTemperature::new::<
+///     degree_celsius>(21.0);
+/// let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+///
+/// // now let's use the calc pressure change object
+/// use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+///
+/// // (1) so if you want to calculate pressure change:
+///
+/// let pressure_change = CalcPressureChange::from_mass_rate(
+///                                     &static_mixer_pipe_6a,
+///                                     mass_flow_expected,
+///                                     fluid_temp);
+///
+/// println!("calculated pressure_change: {:?} \n", pressure_change);
+///
+/// use uom::si::pressure::pascal;
+/// // (2) if you want to calculate mass flowrate
+///
+/// let pressure_change = Pressure::new::<pascal>(15900_f64);
+///
+/// let test_mass_flow = CalcPressureChange::to_mass_rate(
+///                                     &static_mixer_pipe_6a,
+///                                     pressure_change,
+///                                     fluid_temp);
+///
+/// println!("actual_mass_rate: {:?} \n", test_mass_flow);
+///
+///
+/// ```
+pub struct DowthermAPipe {
 // now i will have dowtherm A pipe
 // this is simliar in composition to therminol VP 1 so 
 // i class them as the same
-pub struct DowthermAPipe {
+
+    /// the dowtherm_pipe_properties object
+    /// or struct instance
+    /// will have pipe length, hydraulic diameter,
+    /// angle of inclilne, 
+    /// form losses and
+    /// roughness
+    ///
+    /// all are user specified through the constructor
+    /// 
     pub dowtherm_pipe_properties: PipeProperties,
 }
-
+/// dowtherm A pipe has methods to obtain
+/// thermophysical properties using the Dowtherm a correlations
+///
 impl FluidProperties for DowthermAPipe {
     fn density(fluid_temp: ThermodynamicTemperature) -> MassDensity {
         return dowtherm_a_properties::getDowthermADensity(fluid_temp);

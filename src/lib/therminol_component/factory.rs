@@ -14,9 +14,10 @@ DowthermAPipe;
 
 use super::StandardPipeProperties;
 
-/// CTAH branch items
-/// I'm still in the midst of rearranging things though...
-
+/// Pipe6a in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
+/// It is a static mixer pipe
 pub struct Pipe6a {
     // pipe 6a
     // otherwise known as the static mixer pipe 6a
@@ -24,6 +25,7 @@ pub struct Pipe6a {
 
 impl Pipe6a {
 
+    /// returns an instance of Pipe 6a
     pub fn get() -> DowthermAPipe {
         let pipe_6a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -42,6 +44,11 @@ impl Pipe6a {
 
 }
 
+/// static mixer 41
+/// label component 6 
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
 pub struct StaticMixer41 {
     // static mixer 41 (MX-41) on CIET diagram
     // in the pump and CTAH branch
@@ -54,10 +61,14 @@ pub struct StaticMixer41 {
 impl StaticMixer41 {
 
 
+    /// custom darcy friction factor is 0
+    /// MX-41 does not depend on L/D
+    /// for friction factor
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K value for static mixer 41
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -78,6 +89,8 @@ impl StaticMixer41 {
 
     }
 
+    /// returns an instance of MX-41
+    /// or component no.6
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_41: DowthermACustomComponent
@@ -96,6 +109,11 @@ impl StaticMixer41 {
     }
 }
 
+/// Vertical part of Coiled Tube Air Heater (CTAH)
+/// label component 7a
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
+///
 pub struct CTAHVertical {
 
     // coiled tube air heater,
@@ -105,9 +123,17 @@ pub struct CTAHVertical {
     // label 7a
 }
 
+/// CTAH vertical is actually an fldk type pipe
+///
+/// but because I was quickly copying templates from
+/// other fldk components, it became easy just
+/// to force the vertical CTAH to be a custom fldk component
+///
 impl CTAHVertical {
 
 
+    /// CTAH has a darcy friction factor from churchill
+    /// correlation
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -132,6 +158,7 @@ impl CTAHVertical {
         return darcy;
     }
 
+    /// CTAH has a fixed K value of 3.9 
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 3.9;
@@ -144,6 +171,7 @@ impl CTAHVertical {
 
     }
 
+    /// returns an instance of the vertical component of CTAH
     pub fn get() -> DowthermACustomComponent {
 
         let ctah_vertical: DowthermACustomComponent
@@ -162,6 +190,10 @@ impl CTAHVertical {
     }
 }
 
+/// Horizontal part of Coiled Tube Air Heater (CTAH)
+/// label component 7b
+/// in Compact Integral Effects Test (CIET)
+/// CTAH branch 
 pub struct CTAHHorizontal {
 
     // coiled tube air heater
@@ -176,10 +208,16 @@ pub struct CTAHHorizontal {
 impl CTAHHorizontal {
 
 
+    /// custom darcy friction factor is 0
+    /// the horizontal CTAH correlation does not depend on L/D
+    /// for friction factor
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+
+    /// coiled tube air heater (CTAH) horizontal component
+    /// has fldk = 400 + 52,000/Re
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
 
         let mut reverse_flow = false;
@@ -201,6 +239,8 @@ impl CTAHHorizontal {
 
     }
 
+    /// returns an instance of the
+    /// horizontal portion of CTAH
     pub fn get() -> DowthermACustomComponent {
 
         let ctah_horizontal: DowthermACustomComponent
@@ -219,6 +259,8 @@ impl CTAHHorizontal {
     }
 }
 
+/// Static mixer pipe 8a
+/// adjacent to MX-40 in the CTAH branch
 pub struct Pipe8a {
     // pipe 8a
     // otherwise known as the static mixer pipe 8a
@@ -226,6 +268,7 @@ pub struct Pipe8a {
 
 impl Pipe8a {
 
+    /// returns and instance of pipe 8a
     pub fn get() -> DowthermAPipe {
         let pipe_8a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -244,24 +287,26 @@ impl Pipe8a {
 
 }
 
+/// static mixer 40 (MX-40) on CIET diagram
+/// just after CTAH (AKA IHX)
+/// from top to bottom
+/// label 8 on diagram
+///
+/// forced convection flow direction is same as top to bottom
+/// has a fldk of 21+4000/Re
 pub struct StaticMixer40 {
-    // static mixer 40 (MX-40) on CIET diagram
-    // just after CTAH (AKA IHX)
-    // from top to bottom
-    // label 8 on diagram
-    //
-    // forced convection flow direction is same as top to bottom
-    //
-    // has a fldk of 21+4000/Re
 }
 impl StaticMixer40 {
 
-    // let's import everything necessary:
-
+    /// custom darcy is 0
+    /// because fldk does not depend on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    
+    /// has a fldk of 21+4000/Re
+    /// it comes from the custom_k value
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -282,6 +327,7 @@ impl StaticMixer40 {
 
     }
 
+    /// returns an instance of MX-40
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_40: DowthermACustomComponent
@@ -300,12 +346,14 @@ impl StaticMixer40 {
     }
 }
 
+/// pipe number 9 in CIET's CTAH branch
 pub struct Pipe9 {
     // pipe 9
 }
 
 impl Pipe9 {
 
+    /// returns instance of pipe 9
     pub fn get() -> DowthermAPipe {
         let pipe_9: DowthermAPipe
             = StandardPipeProperties::new(
@@ -324,12 +372,14 @@ impl Pipe9 {
 
 }
 
+/// pipe number 10 in CIET's CTAH branch
 pub struct Pipe10 {
     // pipe 10
 }
 
 impl Pipe10 {
 
+    /// returns instance of pipe 10
     pub fn get() -> DowthermAPipe {
         let pipe_10: DowthermAPipe
             = StandardPipeProperties::new(
@@ -348,12 +398,14 @@ impl Pipe10 {
 
 }
 
+/// pipe number 11 in CIET's CTAH branch
 pub struct Pipe11 {
     // pipe 11
 }
 
 impl Pipe11 {
 
+    /// returns instance of pipe 11
     pub fn get() -> DowthermAPipe {
         let pipe_11: DowthermAPipe
             = StandardPipeProperties::new(
@@ -372,12 +424,14 @@ impl Pipe11 {
 
 }
 
+/// pipe number 12 in CIET's CTAH branch
 pub struct Pipe12 {
     // pipe 12
 }
 
 impl Pipe12 {
 
+    /// returns instance of pipe 12
     pub fn get() -> DowthermAPipe {
         let pipe_12: DowthermAPipe
             = StandardPipeProperties::new(
@@ -396,23 +450,31 @@ impl Pipe12 {
 
 }
 
+/// ctah pump is a custom therminol component with
+/// ie no friction factor losses
+/// but it provides a source pressure
+///
+/// it is located between pipe 12 and 13
 pub struct CTAHPump {
-    // ctah pump is an empty component
-    // ie no friction factor losses
-    // but it provides a source pressure
 }
 impl CTAHPump {
 
     // let's import everything necessary:
 
+    /// pump has no internal pressure loss
+    /// so custom darcy friction factor is 0
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// pump has no internal pressure loss
+    /// so custom k is 0
     pub fn custom_k(_reynolds_number: f64) -> f64 {
         return 0.0;
     }
 
+    /// returns an instance of the pump with an internal
+    /// pressure term set by the user in the get method
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 
@@ -435,6 +497,8 @@ impl CTAHPump {
     }
 }
 
+/// pipe number 13 in CIET's CTAH branch
+/// just after the pump
 pub struct Pipe13 {
     // pipe 13 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42,
@@ -443,6 +507,7 @@ pub struct Pipe13 {
 
 impl Pipe13 {
 
+    /// returns an instance of pipe13
     pub fn get() -> DowthermAPipe {
         let pipe_13: DowthermAPipe
             = StandardPipeProperties::new(
@@ -461,6 +526,7 @@ impl Pipe13 {
 
 }
 
+/// pipe number 14 in CIET's CTAH branch
 pub struct Pipe14 {
     // pipe 14 on the diagram in Nico Zweibaum nodalisation
     // probably some combination of V-42,
@@ -474,6 +540,7 @@ pub struct Pipe14 {
 
 impl Pipe14 {
 
+    /// returns an instance of pipe14
     pub fn get() -> DowthermAPipe {
         let pipe_14: DowthermAPipe
             = StandardPipeProperties::new(
@@ -491,6 +558,8 @@ impl Pipe14 {
     }
 }
 
+/// FM-40 Coriolis Flowmeter in CIET's CTAH branch
+/// labelled 14a in simulation schmeatic
 pub struct Flowmeter40 {
     // ctah line flowmeter 40
     // label 14a on simulation diagram
@@ -500,10 +569,15 @@ impl Flowmeter40 {
 
     // let's import everything necessary:
 
+    /// custom darcy is 0 because
+    /// fldk does not depend on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// fldk = 18.0+93000/Re
+    /// this is implemented by setting 
+    /// K = = 18.0+93000/Re
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -525,6 +599,7 @@ impl Flowmeter40 {
 
     }
 
+    /// returns an instance of FM-40 (14a)
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_40_14a: DowthermACustomComponent
@@ -545,6 +620,7 @@ impl Flowmeter40 {
 }
 
 
+/// pipe number 15 in CIET's CTAH branch
 pub struct Pipe15 {
     // pipe 15 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
@@ -556,6 +632,7 @@ pub struct Pipe15 {
 
 impl Pipe15 {
 
+    /// returns an instance of pipe 15
     pub fn get() -> DowthermAPipe {
         let pipe_15: DowthermAPipe
             = StandardPipeProperties::new(
@@ -573,6 +650,7 @@ impl Pipe15 {
     }
 }
 
+/// pipe number 16 in CIET's CTAH branch
 pub struct Pipe16 {
     // pipe 16 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
@@ -584,6 +662,7 @@ pub struct Pipe16 {
 
 impl Pipe16 {
 
+    /// returns an instance of pipe 16
     pub fn get() -> DowthermAPipe {
         let pipe_16: DowthermAPipe
             = StandardPipeProperties::new(
@@ -602,6 +681,14 @@ impl Pipe16 {
     }
 }
 
+/// Branch (or pipe 17) in CIET's CTAH branch
+///
+/// Approximations were made for this branch though,
+/// technically branch 17a is part of CTAH branch
+/// while 17b is part of the DHX branch,
+/// I combined both for convenience
+///
+/// This is treated as a single pipe though
 pub struct Branch17 {
     // pipe 17 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of F30 on CIET's P&ID
@@ -613,6 +700,7 @@ pub struct Branch17 {
 
 impl Branch17 {
 
+    /// returns an instance of Branch 17
     pub fn get() -> DowthermAPipe {
         let pipe_17: DowthermAPipe
             = StandardPipeProperties::new(
@@ -631,11 +719,31 @@ impl Branch17 {
     }
 }
 
-/// Heater Branch (top to bottom)
+/// Branch 5 in the Heater Branch (top to bottom perspective)
+/// 
+/// Approximations were made for this branch though,
+/// technically branch 5a is part of DHX branch
+/// while 5b is part of the DHX branch,
+/// I combined both for convenience
+///
+/// This is treated as a single pipe though
+///
+/// Now I'd probably made a mistake putting branch 5 in
+/// the heater branch, it's probably better put inside the
+/// CTAH branch, (as of Oct 2022)
+/// I'll probably put this in the CTAH branch in future
+///
+/// But for forced isothermal circulation tests with only
+/// the heater branch and CTAH branch, it doesn't really matter
+/// since there are only two branches
+///
+/// So no matter which branch you put branch or pipe 5 in,
+/// it is still the same set of pipes in series
+/// calculations will still be the same numerically
+///
+/// 
 // this is reverse order compared to table A-1 in
 // the Zweibaum nodalised relap model
-
-
 pub struct Branch5 {
     // pipe 5 on the diagram in Nico Zweibaum nodalisation
     // and from a top to bottom direction from pipe 5
@@ -648,6 +756,7 @@ pub struct Branch5 {
 
 impl Branch5 {
 
+    /// returns an instance of branch5
     pub fn get() -> DowthermAPipe {
         let pipe_5: DowthermAPipe
             = StandardPipeProperties::new(
@@ -667,6 +776,7 @@ impl Branch5 {
 }
 
 
+/// pipe 4 within the heater branch
 pub struct Pipe4 {
     // pipe 4 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
@@ -678,6 +788,7 @@ pub struct Pipe4 {
 
 impl Pipe4 {
 
+    /// returns an instance of pipe4
     pub fn get() -> DowthermAPipe {
         let pipe_4: DowthermAPipe
             = StandardPipeProperties::new(
@@ -696,6 +807,7 @@ impl Pipe4 {
     }
 }
 
+/// pipe3 within the heater branch
 pub struct Pipe3 {
     // pipe 3 on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
@@ -707,6 +819,7 @@ pub struct Pipe3 {
 
 impl Pipe3 {
 
+    /// returns an instance of pipe 3
     pub fn get() -> DowthermAPipe {
         let pipe_3: DowthermAPipe
             = StandardPipeProperties::new(
@@ -725,6 +838,10 @@ impl Pipe3 {
     }
 }
 
+/// MX-10 within the heater branch
+/// labelled as component 2
+///
+///
 pub struct StaticMixer10 {
     // static mixer 10 (MX-10) on CIET diagram
     // just before the heater in the heater branch
@@ -741,10 +858,20 @@ pub struct StaticMixer10 {
 impl StaticMixer10 {
 
 
+    /// darcy friction factor is 0
+    ///
+    /// This is because the MX-10 friction factor
+    /// doesn't depend on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom k for MX-10
+    ///
+    /// fldk = 21 + 4000/Re
+    ///
+    /// this is done by setting 
+    /// K = 21 + 4000/Re
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -765,6 +892,7 @@ impl StaticMixer10 {
 
     }
 
+    /// returns an instance of MX-10
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_10: DowthermACustomComponent
@@ -783,6 +911,9 @@ impl StaticMixer10 {
     }
 }
 
+/// static mixer pipe2a in heater branch
+///
+/// adjacent to MX-10
 pub struct Pipe2a {
     // pipe 2a on the diagram in Nico Zweibaum nodalisation
     // probably corresponds of V11 and F12
@@ -794,6 +925,7 @@ pub struct Pipe2a {
 
 impl Pipe2a {
 
+    /// returns an instance of pipe2a
     pub fn get() -> DowthermAPipe {
         let pipe_2a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -812,6 +944,7 @@ impl Pipe2a {
     }
 }
 
+/// heater top head 1a of heater branch in CIET
 pub struct HeaterTopHead1a {
 
     // heater top head
@@ -824,6 +957,11 @@ pub struct HeaterTopHead1a {
 impl HeaterTopHead1a {
 
 
+    /// custom darcy is taken from churchill friction factor
+    ///
+    /// Actually a dowtherm pipe would do,
+    /// but I just copied and pasted the custom fldk component
+    /// template
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -848,6 +986,9 @@ impl HeaterTopHead1a {
         return darcy;
     }
 
+    /// custom K is fixed at 3.75
+    ///
+    /// reverse flow logic means K is -3.75
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 3.75;
@@ -860,6 +1001,7 @@ impl HeaterTopHead1a {
 
     }
 
+    /// returns an instance of heater top head 1a
     pub fn get() -> DowthermACustomComponent {
 
         let heater_top_head: DowthermACustomComponent
@@ -878,6 +1020,10 @@ impl HeaterTopHead1a {
     }
 }
 
+/// This is the first version of CIET's heater
+/// 
+/// It is found in CIET's heater branch;
+/// It has hydrodynamic losses similar to a pipe
 pub struct CietHeaterVersion1 {
 
     // this is the first version of the ciet heater
@@ -891,6 +1037,7 @@ pub struct CietHeaterVersion1 {
 impl CietHeaterVersion1 {
 
 
+    /// custom darcy here is the same as churchill friction factor
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -915,6 +1062,7 @@ impl CietHeaterVersion1 {
         return darcy;
     }
 
+    /// K = 0 for CIET's heater version 1
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 0.0;
@@ -927,6 +1075,7 @@ impl CietHeaterVersion1 {
 
     }
 
+    /// returns an instance of CIET heater version 1
     pub fn get() -> DowthermACustomComponent {
 
         let heater_version_1_label_1: DowthermACustomComponent
@@ -945,6 +1094,7 @@ impl CietHeaterVersion1 {
     }
 }
 
+/// heater bottom head 1b within CIET's heater branch
 pub struct HeaterBottomHead1b {
 
     // heater top head
@@ -957,6 +1107,7 @@ pub struct HeaterBottomHead1b {
 impl HeaterBottomHead1b {
 
 
+    /// custom darcy here is the same as churchill friction factor
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -981,6 +1132,9 @@ impl HeaterBottomHead1b {
         return darcy;
     }
 
+    /// custom K is fixed at 3.95
+    ///
+    /// reverse flow logic means K is -3.95
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 3.95;
@@ -993,6 +1147,7 @@ impl HeaterBottomHead1b {
 
     }
 
+    /// returns an instance of heater bottom head 1b
     pub fn get() -> DowthermACustomComponent {
 
         let heater_bottom_head: DowthermACustomComponent
@@ -1011,6 +1166,7 @@ impl HeaterBottomHead1b {
     }
 }
 
+/// pipe 18 within CIET's heater branch
 pub struct Pipe18 {
     // pipe 18 on the diagram in Nico Zweibaum nodalisation
     //
@@ -1021,6 +1177,7 @@ pub struct Pipe18 {
 
 impl Pipe18 {
 
+    /// returns an instance of pipe 18
     pub fn get() -> DowthermAPipe {
         let pipe_18: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1039,9 +1196,8 @@ impl Pipe18 {
     }
 }
 
-/// DHX Branch from Top to Bottom
-/// this is volume
-
+/// pipe 26 in DHX Branch from Top to Bottom orientation
+///
 pub struct Pipe26 {
     // pipe 26 on the diagram in Nico Zweibaum nodalisation
     //
@@ -1052,6 +1208,7 @@ pub struct Pipe26 {
 
 impl Pipe26 {
 
+    /// returns an instance of pipe 26
     pub fn get() -> DowthermAPipe {
         let pipe_26: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1070,12 +1227,12 @@ impl Pipe26 {
     }
 }
 
+/// static mixer 21 (MX-21) on CIET diagram
+/// in the DHX branch in primary loop
+/// just before the DRACS heat exchanger
+/// from top to bottom
+/// label 25
 pub struct StaticMixer21 {
-    // static mixer 21 (MX-21) on CIET diagram
-    // in the DRACS branch in primary loop
-    // just before the DRACS heat exchanger
-    // from top to bottom
-    // label 25
     //
     // in reality flow goes from bottom to
     // top in natural convection
@@ -1088,10 +1245,17 @@ pub struct StaticMixer21 {
 impl StaticMixer21 {
 
 
+    /// custom darcy is 0 
+    ///
+    /// this is because fldk has no dependence on L/D
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1112,6 +1276,9 @@ impl StaticMixer21 {
 
     }
 
+    /// returns an instance of MX-21
+    ///
+    /// It is labelled 25 on diagram
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_21: DowthermACustomComponent
@@ -1131,6 +1298,8 @@ impl StaticMixer21 {
 }
 
 
+/// Static mixer pipe 25a adjacent to MX-21
+/// in DHX branch
 pub struct Pipe25a {
     // pipe 25a
     // otherwise known as the static mixer pipe 25a
@@ -1138,6 +1307,8 @@ pub struct Pipe25a {
 
 impl Pipe25a {
 
+    /// returns an instance of static mixer pipe 25a
+    /// adjacent to MX-21
     pub fn get() -> DowthermAPipe {
         let pipe_25a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1156,19 +1327,23 @@ impl Pipe25a {
 
 }
 
+/// this is the heat exchanger
+/// in the DHX branch, labelled 24
+///
+/// It is shell side heat exchanger which allows
+/// for heat to be transferred to natural circulation loop
+/// or DRACS Loop
+/// inclined at 90 degrees bottom to top
+/// or 90 degrees + 180 top to bottom orientation
+///
 pub struct DHXShellSideHeatExchanger {
 
-    // this is the DRACS DHX shell side heat exchanger
-    // in the DHX branch
-    // inclined at 90 degrees bottom to top
-    // or 90 degrees + 180 top to bottom orientation
-    //
-    // label 24
 }
 
 impl DHXShellSideHeatExchanger {
 
 
+    /// custom darcy here is same as churchill friction factor
     pub fn custom_darcy(mut reynolds_number: f64, roughness_ratio: f64) -> f64 {
 
         if roughness_ratio < 0.0 {
@@ -1193,6 +1368,9 @@ impl DHXShellSideHeatExchanger {
         return darcy;
     }
 
+    /// custom K is fixed at 23.9
+    ///
+    /// reverse flow logic means K is -23.9
     pub fn custom_k(reynolds_number: f64) -> f64 {
 
         let custom_k_value = 23.9;
@@ -1205,6 +1383,8 @@ impl DHXShellSideHeatExchanger {
 
     }
 
+    /// returns an instance of dhx shell side
+    /// heat exchanger 24
     pub fn get() -> DowthermACustomComponent {
 
         let dhx_shell_side: DowthermACustomComponent
@@ -1223,30 +1403,38 @@ impl DHXShellSideHeatExchanger {
     }
 }
 
+/// static mixer 20 (MX-20) on CIET diagram
+/// in the DRACS branch in primary loop
+/// just after the DRACS heat exchanger
+/// from top to bottom
+/// label 23
+///
+/// in reality flow goes from bottom to
+/// top in natural convection
+/// also in the DRACS
+/// loop there are flow diodes to make
+/// it such that flow going from bottom to top
+/// encounters more resistance
+///
+/// original angle is is 90 degrees
+/// but i orientate from top to bottom
 pub struct StaticMixer20 {
-    // static mixer 20 (MX-20) on CIET diagram
-    // in the DRACS branch in primary loop
-    // just after the DRACS heat exchanger
-    // from top to bottom
-    // label 23
-    //
-    // in reality flow goes from bottom to
-    // top in natural convection
-    // also in the DRACS
-    // loop there are flow diodes to make
-    // it such that flow going from bottom to top
-    // encounters more resistance
-    //
-    // original angle is is 90 degrees
-    // but i orientate from top to bottom
 }
 impl StaticMixer20 {
 
 
+    /// custom darcy is 0 
+    ///
+    /// because fldk is independent of L/D
+    /// so we set custom darcy = 0
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1267,6 +1455,8 @@ impl StaticMixer20 {
 
     }
 
+    /// returns an instance of MX-20
+    /// label 23
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_20: DowthermACustomComponent
@@ -1285,13 +1475,16 @@ impl StaticMixer20 {
     }
 }
 
+/// static mixer pipe 23a in DHX branch in CIET
+///
+/// otherwise known as the static mixer pipe 
+/// to MX-20
 pub struct Pipe23a {
-    // pipe 23a
-    // otherwise known as the static mixer pipe 23a
 }
 
 impl Pipe23a {
 
+    /// returns an instance of static mixer pipe 23a
     pub fn get() -> DowthermAPipe {
         let pipe_23a: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1310,6 +1503,7 @@ impl Pipe23a {
 
 }
 
+/// pipe 22 within DHX branch in CIEt
 pub struct Pipe22 {
     // pipe 22
     // otherwise known as the static mixer pipe 22
@@ -1317,6 +1511,7 @@ pub struct Pipe22 {
 
 impl Pipe22 {
 
+    /// returns an intance of pipe 22
     pub fn get() -> DowthermAPipe {
         let pipe_22: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1335,10 +1530,11 @@ impl Pipe22 {
 
 }
 
+/// FM-20 DHX branch flow coriolis flowmeter 20
+///
+/// natural convection heat exchanger in primary loop
+/// diagram label is 21a
 pub struct Flowmeter20 {
-    // DHX flow flowmeter 20
-    // natural convection heat exchanger in primary loop
-    // diagram label is 21a
     // we use the convention of top of bypass branch to bottom
     // hence degree is -90
     //
@@ -1352,10 +1548,19 @@ impl Flowmeter20 {
 
     // let's import everything necessary:
 
+    /// custom darcy = 0 
+    /// 
+    /// as fldk has no dependence on L/D
+    /// not explicitly anyway
+    /// it is an empirical correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 18 + 93000/(Re^1.35)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1377,6 +1582,8 @@ impl Flowmeter20 {
 
     }
 
+    /// returns an isntance of 
+    /// FM-20 (label 21a)
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_20: DowthermACustomComponent
@@ -1395,6 +1602,18 @@ impl Flowmeter20 {
     }
 }
 
+/// FM-20 DHX branch flow coriolis flowmeter 20
+///
+/// natural convection heat exchanger in primary loop
+/// diagram label is 21a
+///
+/// However, i put an artificial check valve behaviour
+/// here, in that when flow is reversed from normal pump direction
+/// a huge K value is put in
+/// at
+/// -1.0e10 - 1.0e10/Re
+///
+/// This is of course with reverse flow taken into account already
 pub struct Flowmeter20WithHighKCheckValve {
     // DHX flow flowmeter 20
     // natural convection heat exchanger in primary loop
@@ -1412,10 +1631,31 @@ impl Flowmeter20WithHighKCheckValve {
 
     // let's import everything necessary:
 
+    /// custom darcy = 0 
+    /// 
+    /// as fldk has no dependence on L/D
+    /// not explicitly anyway
+    /// it is an empirical correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K 
+    ///
+    /// It is set to 18 + 93000/(Re^1.35) 
+    /// in pump reverse flow direction (or normal natural 
+    /// convection direction)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
+    ///
+    ///
+    /// but in pump forward flow direction
+    ///
+    /// fldk = 1.0e10 + 1.0e10 / Re
+    ///
+    /// This enables the flow resistance to be extremely high
+    /// even during laminar regime.
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1437,6 +1677,8 @@ impl Flowmeter20WithHighKCheckValve {
 
     }
 
+    /// returns an instance of FM-20
+    /// with artificial check valve behaviour
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_20: DowthermACustomComponent
@@ -1455,12 +1697,14 @@ impl Flowmeter20WithHighKCheckValve {
     }
 }
 
+/// pipe 21 within CIET DHX loop
 pub struct Pipe21 {
     // pipe 21
 }
 
 impl Pipe21 {
 
+    /// returns an instance of pipe21
     pub fn get() -> DowthermAPipe {
         let pipe_21: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1479,12 +1723,14 @@ impl Pipe21 {
 
 }
 
+/// pipe 20 within CIET DHX loop
 pub struct Pipe20 {
     // pipe 20
 }
 
 impl Pipe20 {
 
+    /// returns an instance of pipe 20
     pub fn get() -> DowthermAPipe {
         let pipe_20: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1503,12 +1749,14 @@ impl Pipe20 {
 
 }
 
+/// pipe 19 within CIET DHX loop
 pub struct Pipe19 {
     // pipe 19
 }
 
 impl Pipe19 {
 
+    /// returns an instance of pipe 19
     pub fn get() -> DowthermAPipe {
         let pipe_19: DowthermAPipe
             = StandardPipeProperties::new(
@@ -1527,10 +1775,11 @@ impl Pipe19 {
 
 }
 
-/// bypass line times in ciet,
-/// tbd, still organising
+/// bypass flow flowmeter FM-30
+///
+/// no data given, so it's just a placeholder
+/// with same stats as FM-20 and FM-40
 pub struct Flowmeter30 {
-    // bypass flow flowmeter FM30
     // not labelled on diagram
     // we use the convention of top of bypass branch to bottom
     // hence degree is a 180-90 degrees = -90 degrees
@@ -1539,10 +1788,18 @@ impl Flowmeter30 {
 
     // let's import everything necessary:
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 18 + 93000/(Re^1.35)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1564,6 +1821,7 @@ impl Flowmeter30 {
 
     }
 
+    /// returns an instance of FM-30
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_30: DowthermACustomComponent
@@ -1583,13 +1841,13 @@ impl Flowmeter30 {
 }
 
 
+/// DHX flow flowmeter 60
+/// natural convection heat exchanger in DRACS loop
+/// this is the secondary loop equivalent for
+/// decay heat removal
+///
+/// diagram label 37a on simulation model
 pub struct Flowmeter60 {
-    // DHX flow flowmeter 60
-    // natural convection heat exchanger in DRACS loop
-    // this is the secondary loop equivalent for
-    // decay heat removal
-    //
-    // diagram label 37a on simulation model
     // we use the convention of top of bypass branch to bottom (Tank 2)
     // hence degree is -90
 }
@@ -1597,10 +1855,18 @@ impl Flowmeter60 {
 
     // let's import everything necessary:
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 18 + 93000/(Re^1.35)
+    ///
+    /// because
+    /// fldk = 18 + 93000/(Re^1.35)
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1622,6 +1888,7 @@ impl Flowmeter60 {
 
     }
 
+    /// returns an instance of FM-60 within DRACS loop
     pub fn get() -> DowthermACustomComponent {
 
         let flowmeter_60: DowthermACustomComponent
@@ -1641,15 +1908,9 @@ impl Flowmeter60 {
 }
 
 
-/// static mixers are here
+/// static mixer MX-60 within DRACS loop
 ///
-///
-
-
-
-
-
-
+/// label 36 on diagram
 pub struct StaticMixer60 {
     // static mixer 60 (MX-60) on CIET diagram
     // in the NDHX branch in secondary DRACS loop
@@ -1665,10 +1926,18 @@ pub struct StaticMixer60 {
 impl StaticMixer60 {
 
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1689,6 +1958,8 @@ impl StaticMixer60 {
 
     }
 
+    /// returns an instance of MX-60
+    /// static mixer 
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_60: DowthermACustomComponent
@@ -1707,6 +1978,7 @@ impl StaticMixer60 {
     }
 }
 
+/// static mixer MX-60 within DRACS loop
 pub struct StaticMixer61 {
     // static mixer 61 (MX-61) on CIET diagram
     // in the DHX branch in secondary DRACS loop
@@ -1724,10 +1996,18 @@ pub struct StaticMixer61 {
 impl StaticMixer61 {
 
 
+    /// darcy = 0
+    /// 
+    /// as fldk is empirical and indpendent of L/D
+    /// in that correlation
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 0.0;
     }
 
+    /// custom K = 21.0 + 4000/Re
+    ///
+    /// This is because fldk = = 21.0 + 4000/Re
+    /// And we don't have L/D dependence
     pub fn custom_k(mut reynolds_number: f64) -> f64 {
         let mut reverse_flow = false;
 
@@ -1748,6 +2028,7 @@ impl StaticMixer61 {
 
     }
 
+    /// returns an instance of static mixer 61
     pub fn get() -> DowthermACustomComponent {
 
         let static_mixer_61: DowthermACustomComponent
@@ -1768,10 +2049,11 @@ impl StaticMixer61 {
 
 
 
-/// test components
-// pump and pipe combination
-
-
+/// here is a pump with some internal resistance
+/// part of test components
+///
+///
+/// just a sandbox for me
 pub struct PumpWithResistance {
     // this is a pump with resistance
     // i can set the internal pressure term to some value
@@ -1783,14 +2065,25 @@ impl PumpWithResistance {
 
     // let's import everything necessary:
 
+    /// custom darcy = 64/Re
+    ///
+    /// no reverse flow logic given
     pub fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
         return 64.0/_reynolds_number;
     }
 
+    /// custom K = 5.25
+    ///
+    /// no reverse flow logic given
     pub fn custom_k(_reynolds_number: f64) -> f64 {
         return 5.25;
     }
 
+    /// returns an instance of a pump with
+    /// resistance,
+    ///
+    /// It's not used though, just a piece of code developed during
+    /// sandboxing and development
     pub fn get(pressure_pascals: f64
                ) -> DowthermACustomComponent {
 

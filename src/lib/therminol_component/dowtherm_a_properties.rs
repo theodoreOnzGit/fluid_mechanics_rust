@@ -11,6 +11,8 @@ use uom::si::available_energy::joule_per_kilogram;
 extern crate peroxide;
 use peroxide::prelude::*;
 
+/// function to obtain dowtherm A density
+/// given a temperature
 #[allow(non_snake_case)]
 pub fn getDowthermADensity(
     fluidTemp: ThermodynamicTemperature) -> MassDensity {
@@ -27,6 +29,8 @@ pub fn getDowthermADensity(
     return MassDensity::new::<kilogram_per_cubic_meter>(densityValueKgPerM3);
 }
 
+/// function to obtain dowtherm A viscosity
+/// given a temperature
 #[allow(non_snake_case)]
 pub fn  getDowthermAViscosity(
     fluidTemp: ThermodynamicTemperature) -> DynamicViscosity{
@@ -40,6 +44,8 @@ pub fn  getDowthermAViscosity(
                                 
 }
 
+/// function to obtain dowtherm A specific heat capacity
+/// given a temperature
 #[allow(non_snake_case)]
 pub fn getDowthermAConstantPressureSpecificHeatCapacity(
     fluidTemp: ThermodynamicTemperature) -> SpecificHeatCapacity{
@@ -53,6 +59,8 @@ pub fn getDowthermAConstantPressureSpecificHeatCapacity(
         cp_value_joule_per_kg);
 }
 
+/// function to obtain dowtherm A thermal conductivity
+/// given a temperature
 #[allow(non_snake_case)]
 pub fn getDowthermAThermalConductivity(
     fluidTemp: ThermodynamicTemperature) -> ThermalConductivity {
@@ -66,11 +74,18 @@ pub fn getDowthermAThermalConductivity(
         thermalConductivityValue);
 }
 
-/// i also have an analytically integrated function for enthalpy of 
+/// function to obtain dowtherm A enthalpy
+/// given a temperature
+///
+/// 
+/// This is done via analytically integrating 
+/// the function for specific heat capacity of 
 /// dowtherm A
+///
+/// However,
 /// the thing is that with enthalpy
 /// we need a reference value
-/// i take mine to be 0 enthalpy at 20C
+/// i take the reference value to be 0 J/kg enthalpy at 20C
 /// integrating heat capacity with respect to T, we get
 ///
 /// cp = 1518 + 2.82*T
@@ -125,8 +140,32 @@ pub fn getDowthermAEnthalpy(
         enthalpy_value_joule_per_kg);
 }
 
-/// this functions enables us to get temperature from enthalpy using
-/// a root finding method
+/// function to obtain dowtherm A temperature 
+/// given a enthalpy
+///
+/// 
+/// This is done via analytically integrating 
+/// the function for specific heat capacity of 
+/// dowtherm A
+///
+/// However,
+/// the thing is that with enthalpy
+/// we need a reference value
+/// i take the reference value to be 0 J/kg enthalpy at 20C
+/// integrating heat capacity with respect to T, we get
+///
+/// cp = 1518 + 2.82*T
+///
+/// H = 1518*T + 2.82/2.0*T^2 + C
+/// at T = 20C, 
+/// H = 30924 + C
+/// H = 0
+/// C = -30924 (i used libre office to calculate this)
+///
+/// Once i have this correlation, i will use
+/// an iterative root finding method to find the temperature
+///
+/// As of Oct 2022, it is bisection
 ///
 /// Example: 
 ///
@@ -203,9 +242,10 @@ pub fn get_temperature_from_enthalpy(
 }
 
 
-// function checks if a fluid temperature falls in a range (20-180C)
-// it is assumed that temperature here is in degrees C
-// to avoid units, use the overload above.
+/// function checks if a fluid temperature falls in a range (20-180C)
+///
+/// If it falls outside this range, it will panic
+/// or throw an error, and the program will not run
 #[allow(non_snake_case)]
 pub fn rangeCheck(fluidTemp: ThermodynamicTemperature) -> bool{
 

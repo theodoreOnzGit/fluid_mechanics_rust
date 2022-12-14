@@ -9,10 +9,162 @@ use uom::si::acceleration::meter_per_second_squared;
 use uom::si::area::square_meter;
 
 
-// the 'a notation states that
-// the dowthermACustomComponent only lives as long as
-// the custom_component_properties object
+/// This structure contains methods to calculate 
+/// pressure losses for a dowtherm A custom component
+///
+/// The user only needs to follow this code example
+/// and use the constructor (or the "new" method)
+/// in order to create a custom component to user specifications:
+/// 
+/// ```rust
+/// // first you need to use the DowthermACustomComponent
+/// // struct and the 
+/// // StandardCustomComponentProperties struct
+///
+/// use fluid_mechanics_rust::therminol_component::custom_therminol_component::
+///     DowthermACustomComponent;
+///
+/// use crate::fluid_mechanics_rust::therminol_component::
+///     StandardCustomComponentProperties;
+///
+/// // secondly you need to define your fldk functions
+/// // both custom f and custom k
+/// fn custom_darcy(_reynolds_number: f64, _roughness_ratio: f64) -> f64 {
+///     return 0.0;
+/// }
+///
+/// // you should also define behaviour for 0 reynold's number;
+/// // the underlying code does not deal with negative Re or
+/// // zero Re scenarios
+///
+/// fn custom_k(mut reynolds_number: f64) -> f64 {
+///     let mut reverse_flow = false;
+///
+///     // the user account for reverse flow scenarios...
+///     // and also zero flow scenarios
+///     if reynolds_number < 0.0 {
+///         reverse_flow = true;
+///         reynolds_number = reynolds_number * -1.0;
+///     }
+///
+///     if reynolds_number == 0.0 {
+///         return 0.0;
+///     }
+///
+///
+///     let custom_k_value = 
+///         18.0 + 93000.0/reynolds_number.powf(1.35);
+///     // coriolis flowmeter
+///
+///     if reverse_flow {
+///         return -custom_k_value;
+///     }
+///
+///     return custom_k_value;
+///
+/// }
+///
+/// // to make a new pipe object, in this case
+/// // the flowmeter_40_14a object,
+/// // you need to make sure it is of the type
+/// // DowthermACustomComponent, using the type annotation
+///
+/// // after that, use the new method within
+/// // StandardCustomComponentProperties
+/// // to construct it according to the template
+/// // make sure the name is of the type string
+/// // using the to_string() method
+///
+/// let flowmeter_40_14a: DowthermACustomComponent 
+///     = StandardCustomComponentProperties::new(
+///     "flowmeter_40_14a".to_string(),
+///     2.79e-2, // component diameter in meters
+///     6.11e-4, // component area in square meters
+///     0.36, // component length in meters
+///     0.015, // estimated component wall roughness (doesn't matter here,
+///            // but i need to fill in
+///     0.0, //incline angle in degrees
+///     &custom_darcy,
+///     &custom_k);
+///
+/// 
+/// // now let's have a temperature of 21C and mass flow of 0.15 kg/s
+/// // that's if you want to calculate pressure change
+/// // to and from mass flowrate:
+///
+/// use uom::si::thermodynamic_temperature::kelvin;
+/// use uom::si::thermodynamic_temperature::degree_celsius;
+/// 
+/// use uom::si::f64::*;
+/// use uom::typenum::P2;
+/// use uom::si::mass_rate::kilogram_per_second;
+///
+/// let fluid_temp = ThermodynamicTemperature::new::<
+///     degree_celsius>(21.0);
+/// let mass_flow_expected = MassRate::new::<kilogram_per_second>(0.15);
+///
+/// // now let's use the calc pressure change object
+/// use crate::fluid_mechanics_rust::therminol_component::CalcPressureChange;
+///
+/// // (1) so if you want to calculate pressure change:
+///
+/// let pressure_change = CalcPressureChange::from_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     mass_flow_expected,
+///                                     fluid_temp);
+///
+/// println!("calculated pressure_change: {:?} \n", pressure_change);
+///
+/// let mass_flow_expected = MassRate::new::<kilogram_per_second>(-0.15);
+///
+/// let pressure_change = CalcPressureChange::from_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     mass_flow_expected,
+///                                     fluid_temp);
+///
+/// println!("calculated pressure_change: {:?} \n", pressure_change);
+///
+/// use uom::si::pressure::pascal;
+/// // (2) if you want to calculate mass flowrate
+///
+/// let pressure_change = Pressure::new::<pascal>(0.0_f64);
+///
+/// let test_mass_flow = CalcPressureChange::to_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     pressure_change,
+///                                     fluid_temp);
+///
+/// println!("zeroPressure_mass_rate: {:?} \n", test_mass_flow);
+///
+/// let pressure_change = Pressure::new::<pascal>(1000.0_f64);
+///
+/// let test_mass_flow = CalcPressureChange::to_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     pressure_change,
+///                                     fluid_temp);
+///
+/// println!("positivePressure_mass_rate: {:?} \n", test_mass_flow);
+///
+/// let pressure_change = Pressure::new::<pascal>(-1000.0_f64);
+///
+/// let test_mass_flow = CalcPressureChange::to_mass_rate(
+///                                     &flowmeter_40_14a,
+///                                     pressure_change,
+///                                     fluid_temp);
+///
+/// println!("negativePressure_mass_rate: {:?} \n", test_mass_flow);
+///
+/// ```
 pub struct DowthermACustomComponent {
+    /// the dowtherm_custom_component_properties object
+    /// or struct instance
+    /// will have pipe length, hydraulic diameter,
+    /// angle of inclilne, 
+    /// form losses and
+    /// roughness
+    ///
+    /// all are user specified through the constructor
+    /// 
     pub dowtherm_custom_component_properties: CustomComponentProperties,
 }
 
