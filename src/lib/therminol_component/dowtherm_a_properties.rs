@@ -1,3 +1,4 @@
+#[warn(missing_docs)]
 use uom::si::f64::*;
 use uom::si::thermodynamic_temperature::degree_celsius;
 use uom::si::mass_density::kilogram_per_cubic_meter;
@@ -65,20 +66,44 @@ pub fn getDowthermAThermalConductivity(
         thermalConductivityValue);
 }
 
-// i also have an analytically integrated function for enthalpy of 
-// dowtherm A
-// the thing is that with enthalpy
-// we need a reference value
-// i take mine to be 0 enthalpy at 20C
-// integrating heat capacity with respect to T, we get
-//
-// cp = 1518 + 2.82*T
-//
-// H = 1518*T + 2.82/2.0*T^2 + C
-// at T = 20C, 
-// H = 30924 + C
-// H = 0
-// C = -30924 (i used libre office to calculate this)
+/// i also have an analytically integrated function for enthalpy of 
+/// dowtherm A
+/// the thing is that with enthalpy
+/// we need a reference value
+/// i take mine to be 0 enthalpy at 20C
+/// integrating heat capacity with respect to T, we get
+///
+/// cp = 1518 + 2.82*T
+///
+/// H = 1518*T + 2.82/2.0*T^2 + C
+/// at T = 20C, 
+/// H = 30924 + C
+/// H = 0
+/// C = -30924 (i used libre office to calculate this)
+///
+/// Example use:
+/// ```rust
+///
+/// use uom::si::f64::*;
+/// use uom::si::thermodynamic_temperature::kelvin;
+/// use fluid_mechanics_rust::therminol_component::
+/// dowtherm_a_properties::getDowthermAEnthalpy;
+///
+/// let temp1 = ThermodynamicTemperature::new::<kelvin>(303_f64);
+///
+/// let specific_enthalpy_1 = 
+/// getDowthermAEnthalpy(temp1);
+///
+///
+/// let expected_enthalpy: f64 = 
+/// 1518_f64*30_f64 + 2.82/2.0*30_f64.powf(2_f64) - 30924_f64;
+///
+/// // the expected value is about 15885 J/kg
+///
+/// extern crate approx;
+/// approx::assert_relative_eq!(expected_enthalpy, specific_enthalpy_1.value, 
+/// max_relative=0.02);
+/// ```
 #[allow(non_snake_case)]
 pub fn getDowthermAEnthalpy(
     fluidTemp: ThermodynamicTemperature) -> AvailableEnergy{
@@ -100,10 +125,43 @@ pub fn getDowthermAEnthalpy(
         enthalpy_value_joule_per_kg);
 }
 
-// this functions enables us to get temperature from enthalpy using
-// a root finding method
+/// this functions enables us to get temperature from enthalpy using
+/// a root finding method
+///
+/// Example: 
+///
+/// ```rust
+/// use uom::si::f64::*;
+/// use uom::si::thermodynamic_temperature::kelvin;
+/// use uom::si::available_energy::joule_per_kilogram;
+/// use fluid_mechanics_rust::therminol_component::
+/// dowtherm_a_properties::get_temperature_from_enthalpy;
+///
+///
+/// let specific_enthalpy_1 = AvailableEnergy::new::
+/// <joule_per_kilogram>(15885.0);
+///
+/// let temp_expected = ThermodynamicTemperature::new::
+/// <kelvin>(303_f64);
+/// 
+/// let temp_acutal = get_temperature_from_enthalpy(
+/// specific_enthalpy_1);
+///
+///
+/// extern crate approx;
+/// approx::assert_relative_eq!(temp_expected.value, 
+/// temp_acutal.value, 
+/// max_relative=0.01);
+///
+///
+/// ```
 pub fn get_temperature_from_enthalpy(
     fluid_enthalpy: AvailableEnergy) -> ThermodynamicTemperature {
+
+    if fluid_enthalpy.value < 0_f64 {
+        panic!("dowtherm A : get_temperature_from_enthalpy \n
+               enthalpy < 0.0 , out of correlation range");
+    }
 
     // first let's convert enthalpy to a double (f64)
     let enthalpy_value_joule_per_kg = 
