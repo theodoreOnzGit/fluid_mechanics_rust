@@ -61,6 +61,7 @@ pub trait FluidComponent {
 
 }
 
+use standard_pipe_calc::FluidPipeCalcPressureLoss;
 
 
 #[cfg(test)]
@@ -88,6 +89,8 @@ pub mod fluid_component_tests {
     /// tests
     ///
     /// it is made of copper, 1m long, 2 in in diameter
+    ///
+    /// This does not take inclined angles into consideration yet
     #[test]
     pub fn simple_fluid_pipe_example_1 () {
         

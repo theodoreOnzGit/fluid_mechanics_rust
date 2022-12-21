@@ -4,6 +4,153 @@ use crate::churchill_friction_factor;
 use crate::dimensionalisation;
 
 use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
+
+/// provides generic methods to calculate pressure change
+/// to and from mass flowrate for an Inclined pipe
+/// with some internal pressure source (eg. pump)
+pub trait FluidPipeCalcPressureChange : FluidPipeCalcPressureLoss{
+
+    /// gets the angle of incline for a pipe
+    fn get_pipe_incline_angle(&mut self) -> Angle;
+
+    /// gets the pressure source for a pipe
+    fn get_pipe_internal_pressure_source(&mut self) -> Pressure;
+
+    /// sets the internal pressure source for a pipe
+    fn set_pipe_internal_pressure_source(
+        &mut self,
+        internal_pressure: Pressure);
+
+    /// gets the hydrostatic pressure change
+    /// using h rho g
+    ///
+    /// the height increase is equal
+    ///
+    /// h = pipe_length * sin (incline_angle)
+    fn get_hydrostatic_pressure_change(
+        &mut self, 
+        pipe_length: Length,
+        incline_angle: Angle,
+        fluid_density: MassDensity) -> Pressure {
+
+        let g: Acceleration = 
+            Acceleration::new::<meter_per_second_squared>(-9.81);
+        let delta_h: Length = pipe_length*incline_angle.sin();
+
+        let hydrostatic_pressure_increase: Pressure =
+            fluid_density * g * delta_h;
+
+        return hydrostatic_pressure_increase;
+    }
+
+
+    /// calculates a pressure change of the pipe 
+    /// given the 
+    ///
+    /// pressure_change = pressure_loss + hydrostatic_pressure + 
+    /// internal_source_pressure
+    fn pipe_calc_pressure_change(
+        &mut self,
+        fluid_mass_flowrate: MassRate,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        pipe_length: Length,
+        absolute_roughness: Length,
+        form_loss_k: f64,
+        incline_angle: Angle,
+        source_pressure: Pressure) -> Pressure {
+
+        // first we calculate the pressure loss
+        // of the pipe
+        // given a flat surface
+
+        let pressure_loss = 
+            self.pipe_calc_pressure_loss(
+                fluid_mass_flowrate,
+                cross_sectional_area,
+                hydraulic_diameter,
+                fluid_viscosity,
+                fluid_density,
+                pipe_length,
+                absolute_roughness,
+                form_loss_k);
+
+        let hydrostatic_pressure_increase: Pressure = 
+            self.get_hydrostatic_pressure_change(
+                pipe_length,
+                incline_angle,
+                fluid_density);
+
+        let pressure_change = 
+            -pressure_loss +
+            hydrostatic_pressure_increase+
+            source_pressure;
+
+
+        return pressure_change;
+
+    }
+
+    /// calculates a mass flowrate given a pressure change
+    /// for a fluid pipe
+    fn pipe_calculate_mass_flowrate_from_pressure_change(
+        &mut self,
+        pressure_change: Pressure,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        pipe_length: Length,
+        absolute_roughness: Length,
+        form_loss_k: f64,
+        incline_angle: Angle,
+        source_pressure: Pressure) -> MassRate {
+
+        // now we need to calculate a pressure loss term
+        // we use:
+        // Pressure Change = - pressure loss + hydrostatic pressure +
+        // source pressure
+        //
+        // so we just add pressure loss to both sides and subtract pressure
+        // change to both sides
+        // pressure loss  = - pressure change + hydrostatic pressure +
+        // source pressure
+
+        // for hydrostatic pressure gain
+        // g is earth gravity at 9.81
+        // delta H is positive upwards
+        let hydrostatic_pressure_increase: Pressure =
+            self.get_hydrostatic_pressure_change(
+                pipe_length,
+                incline_angle,
+                fluid_density);
+
+        // now calculate pressure loss
+        let pressure_loss = 
+            -pressure_change +
+            hydrostatic_pressure_increase +
+            source_pressure;
+
+        let mass_rate = 
+            self.pipe_calc_mass_flowrate(
+                pressure_loss,
+                cross_sectional_area,
+                hydraulic_diameter,
+                fluid_viscosity,
+                fluid_density,
+                pipe_length,
+                absolute_roughness,
+                form_loss_k);
+
+        return mass_rate;
+
+    }
+
+}
+
 /// provides generic methods to calculate mass flowrate
 /// and pressure losses for pipes
 ///
