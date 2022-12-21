@@ -6,17 +6,21 @@ use crate::dimensionalisation;
 use uom::si::f64::*;
 /// provides generic methods to calculate mass flowrate
 /// and pressure losses for pipes
+///
+/// see FluidComponent example for how to use
 pub trait FluidPipeCalcPressureLoss {
 
     /// gets form loss k for a pipe
     fn get_pipe_form_loss_k(&mut self) -> f64;
+
+    /// gets absolute roughness for a pipe
+    fn get_pipe_absolute_roughness(&mut self) -> Length;
     
-    /// sets form loss k for a pipe
-    fn set_pipe_form_loss_k(&mut self, pipe_form_loss_k: f64);
 
     /// a function calculates pressure
     /// loss given a mass flowrate and pipe properties
-    fn pipe_calc_pressure_loss(mut fluid_mass_flowrate: MassRate,
+    fn pipe_calc_pressure_loss(&mut self,
+                               mut fluid_mass_flowrate: MassRate,
                                cross_sectional_area: Area,
                                hydraulic_diameter: Length,
                                fluid_viscosity: DynamicViscosity,
@@ -85,7 +89,8 @@ pub trait FluidPipeCalcPressureLoss {
 
     /// a function which calculates pressure
     /// loss given a mass flowrate and pipe properties
-    fn pipe_calc_mass_flowrate(pressure_loss: Pressure,
+    fn pipe_calc_mass_flowrate(&mut self,
+                               pressure_loss: Pressure,
                                cross_sectional_area: Area,
                                hydraulic_diameter: Length,
                                fluid_viscosity: DynamicViscosity,
