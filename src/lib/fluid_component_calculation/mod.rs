@@ -64,7 +64,7 @@ pub trait FluidComponent {
 
 
 #[cfg(test)]
-pub mod fluid_component_tests {
+pub mod fluid_component_tests_and_examples {
     use std::f64::consts::PI;
 
     use crate::fluid_component_calculation::FluidComponent;
@@ -392,7 +392,7 @@ pub mod fluid_component_tests {
                         fluid_density) +
                     self.get_pipe_internal_pressure_source();
 
-                self.pressure_loss = pressure_loss;
+                self.set_pressure_loss(pressure_loss);
             }
 
             fn get_pressure_change(&mut self) -> Pressure {
@@ -634,6 +634,13 @@ pub mod fluid_component_tests {
 
         // and that concludes the example! You can now set 
         // the water pipe to anything you want.
+        //
+        // of course, it will be good to have common enums and cases
+        // that can return surface roughness of commonly used material
+        // as well as densities, viscosities, etc.
+        //
+        // Likely I'll put them in some property library stored as a trait
+
 
 
     }

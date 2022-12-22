@@ -4,6 +4,12 @@ use crate::custom_fldk;
 use crate::dimensionalisation;
 
 use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
+
+pub trait FluidCustomComponentCalcPressureLoss {
+}
+
+
 /// Contains functions to calculate pressure loss from
 /// mass flowrate or to mass flowrate
 /// for user specified components with custom fldk
