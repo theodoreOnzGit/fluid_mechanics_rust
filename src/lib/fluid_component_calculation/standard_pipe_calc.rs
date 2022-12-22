@@ -2,55 +2,17 @@
 // since i have to manually import files from above directories
 use crate::churchill_friction_factor;
 use crate::dimensionalisation;
+use crate::fluid_component_calculation::FluidComponent;
 
 use uom::si::f64::*;
-use uom::si::acceleration::meter_per_second_squared;
 
 /// provides generic methods to calculate pressure change
 /// to and from mass flowrate for an Inclined pipe
 /// with some internal pressure source (eg. pump)
-pub trait FluidPipeCalcPressureChange : FluidPipeCalcPressureLoss{
-
-    /// gets pressure change for a pipe given
-    /// the set parameters
-    fn get_pressure_change(&mut self) -> Pressure;
-
-    /// sets the pressure change for the given pipe
-    fn set_pressure_change(&mut self, pressure_change: Pressure);
-
-    /// gets the angle of incline for a pipe
-    fn get_pipe_incline_angle(&mut self) -> Angle;
-
-    /// gets the pressure source for a pipe
-    fn get_pipe_internal_pressure_source(&mut self) -> Pressure;
-
-    /// sets the internal pressure source for a pipe
-    fn set_pipe_internal_pressure_source(
-        &mut self,
-        internal_pressure: Pressure);
-
-    /// gets the hydrostatic pressure change
-    /// using h rho g
-    ///
-    /// the height increase is equal
-    ///
-    /// h = pipe_length * sin (incline_angle)
-    fn get_hydrostatic_pressure_change(
-        &mut self, 
-        pipe_length: Length,
-        incline_angle: Angle,
-        fluid_density: MassDensity) -> Pressure {
-
-        let g: Acceleration = 
-            Acceleration::new::<meter_per_second_squared>(-9.81);
-        let delta_h: Length = pipe_length*incline_angle.sin();
-
-        let hydrostatic_pressure_increase: Pressure =
-            fluid_density * g * delta_h;
-
-        return hydrostatic_pressure_increase;
-    }
-
+///
+/// 
+pub trait FluidPipeCalcPressureChange : FluidPipeCalcPressureLoss + 
+FluidComponent{
 
     /// calculates a pressure change of the pipe 
     /// given the 

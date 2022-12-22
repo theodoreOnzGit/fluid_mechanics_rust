@@ -17,7 +17,7 @@ pub mod custom_component_calc;
 
 
 use uom::si::f64::*;
-
+use uom::si::acceleration::meter_per_second_squared;
 
 /// This is a generic fluid component trait,
 /// which specifies that fluid components in general
@@ -58,6 +58,46 @@ pub trait FluidComponent {
     /// gets the component length
     fn get_component_length(&mut self) -> Length;
 
+    /// gets pressure change for a pipe given
+    /// the set parameters
+    fn get_pressure_change(&mut self) -> Pressure;
+
+    /// sets the pressure change for the given pipe
+    fn set_pressure_change(&mut self, pressure_change: Pressure);
+    
+
+    /// gets the angle of incline for a pipe
+    fn get_incline_angle(&mut self) -> Angle;
+
+    /// gets the hydrostatic pressure change
+    /// using h rho g
+    ///
+    /// the height increase is equal
+    ///
+    /// h = pipe_length * sin (incline_angle)
+    fn get_hydrostatic_pressure_change(
+        &mut self, 
+        pipe_length: Length,
+        incline_angle: Angle,
+        fluid_density: MassDensity) -> Pressure {
+
+        let g: Acceleration = 
+            Acceleration::new::<meter_per_second_squared>(-9.81);
+        let delta_h: Length = pipe_length*incline_angle.sin();
+
+        let hydrostatic_pressure_increase: Pressure =
+            fluid_density * g * delta_h;
+
+        return hydrostatic_pressure_increase;
+    }
+
+    /// gets the pressure source for a pipe
+    fn get_internal_pressure_source(&mut self) -> Pressure;
+
+    /// sets the internal pressure source for a pipe
+    fn set_pipe_internal_pressure_source(
+        &mut self,
+        internal_pressure: Pressure);
 
 }
 
@@ -153,6 +193,25 @@ pub mod fluid_component_tests_and_examples {
             }
 
 
+            /// pressure change is accounts for total pressure
+            /// differential between start and end point of the pipe,
+            /// including hydrostatic pressure and any sources
+            /// which may contribute to the pressure, eg. pumps
+            /// 
+            /// pressure change = -pressure loss + hydrostatic pressure
+            fn get_pressure_change(&mut self) -> Pressure {
+
+                // for this, i have
+                // pressure change = -pressure loss + hydrostatic pressure
+                // + internal pressure
+                return -self.get_pressure_loss();
+            }
+
+
+            fn set_pressure_change(&mut self, pressure_change:Pressure) {
+                self.set_pressure_loss(-pressure_change);
+            }
+
             /// gets pressure loss
             /// i calculate pressure loss when i invoke this method
             /// and the method comes from the 
@@ -232,6 +291,33 @@ pub mod fluid_component_tests_and_examples {
             fn get_component_length(&mut self) -> Length {
                 return Length::new::<meter>(1.0);
             }
+
+            /// i'm manually fixing the incline angle at zero
+            /// meaning that this pipe is horizontal
+            fn get_incline_angle(&mut self) -> Angle {
+                return Angle::new::<degree>(0.0);
+            }
+
+            /// For the air pipe, there should be no internal source
+
+            fn get_internal_pressure_source(&mut self) -> Pressure {
+                return Pressure::new::<pascal>(0.0);
+            }
+
+            fn set_pipe_internal_pressure_source(
+                &mut self, 
+                _internal_pressure_source: Pressure
+                ){
+                // doesn't actually do anything,
+                // i refuse to let it set anything
+                //
+                // rather i have it panic a special kind of panic
+                // called unimplemented
+
+                unimplemented!();
+
+            }
+
 
         }
 
@@ -357,78 +443,7 @@ pub mod fluid_component_tests_and_examples {
             hydraulic_diameter: Length,
         }
 
-        impl FluidPipeCalcPressureChange for WaterPipe {
-            fn get_pipe_incline_angle(&mut self) -> Angle {
-                return self.incline_angle;
-            }
-
-            fn get_pipe_internal_pressure_source(&mut self) -> Pressure {
-                return self.internal_pressure_source;
-            }
-
-            fn set_pipe_internal_pressure_source(
-                &mut self,
-                internal_pressure_source: Pressure){
-                self.internal_pressure_source = internal_pressure_source;
-            }
-
-            fn set_pressure_change(&mut self, pressure_change: Pressure){
-                // we use the following formula
-                // pressure_change = -pressure_loss + hydrostatic_pressure +
-                // internal pressure source
-                //
-                // by setting pressure change, we are indirectly setting
-                // pressure loss
-                //
-
-                let pipe_length = self.get_component_length();
-                let incline_angle = self.get_pipe_incline_angle();
-                let fluid_density = self.get_fluid_density();
-
-                let pressure_loss = -pressure_change +
-                    self.get_hydrostatic_pressure_change(
-                        pipe_length,
-                        incline_angle,
-                        fluid_density) +
-                    self.get_pipe_internal_pressure_source();
-
-                self.set_pressure_loss(pressure_loss);
-            }
-
-            fn get_pressure_change(&mut self) -> Pressure {
-                
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let fluid_viscosity = self.get_fluid_viscosity();
-                let fluid_density = self.get_fluid_density();
-                let pipe_length = self.get_component_length();
-                let incline_angle = self.get_pipe_incline_angle();
-                let internal_pressure_source = self.get_pipe_internal_pressure_source();
-                let mass_flowrate = self.mass_flowrate;
-
-
-                // return the pressure change value
-                let pressure_change = self.pipe_calc_pressure_change(
-                    mass_flowrate,
-                    cross_sectional_area,
-                    hydraulic_diameter,
-                    fluid_viscosity,
-                    fluid_density,
-                    pipe_length,
-                    absolute_roughness,
-                    form_loss_k,
-                    incline_angle,
-                    internal_pressure_source);
-
-                self.set_pressure_change(pressure_change);
-
-                return pressure_change;
-                
-            }
-
-        }
+        impl FluidPipeCalcPressureChange for WaterPipe {}
 
         impl FluidPipeCalcPressureLoss for WaterPipe {
             fn get_pipe_form_loss_k(&mut self) -> f64 {
@@ -441,8 +456,22 @@ pub mod fluid_component_tests_and_examples {
         }
 
         impl FluidComponent for WaterPipe {
+            fn get_internal_pressure_source(&mut self) -> Pressure {
+                return self.internal_pressure_source;
+            }
+
+            fn set_pipe_internal_pressure_source(
+                &mut self,
+                internal_pressure_source: Pressure){
+                self.internal_pressure_source = internal_pressure_source;
+            }
+
             fn get_component_length(&mut self) -> Length {
                 return self.pipe_length;
+            }
+
+            fn get_incline_angle(&mut self) -> Angle {
+                return self.incline_angle;
             }
 
             fn get_fluid_density(&mut self) -> MassDensity {
@@ -482,8 +511,8 @@ pub mod fluid_component_tests_and_examples {
                 let fluid_density = self.get_fluid_density();
                 let pipe_length = self.get_component_length();
                 let pressure_loss = self.pressure_loss;
-                let incline_angle = self.get_pipe_incline_angle();
-                let internal_pressure_source = self.get_pipe_internal_pressure_source();
+                let incline_angle = self.get_incline_angle();
+                let internal_pressure_source = self.get_internal_pressure_source();
 
                 let pressure_change = 
                     -pressure_loss 
@@ -551,7 +580,63 @@ pub mod fluid_component_tests_and_examples {
                 self.pressure_loss = pressure_loss;
 
                 return self.pressure_loss;
-           }
+            }
+
+            fn set_pressure_change(&mut self, pressure_change: Pressure){
+                // we use the following formula
+                // pressure_change = -pressure_loss + hydrostatic_pressure +
+                // internal pressure source
+                //
+                // by setting pressure change, we are indirectly setting
+                // pressure loss
+                //
+
+                let pipe_length = self.get_component_length();
+                let incline_angle = self.get_incline_angle();
+                let fluid_density = self.get_fluid_density();
+
+                let pressure_loss = -pressure_change +
+                    self.get_hydrostatic_pressure_change(
+                        pipe_length,
+                        incline_angle,
+                        fluid_density) +
+                    self.get_internal_pressure_source();
+
+                self.set_pressure_loss(pressure_loss);
+            }
+
+            fn get_pressure_change(&mut self) -> Pressure {
+
+                let form_loss_k = self.get_pipe_form_loss_k();
+                let absolute_roughness = self.get_pipe_absolute_roughness();
+                let cross_sectional_area = self.get_cross_sectional_area();
+                let hydraulic_diameter = self.get_hydraulic_diameter();
+                let fluid_viscosity = self.get_fluid_viscosity();
+                let fluid_density = self.get_fluid_density();
+                let pipe_length = self.get_component_length();
+                let incline_angle = self.get_incline_angle();
+                let internal_pressure_source = self.get_internal_pressure_source();
+                let mass_flowrate = self.mass_flowrate;
+
+
+                // return the pressure change value
+                let pressure_change = self.pipe_calc_pressure_change(
+                    mass_flowrate,
+                    cross_sectional_area,
+                    hydraulic_diameter,
+                    fluid_viscosity,
+                    fluid_density,
+                    pipe_length,
+                    absolute_roughness,
+                    form_loss_k,
+                    incline_angle,
+                    internal_pressure_source);
+
+                self.set_pressure_change(pressure_change);
+
+                return pressure_change;
+
+            }
         }
 
         // lastly we implement the constructor,
