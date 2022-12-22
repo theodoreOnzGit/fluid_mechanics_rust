@@ -61,7 +61,6 @@ pub trait FluidComponent {
 
 }
 
-use standard_pipe_calc::FluidPipeCalcPressureLoss;
 
 
 #[cfg(test)]
@@ -70,13 +69,14 @@ pub mod fluid_component_tests {
 
     use crate::fluid_component_calculation::FluidComponent;
     use crate::fluid_component_calculation::standard_pipe_calc
-        ::FluidPipeCalcPressureLoss;
+        ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
     use uom::si::dynamic_viscosity::millipascal_second;
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
     use uom::si::mass_density::kilogram_per_cubic_meter;
     use uom::si::mass_rate::kilogram_per_second;
     use uom::si::pressure::{pascal, kilopascal};
+    use uom::si::dynamic_viscosity::poise;
     
     /// Example 1: 
     ///
@@ -320,6 +320,237 @@ pub mod fluid_component_tests {
 
     }
 
+    /// Example 2:
+    ///
+    /// We saw previously how to create an air pipe
+    /// now we shall make a slanted water pipe
+    /// with some internal pressure source (as if it had a pump attached
+    /// to it)
+    ///
+    /// we shall improve on how we can create the pipes
+    /// to do so, we shall use the FluidComponent trait and the 
+    /// FluidPipeCalcPressureChange trait
+    ///
+    #[test]
+    pub fn water_pipe_with_internal_pump_example_2() {
+
+        // first we want to start with a water pipe struct,
+        // this time, we use the constructor to define both
+        // pipe properties and fluid properties
+        //
+        // this is still an isothermal case
+        //
+        // you may want to implement the traits so that you know what data
+        // you need to have
+
+        struct WaterPipe {
+            mass_flowrate: MassRate,
+            pressure_loss: Pressure,
+            dynamic_viscosity: DynamicViscosity,
+            density: MassDensity,
+            form_loss_k: f64,
+            absolute_roughness: Length,
+            incline_angle: Angle,
+            internal_pressure_source: Pressure,
+            pipe_length: Length,
+            hydraulic_diameter: Length,
+        }
+
+        impl FluidPipeCalcPressureChange for WaterPipe {
+            fn get_pipe_incline_angle(&mut self) -> Angle {
+                return self.incline_angle;
+            }
+
+            fn get_pipe_internal_pressure_source(&mut self) -> Pressure {
+                return self.internal_pressure_source;
+            }
+
+            fn set_pipe_internal_pressure_source(
+                &mut self,
+                internal_pressure_source: Pressure){
+                self.internal_pressure_source = internal_pressure_source;
+            }
+
+            fn get_pressure_change(&mut self) -> Pressure {
+                
+                let form_loss_k = self.get_pipe_form_loss_k();
+                let absolute_roughness = self.get_pipe_absolute_roughness();
+                let cross_sectional_area = self.get_cross_sectional_area();
+                let hydraulic_diameter = self.get_hydraulic_diameter();
+                let fluid_viscosity = self.get_fluid_viscosity();
+                let fluid_density = self.get_fluid_density();
+                let pipe_length = self.get_component_length();
+                let incline_angle = self.get_pipe_incline_angle();
+                let internal_pressure_source = self.get_pipe_internal_pressure_source();
+                let mass_flowrate = self.mass_flowrate;
+
+                // return the pressure change value
+                self.pipe_calc_pressure_change(
+                    mass_flowrate,
+                    cross_sectional_area,
+                    hydraulic_diameter,
+                    fluid_viscosity,
+                    fluid_density,
+                    pipe_length,
+                    absolute_roughness,
+                    form_loss_k,
+                    incline_angle,
+                    internal_pressure_source)
+                
+            }
+
+        }
+
+        impl FluidPipeCalcPressureLoss for WaterPipe {
+            fn get_pipe_form_loss_k(&mut self) -> f64 {
+                return self.form_loss_k;
+            }
+
+            fn get_pipe_absolute_roughness(&mut self) -> Length {
+                return self.absolute_roughness;
+            }
+        }
+
+        impl FluidComponent for WaterPipe {
+            fn get_component_length(&mut self) -> Length {
+                return self.pipe_length;
+            }
+
+            fn get_fluid_density(&mut self) -> MassDensity {
+                return self.density;
+            }
+
+            fn get_fluid_viscosity(&mut self) -> DynamicViscosity {
+                return self.dynamic_viscosity;
+            }
+
+            fn get_hydraulic_diameter(&mut self) -> Length {
+                return self.hydraulic_diameter;
+            }
+
+            fn get_cross_sectional_area(&mut self) -> Area {
+                return self.get_hydraulic_diameter()*
+                    self.get_hydraulic_diameter()*
+                    PI/4.0_f64;
+            }
+
+            fn set_pressure_loss(&mut self, pressure_loss: Pressure){
+                self.pressure_loss = pressure_loss;
+            }
+
+            fn set_mass_flowrate(&mut self, mass_flowrate: MassRate){
+                self.mass_flowrate = mass_flowrate;
+            }
+
+            fn get_mass_flowrate(&mut self) -> MassRate {
+                // get pipe parameters and flow conditions
+                // from the get methods
+                let form_loss_k = self.get_pipe_form_loss_k();
+                let absolute_roughness = self.get_pipe_absolute_roughness();
+                let cross_sectional_area = self.get_cross_sectional_area();
+                let hydraulic_diameter = self.get_hydraulic_diameter();
+                let fluid_viscosity = self.get_fluid_viscosity();
+                let fluid_density = self.get_fluid_density();
+                let pipe_length = self.get_component_length();
+                let pressure_loss = self.pressure_loss;
+                let incline_angle = self.get_pipe_incline_angle();
+                let internal_pressure_source = self.get_pipe_internal_pressure_source();
+
+                let mass_flowrate = 
+                    self.pipe_calculate_mass_flowrate_from_pressure_change(
+                        pressure_loss, 
+                        cross_sectional_area, 
+                        hydraulic_diameter, 
+                        fluid_viscosity, 
+                        fluid_density, 
+                        pipe_length, 
+                        absolute_roughness, 
+                        form_loss_k,
+                        incline_angle,
+                        internal_pressure_source);
+
+                // you can return the mass flowrate straightaway
+                // or set the struct variable first and then
+                // return it
+
+                self.set_mass_flowrate(mass_flowrate);
+
+                return self.mass_flowrate;
+
+            }
+
+            fn get_pressure_loss(&mut self) -> Pressure {
+
+
+                // get pipe parameters and flow conditions
+                // from the get methods
+                let form_loss_k = self.get_pipe_form_loss_k();
+                let absolute_roughness = self.get_pipe_absolute_roughness();
+                let cross_sectional_area = self.get_cross_sectional_area();
+                let mass_flowrate = self.mass_flowrate;
+                let hydraulic_diameter = self.get_hydraulic_diameter();
+                let viscosity = self.get_fluid_viscosity();
+                let density = self.get_fluid_density();
+                let pipe_legnth = self.get_component_length();
+
+
+                // calculate the pressure loss
+
+                let pressure_loss = 
+                    self.pipe_calc_pressure_loss(
+                        mass_flowrate,
+                        cross_sectional_area,
+                        hydraulic_diameter,
+                        viscosity,
+                        density,
+                        pipe_legnth,
+                        absolute_roughness,
+                        form_loss_k);
+
+                // you can return the pressure loss straightaway
+                // or set the struct variable first and then
+                // return it
+
+                self.pressure_loss = pressure_loss;
+
+                return self.pressure_loss;
+           }
+        }
+
+        // lastly we implement the constructor,
+        // since we know the pipe has water flowing through,
+        // density and viscosity are fixed
+        //
+        // Everything else though, has to be set by the user
+        // mass flowrate and pressure loss can be
+        // set to 0 by default
+        // 
+        // internal pressure source is also set to 0,
+        // it is up to the user to set internal pressure source
+        impl WaterPipe {
+            fn new(form_loss_K: f64,
+                   absolute_roughness: Length,
+                   incline_angle: Angle,
+                   pipe_length: Length,
+                   hydraulic_diameter: Length) -> Self {
+
+                return Self {
+                    mass_flowrate: MassRate::new::<kilogram_per_second>(0.0),
+                    pressure_loss: Pressure::new::<pascal>(0.0),
+                    dynamic_viscosity: DynamicViscosity::new::<poise>(0.01),
+                    density: MassDensity::new::<kilogram_per_cubic_meter>(1000.0),
+                    form_loss_k: form_loss_k,
+                    absolute_roughness: absolute_roughness,
+                    incline_angle: Angle,
+                    internal_pressure_source: Pressure::new::<pascal>(0.0),
+                    pipe_length: Length,
+                    hydraulic_diameter: Length,
+                };
+            }
+        }
+
+        // and just like that we've finished defining our water pipe
+    }
 
 }
 

@@ -11,6 +11,10 @@ use uom::si::acceleration::meter_per_second_squared;
 /// with some internal pressure source (eg. pump)
 pub trait FluidPipeCalcPressureChange : FluidPipeCalcPressureLoss{
 
+    /// gets pressure change for a pipe given
+    /// the set parameters
+    fn get_pressure_change(&mut self) -> Pressure;
+
     /// gets the angle of incline for a pipe
     fn get_pipe_incline_angle(&mut self) -> Angle;
 
