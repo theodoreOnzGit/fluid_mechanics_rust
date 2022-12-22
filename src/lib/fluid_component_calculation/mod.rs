@@ -77,6 +77,7 @@ pub mod fluid_component_tests {
     use uom::si::mass_rate::kilogram_per_second;
     use uom::si::pressure::{pascal, kilopascal};
     use uom::si::dynamic_viscosity::poise;
+    use uom::si::angle::degree;
     
     /// Example 1: 
     ///
@@ -371,6 +372,29 @@ pub mod fluid_component_tests {
                 self.internal_pressure_source = internal_pressure_source;
             }
 
+            fn set_pressure_change(&mut self, pressure_change: Pressure){
+                // we use the following formula
+                // pressure_change = -pressure_loss + hydrostatic_pressure +
+                // internal pressure source
+                //
+                // by setting pressure change, we are indirectly setting
+                // pressure loss
+                //
+
+                let pipe_length = self.get_component_length();
+                let incline_angle = self.get_pipe_incline_angle();
+                let fluid_density = self.get_fluid_density();
+
+                let pressure_loss = -pressure_change +
+                    self.get_hydrostatic_pressure_change(
+                        pipe_length,
+                        incline_angle,
+                        fluid_density) +
+                    self.get_pipe_internal_pressure_source();
+
+                self.pressure_loss = pressure_loss;
+            }
+
             fn get_pressure_change(&mut self) -> Pressure {
                 
                 let form_loss_k = self.get_pipe_form_loss_k();
@@ -384,8 +408,9 @@ pub mod fluid_component_tests {
                 let internal_pressure_source = self.get_pipe_internal_pressure_source();
                 let mass_flowrate = self.mass_flowrate;
 
+
                 // return the pressure change value
-                self.pipe_calc_pressure_change(
+                let pressure_change = self.pipe_calc_pressure_change(
                     mass_flowrate,
                     cross_sectional_area,
                     hydraulic_diameter,
@@ -395,7 +420,11 @@ pub mod fluid_component_tests {
                     absolute_roughness,
                     form_loss_k,
                     incline_angle,
-                    internal_pressure_source)
+                    internal_pressure_source);
+
+                self.set_pressure_change(pressure_change);
+
+                return pressure_change;
                 
             }
 
@@ -456,9 +485,17 @@ pub mod fluid_component_tests {
                 let incline_angle = self.get_pipe_incline_angle();
                 let internal_pressure_source = self.get_pipe_internal_pressure_source();
 
+                let pressure_change = 
+                    -pressure_loss 
+                    + internal_pressure_source 
+                    + self.get_hydrostatic_pressure_change(
+                        pipe_length,
+                        incline_angle,
+                        fluid_density);
+
                 let mass_flowrate = 
                     self.pipe_calculate_mass_flowrate_from_pressure_change(
-                        pressure_loss, 
+                        pressure_change, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
                         fluid_viscosity, 
@@ -550,6 +587,53 @@ pub mod fluid_component_tests {
         }
 
         // and just like that we've finished defining our water pipe
+        //
+        // pipe shall be 1m long, angled 25 degrees
+        // 1 inch diameter
+        // form loss is 0.5
+        // copper, 0.002 mm roughness
+
+        let mut water_pipe_1 = WaterPipe::new(
+            0.5, // form losses
+            Length::new::<millimeter>(0.002), // surface roughness
+            Angle::new::<degree>(25.0), // incline angle
+            Length::new::<meter>(1.0), // pipe length
+            Length::new::<inch>(1.0)); // pipe inner diameter
+
+
+        // let's set mass flowrate at 0.5 kg/s
+        water_pipe_1.set_mass_flowrate(
+            MassRate::new::<kilogram_per_second>(0.5)
+            );
+
+        // find the pressure change
+
+        let pressure_change = water_pipe_1.get_pressure_change();
+
+        // pressure change is -4861 Pa
+        approx::assert_relative_eq!(
+            pressure_change.value,
+            -4861_f64,
+            max_relative = 0.01 );
+
+        // likewise when i get my mass flowrate from pressure change
+        // i should get the same value
+
+
+
+        let mass_flowrate = 
+            water_pipe_1.get_mass_flowrate();
+
+        water_pipe_1.set_pressure_change(
+            Pressure::new::<pascal>(-4861_f64));
+
+        approx::assert_relative_eq!(
+            mass_flowrate.value,
+            0.5,
+            max_relative = 0.01 );
+
+        // and that concludes the example! You can now set 
+        // the water pipe to anything you want.
 
 
     }

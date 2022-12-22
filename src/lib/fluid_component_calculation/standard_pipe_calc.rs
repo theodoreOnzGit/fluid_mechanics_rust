@@ -15,6 +15,9 @@ pub trait FluidPipeCalcPressureChange : FluidPipeCalcPressureLoss{
     /// the set parameters
     fn get_pressure_change(&mut self) -> Pressure;
 
+    /// sets the pressure change for the given pipe
+    fn set_pressure_change(&mut self, pressure_change: Pressure);
+
     /// gets the angle of incline for a pipe
     fn get_pipe_incline_angle(&mut self) -> Angle;
 
