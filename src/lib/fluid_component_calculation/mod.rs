@@ -528,7 +528,7 @@ pub mod fluid_component_tests {
         // internal pressure source is also set to 0,
         // it is up to the user to set internal pressure source
         impl WaterPipe {
-            fn new(form_loss_K: f64,
+            fn new(form_loss_k: f64,
                    absolute_roughness: Length,
                    incline_angle: Angle,
                    pipe_length: Length,
@@ -541,15 +541,17 @@ pub mod fluid_component_tests {
                     density: MassDensity::new::<kilogram_per_cubic_meter>(1000.0),
                     form_loss_k: form_loss_k,
                     absolute_roughness: absolute_roughness,
-                    incline_angle: Angle,
+                    incline_angle: incline_angle,
                     internal_pressure_source: Pressure::new::<pascal>(0.0),
-                    pipe_length: Length,
-                    hydraulic_diameter: Length,
+                    pipe_length: pipe_length,
+                    hydraulic_diameter: hydraulic_diameter,
                 };
             }
         }
 
         // and just like that we've finished defining our water pipe
+
+
     }
 
 }
