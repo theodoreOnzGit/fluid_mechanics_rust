@@ -13,6 +13,7 @@ use uom::si::acceleration::meter_per_second_squared;
 /// custom form loss correlation
 pub trait FluidCustomComponentCalcPressureLoss {
 
+
     /// calculates pressure loss for a component given 
     /// pipe parameter inputs and
     /// custom darcy friction factor and custom form loss
@@ -24,7 +25,7 @@ pub trait FluidCustomComponentCalcPressureLoss {
         hydraulic_diameter: Length,
         fluid_viscosity: DynamicViscosity,
         fluid_density: MassDensity,
-        pipe_length: Length,
+        component_length: Length,
         absolute_roughness: Length,
         custom_darcy: &dyn Fn(f64, f64) -> f64,
         custom_k: &dyn Fn(f64) -> f64) -> Pressure {
@@ -50,7 +51,7 @@ pub trait FluidCustomComponentCalcPressureLoss {
                 roughness_ratio_quantity_object);
 
         let length_to_diameter_quantity_object = 
-            pipe_length/
+            component_length/
             hydraulic_diameter;
 
         let length_to_diameter = 
@@ -81,6 +82,59 @@ pub trait FluidCustomComponentCalcPressureLoss {
         return pressure_loss;
     }
 
+    /// calculates mass flowrate using input parameters
+    fn fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
+        &mut self,
+        pressure_loss: Pressure,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        component_length: Length,
+        absolute_roughness: Length,
+        custom_darcy: &dyn Fn(f64, f64) -> f64,
+        custom_k: &dyn Fn(f64) -> f64) -> MassRate {
+
+
+        // first let's get our relevant ratios:
+        let roughness_ratio_quantity = absolute_roughness/hydraulic_diameter;
+
+        let roughness_ratio = 
+            dimensionalisation::convert_dimensionless_number_to_float(
+                roughness_ratio_quantity);
+
+        let length_to_diameter_ratio 
+            = dimensionalisation::convert_dimensionless_number_to_float(
+                component_length/hydraulic_diameter);
+
+        // then get Bejan number:
+        let bejan_number_calculated_using_diameter = 
+            dimensionalisation::CalcBejan::from_pressure(
+            pressure_loss, 
+            hydraulic_diameter, 
+            fluid_density, 
+            fluid_viscosity);
+
+        // let's get Re
+        let reynolds_number_calculated_using_diameter = 
+            custom_fldk::getRe(custom_darcy,
+                               bejan_number_calculated_using_diameter,
+                               roughness_ratio,
+                               length_to_diameter_ratio,
+                               custom_k);
+
+
+        // and finally return mass flowrate
+        //
+        let fluid_mass_flowrate = 
+            dimensionalisation::CalcReynolds::to_mass_rate(
+                cross_sectional_area,
+                reynolds_number_calculated_using_diameter,
+                hydraulic_diameter,
+                fluid_viscosity);
+
+        return fluid_mass_flowrate;
+    }
 }
 
 

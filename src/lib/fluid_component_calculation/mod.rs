@@ -160,6 +160,8 @@ pub trait FluidComponent {
 
 
 
+
+
 #[cfg(test)]
 pub mod fluid_component_tests_and_examples {
     use std::f64::consts::PI;
@@ -167,6 +169,7 @@ pub mod fluid_component_tests_and_examples {
     use crate::fluid_component_calculation::FluidComponent;
     use crate::fluid_component_calculation::standard_pipe_calc
         ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
+    use crate::therminol_component::dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
     use uom::si::dynamic_viscosity::millipascal_second;
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
