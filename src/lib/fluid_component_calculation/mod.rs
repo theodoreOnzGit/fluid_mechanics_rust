@@ -60,10 +60,68 @@ pub trait FluidComponent {
 
     /// gets pressure change for a pipe given
     /// the set parameters
-    fn get_pressure_change(&mut self) -> Pressure;
+    fn get_pressure_change(&mut self) -> Pressure {
+
+        // the default implementation is this:
+        // pressure_change = -pressure_loss + hydrostatic_pressure_increase 
+        // + pressure source
+        //
+
+
+        let pressure_loss = self.get_pressure_loss();
+
+        // this is the second component: hydrostatic pressure
+
+        let component_length = self.get_component_length();
+        let incline_angle = self.get_incline_angle();
+        let fluid_density = self.get_fluid_density();
+
+        let hydrostatic_pressure_increase = 
+            self.get_hydrostatic_pressure_change(
+                component_length,
+                incline_angle,
+                fluid_density);
+
+        // third component is pressure source
+
+        let pressure_source = self.get_internal_pressure_source();
+
+        return -pressure_loss + hydrostatic_pressure_increase + 
+            pressure_source;
+    }
 
     /// sets the pressure change for the given pipe
-    fn set_pressure_change(&mut self, pressure_change: Pressure);
+    fn set_pressure_change(&mut self, pressure_change: Pressure){
+
+        // the default implementation is this:
+        // pressure_change = -pressure_loss + hydrostatic_pressure_increase 
+        // + pressure source
+        //
+
+        let component_length = self.get_component_length();
+        let incline_angle = self.get_incline_angle();
+        let fluid_density = self.get_fluid_density();
+
+        let hydrostatic_pressure_increase = 
+            self.get_hydrostatic_pressure_change(
+                component_length,
+                incline_angle,
+                fluid_density);
+
+        // third component is pressure source
+        // for any internal pressure source or external, eg pumps
+
+        let pressure_source = self.get_internal_pressure_source();
+
+        // we then get the pressure loss term
+        //
+
+        let pressure_loss = -pressure_change + hydrostatic_pressure_increase +
+            pressure_source;
+
+        // now set the pressure loss term
+        self.set_pressure_loss(pressure_loss);
+    }
     
 
     /// gets the angle of incline for a pipe
