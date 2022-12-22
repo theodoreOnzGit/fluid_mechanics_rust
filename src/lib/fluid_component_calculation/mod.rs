@@ -118,6 +118,8 @@ pub trait FluidComponent {
 
         let pressure_loss = -pressure_change + hydrostatic_pressure_increase +
             pressure_source;
+
+        self.set_pressure_loss(pressure_loss);
     }
     
 
