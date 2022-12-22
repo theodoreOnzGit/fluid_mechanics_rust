@@ -118,9 +118,6 @@ pub trait FluidComponent {
 
         let pressure_loss = -pressure_change + hydrostatic_pressure_increase +
             pressure_source;
-
-        // now set the pressure loss term
-        self.set_pressure_loss(pressure_loss);
     }
     
 
@@ -149,11 +146,11 @@ pub trait FluidComponent {
         return hydrostatic_pressure_increase;
     }
 
-    /// gets the pressure source for a pipe
+    /// gets the pressure source for a 
     fn get_internal_pressure_source(&mut self) -> Pressure;
 
     /// sets the internal pressure source for a pipe
-    fn set_pipe_internal_pressure_source(
+    fn set_internal_pressure_source(
         &mut self,
         internal_pressure: Pressure);
 
@@ -362,7 +359,7 @@ pub mod fluid_component_tests_and_examples {
                 return Pressure::new::<pascal>(0.0);
             }
 
-            fn set_pipe_internal_pressure_source(
+            fn set_internal_pressure_source(
                 &mut self, 
                 _internal_pressure_source: Pressure
                 ){
@@ -518,7 +515,7 @@ pub mod fluid_component_tests_and_examples {
                 return self.internal_pressure_source;
             }
 
-            fn set_pipe_internal_pressure_source(
+            fn set_internal_pressure_source(
                 &mut self,
                 internal_pressure_source: Pressure){
                 self.internal_pressure_source = internal_pressure_source;
