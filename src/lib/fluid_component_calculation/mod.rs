@@ -167,9 +167,12 @@ pub mod fluid_component_tests_and_examples {
     use std::f64::consts::PI;
 
     use crate::fluid_component_calculation::FluidComponent;
+    use crate::fluid_component_calculation::
+        custom_component_calc::{FluidCustomComponentCalcPressureChange, FluidCustomComponentCalcPressureLoss};
     use crate::fluid_component_calculation::standard_pipe_calc
         ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
-    use crate::therminol_component::dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
+    use crate::therminol_component::
+        dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
     use uom::si::dynamic_viscosity::millipascal_second;
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
@@ -790,5 +793,78 @@ pub mod fluid_component_tests_and_examples {
 
     }
 
+    /// Example 3,
+    /// 
+    /// suppose now we have a coriolis flowmeter
+    /// with a custom friction factor correlation
+    ///
+    /// (f_darcy L/D + K) = 18 + 93000/Re^1.35
+    ///
+    /// we shall use water to push flow through this coriolis flowmeter
+    #[test]
+    pub fn coriolis_flowmeter_empirical_custom_component_example_3(){
+
+        struct CoriolisFlowmeter {
+
+            pressure_loss: Pressure,
+            mass_flowrate: MassRate,
+            internal_pressure: Pressure,
+            hydraulic_diameter: Length,
+            incline_angle: Angle,
+
+        }
+
+        impl FluidCustomComponentCalcPressureChange for 
+            CoriolisFlowmeter {
+
+            }
+
+        impl FluidCustomComponentCalcPressureLoss for CoriolisFlowmeter {
+
+        }
+
+        impl FluidComponent for CoriolisFlowmeter {
+            fn set_internal_pressure_source(
+                &mut self,
+                internal_pressure: Pressure) {
+
+                self.internal_pressure = internal_pressure;
+            }
+
+
+            fn get_internal_pressure_source(
+                &mut self) -> Pressure{
+                return self.internal_pressure;
+            }
+
+            fn set_mass_flowrate(
+                &mut self,
+                mass_flowrate: MassRate){
+
+                self.mass_flowrate = mass_flowrate;
+            }
+
+            fn set_pressure_loss(
+                &mut self,
+                pressure_loss: Pressure){
+                self.pressure_loss = pressure_loss;
+            }
+
+            fn get_hydraulic_diameter(&mut self) -> Length{
+
+                return self.hydraulic_diameter;
+
+            }
+
+            fn get_incline_angle(&mut self) -> Angle {
+
+                return self.incline_angle;
+
+            }
+        }
+
+
+
+    }
 }
 

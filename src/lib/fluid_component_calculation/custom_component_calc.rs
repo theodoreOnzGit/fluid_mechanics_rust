@@ -8,9 +8,17 @@ use uom::si::acceleration::meter_per_second_squared;
 
 use super::FluidComponent;
 
+/// Contains default implementations for calculating
+/// mass flowrate from pressure change and vice versea
+///
+/// refer to examples in fluid_component_calculation
+/// to see how its used
 pub trait FluidCustomComponentCalcPressureChange :
 FluidCustomComponentCalcPressureLoss + FluidComponent{
 
+    /// calculates the pressure change for a custom
+    /// fluid component given a mass flowrate
+    /// and other fluid component parameters
     fn fluid_custom_component_calc_pressure_change(
         &mut self,
         fluid_mass_flowrate: MassRate,
@@ -64,6 +72,9 @@ FluidCustomComponentCalcPressureLoss + FluidComponent{
         return pressure_change;
     }
 
+    /// calculates the mass flowrate given pressure change
+    /// and other parameters of the component
+    ///
     fn fluid_custom_component_calc_mass_flowrate_from_pressure_change(
         &mut self,
         pressure_change: Pressure,
@@ -125,6 +136,30 @@ FluidCustomComponentCalcPressureLoss + FluidComponent{
 /// given a custom darcy friction factor and
 /// custom form loss correlation
 pub trait FluidCustomComponentCalcPressureLoss {
+
+    /// returns the custom darcy friction factor function
+    /// for the component
+    fn get_custom_darcy(&mut self) ->
+        &dyn Fn(f64, f64) -> f64 ;
+
+    /// returns the custom form loss factors
+    /// for the component
+    fn get_custom_k(&mut self) ->
+        &dyn Fn(f64) -> f64;
+
+    /// sets the custom darcy friction factor function
+    /// usually a function of Re and roughness ratio
+    /// for the component
+    fn set_custom_darcy(
+        &mut self,
+        custom_darcy: &dyn Fn(f64, f64) -> f64);
+
+    /// sets the custom form loss factors
+    /// for the component, usually
+    /// just a function of Re
+    fn set_custom_k(
+        &mut self,
+        custom_k: &dyn Fn(f64) -> f64);
 
 
     /// calculates pressure loss for a component given 
