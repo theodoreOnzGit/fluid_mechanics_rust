@@ -6,6 +6,48 @@ use crate::dimensionalisation;
 use uom::si::f64::*;
 use uom::si::acceleration::meter_per_second_squared;
 
+use super::FluidComponent;
+
+pub trait FluidCustomComponentCalcPressureChange :
+FluidCustomComponentCalcPressureLoss + FluidComponent{
+
+    fn fluid_custom_component_calc_pressure_change(
+        &mut self,
+        fluid_mass_flowrate: MassRate,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        component_length: Length,
+        absolute_roughness: Length,
+        incline_angle: Angle,
+        source_pressure: Pressure,
+        custom_darcy: &dyn Fn(f64, f64) -> f64,
+        custom_k: &dyn Fn(f64) -> f64) -> Pressure {
+
+        unimplemented!();
+    }
+
+    fn fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
+        &mut self,
+        pressure_loss: Pressure,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        component_length: Length,
+        absolute_roughness: Length,
+        incline_angle: Angle,
+        source_pressure: Pressure,
+        custom_darcy: &dyn Fn(f64, f64) -> f64,
+        custom_k: &dyn Fn(f64) -> f64) -> MassRate {
+
+
+        unimplemented!();
+    }
+
+}
+
 /// provides generic methods to calculate pressure
 /// loss for a custom fluid component (with flow flowing
 /// inside it)
