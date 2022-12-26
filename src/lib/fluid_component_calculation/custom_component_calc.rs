@@ -25,12 +25,48 @@ FluidCustomComponentCalcPressureLoss + FluidComponent{
         custom_darcy: &dyn Fn(f64, f64) -> f64,
         custom_k: &dyn Fn(f64) -> f64) -> Pressure {
 
-        unimplemented!();
+        // now we need to calculate a pressure loss term
+        // we use:
+        // Pressure Change = - pressure loss + hydrostatic pressure +
+        // source pressure
+        //
+        // so we just add pressure loss to both sides and subtract pressure
+        // change to both sides
+        // pressure loss  = - pressure change + hydrostatic pressure +
+        // source pressure
+        //
+
+        let pressure_loss = 
+            self.fluid_custom_component_calc_pressure_loss(
+                fluid_mass_flowrate, 
+                cross_sectional_area, 
+                hydraulic_diameter, 
+                fluid_viscosity, 
+                fluid_density, 
+                component_length, 
+                absolute_roughness, 
+                custom_darcy, 
+                custom_k);
+
+
+        let hydrostatic_pressre =
+            self.get_hydrostatic_pressure_change(
+                component_length, 
+                incline_angle, 
+                fluid_density);
+
+        let pressure_change =
+            - pressure_loss 
+            + hydrostatic_pressre 
+            + source_pressure;
+
+
+        return pressure_change;
     }
 
-    fn fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
+    fn fluid_custom_component_calc_mass_flowrate_from_pressure_change(
         &mut self,
-        pressure_loss: Pressure,
+        pressure_change: Pressure,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
         fluid_viscosity: DynamicViscosity,
@@ -42,8 +78,43 @@ FluidCustomComponentCalcPressureLoss + FluidComponent{
         custom_darcy: &dyn Fn(f64, f64) -> f64,
         custom_k: &dyn Fn(f64) -> f64) -> MassRate {
 
+        // now we need to calculate a pressure loss term
+        // we use:
+        // Pressure Change = - pressure loss + hydrostatic pressure +
+        // source pressure
+        //
+        // so we just add pressure loss to both sides and subtract pressure
+        // change to both sides
+        // pressure loss  = - pressure change + hydrostatic pressure +
+        // source pressure
 
-        unimplemented!();
+        let hydrostatic_pressure = 
+            self.get_hydrostatic_pressure_change(
+                component_length, 
+                incline_angle, 
+                fluid_density);
+
+        let pressure_loss = 
+            - pressure_change
+            + hydrostatic_pressure 
+            + source_pressure;
+
+        // once we have pressure loss
+        // we can get mass flowrate
+
+        let mass_flowrate: MassRate 
+            = self.fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
+                pressure_loss, 
+                cross_sectional_area, 
+                hydraulic_diameter, 
+                fluid_viscosity, 
+                fluid_density, 
+                component_length, 
+                absolute_roughness, 
+                custom_darcy, 
+                custom_k);
+
+        return mass_flowrate;
     }
 
 }
