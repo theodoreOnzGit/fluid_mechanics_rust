@@ -1168,17 +1168,17 @@ pub mod fluid_component_tests_and_examples {
         flowmeter_object.set_mass_flowrate(mass_flowrate);
 
         let mut pressure_change = 
-            flowmeter_object.get_pressure_loss();
+            flowmeter_object.get_pressure_change();
 
         // expected pressure change is 1430 pascals
         approx::assert_relative_eq!(
-            1430_f64,
+            -6335_f64,
             pressure_change.value,
             max_relative=0.01);
 
         // we'll now test the mass flowrate portion
 
-        pressure_change = Pressure::new::<pascal>(1430_f64);
+        pressure_change = Pressure::new::<pascal>(-6335_f64);
 
         flowmeter_object.set_pressure_change(pressure_change);
 
@@ -1188,6 +1188,28 @@ pub mod fluid_component_tests_and_examples {
         approx::assert_relative_eq!(
             0.2,
             mass_flowrate.value,
+            max_relative=0.01);
+
+        // now we can get pressure loss in both direction
+        // one should be the negative value of the other if
+        // done correctly...
+
+        flowmeter_object.set_mass_flowrate(
+            MassRate::new::<kilogram_per_second>(0.2));
+
+        let pressure_loss_positive_direction = 
+            flowmeter_object.get_pressure_loss();
+
+        flowmeter_object.set_mass_flowrate(
+            MassRate::new::<kilogram_per_second>(-0.2));
+
+        let pressure_loss_negative_direction = 
+            flowmeter_object.get_pressure_loss();
+
+
+        approx::assert_relative_eq!(
+            pressure_loss_positive_direction.value,
+            -pressure_loss_negative_direction.value,
             max_relative=0.01);
 
 
