@@ -811,6 +811,13 @@ pub mod fluid_component_tests_and_examples {
             internal_pressure: Pressure,
             hydraulic_diameter: Length,
             incline_angle: Angle,
+            component_length: Length,
+            fluid_density: MassDensity,
+            fluid_viscosity: DynamicViscosity,
+            absolute_roughness: Length,
+            custom_darcy: &dyn Fn(f64, f64) -> f64,
+            custom_k: &dyn Fn(f64) -> f64,
+
 
         }
 
@@ -859,6 +866,87 @@ pub mod fluid_component_tests_and_examples {
             fn get_incline_angle(&mut self) -> Angle {
 
                 return self.incline_angle;
+
+            }
+
+            fn get_component_length(&mut self) -> Length {
+
+                return self.component_length;
+            }
+
+            fn get_fluid_density(&mut self) -> MassDensity {
+
+                return self.fluid_density;
+                
+            }
+
+            fn get_fluid_viscosity(&mut self) -> DynamicViscosity {
+
+                return self.fluid_viscosity;
+
+            }
+
+            fn get_cross_sectional_area(&mut self) -> Area {
+
+                return self.get_hydraulic_diameter()*
+                    self.get_hydraulic_diameter()*
+                    PI/4.0_f64;
+
+            }
+
+            fn get_custom_component_absolute_roughness(&mut self) -> Length {
+
+                return self.absolute_roughness;
+
+            }
+
+            fn get_pressure_loss(&mut self) -> Pressure {
+
+                let fluid_mass_flowrate = 
+                    self.mass_flowrate;
+
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area();
+
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter();
+
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity();
+
+                let fluid_density = 
+                    self.get_fluid_density();
+
+                let component_length = 
+                    self.get_component_length();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness();
+
+                let custom_darcy = 
+                    self.get_custom_darcy();
+
+                let custom_k =
+                    self.get_custom_k();
+
+                let pressure_loss =
+                    self.fluid_custom_component_calc_pressure_loss(
+                    fluid_mass_flowrate, 
+                    cross_sectional_area, 
+                    hydraulic_diameter, 
+                    fluid_viscosity, 
+                    fluid_density, 
+                    component_length, 
+                    absolute_roughness, 
+                    custom_darcy, custom_k);
+
+                self.pressure_loss = pressure_loss;
+
+                return pressure_loss;
+
+            }
+
+            fn get_mass_flowrate(&mut self) -> MassRate {
 
             }
         }

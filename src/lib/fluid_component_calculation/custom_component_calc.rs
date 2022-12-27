@@ -162,6 +162,11 @@ pub trait FluidCustomComponentCalcPressureLoss {
         custom_k: &dyn Fn(f64) -> f64);
 
 
+    /// gets the component absolute roughness for
+    /// the component in question
+    fn get_custom_component_absolute_roughness(
+        &mut self) -> Length;
+
     /// calculates pressure loss for a component given 
     /// pipe parameter inputs and
     /// custom darcy friction factor and custom form loss
