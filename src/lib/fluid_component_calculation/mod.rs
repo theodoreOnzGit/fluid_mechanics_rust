@@ -804,7 +804,7 @@ pub mod fluid_component_tests_and_examples {
     #[test]
     pub fn coriolis_flowmeter_empirical_custom_component_example_3(){
 
-        struct CoriolisFlowmeter {
+        struct CoriolisFlowmeter<'coriolis_lifetime> {
 
             pressure_loss: Pressure,
             mass_flowrate: MassRate,
@@ -815,22 +815,59 @@ pub mod fluid_component_tests_and_examples {
             fluid_density: MassDensity,
             fluid_viscosity: DynamicViscosity,
             absolute_roughness: Length,
-            custom_darcy: &dyn Fn(f64, f64) -> f64,
-            custom_k: &dyn Fn(f64) -> f64,
-
+            custom_darcy: &'coriolis_lifetime dyn Fn(f64, f64) -> f64,
+            custom_k: &'coriolis_lifetime dyn Fn(f64) -> f64,
 
         }
 
-        impl FluidCustomComponentCalcPressureChange for 
-            CoriolisFlowmeter {
+        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureChange for 
+            CoriolisFlowmeter <'coriolis_lifetime> {
 
             }
 
-        impl FluidCustomComponentCalcPressureLoss for CoriolisFlowmeter {
+        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureLoss for 
+            CoriolisFlowmeter <'coriolis_lifetime>{
+
+            fn get_custom_component_absolute_roughness(
+                &mut self) -> Length {
+
+                return self.absolute_roughness;
+            }
+
+            fn get_custom_darcy(&mut self) 
+                -> &dyn Fn(f64, f64) -> f64 {
+
+                    return self.custom_darcy.clone();
+
+            }
+
+            fn get_custom_k(&mut self) 
+                -> &dyn Fn(f64) -> f64 {
+
+                    return self.custom_k.clone();
+
+            }
+
+            fn set_custom_k(
+                &mut self,
+                custom_k: &dyn Fn(f64) -> f64){
+
+                self.custom_k = custom_k;
+
+            }
+
+            fn set_custom_darcy(
+                &mut self,
+                custom_darcy: &dyn Fn(f64,f64) -> f64){
+
+                self.custom_darcy = custom_darcy;
+            }
+
 
         }
 
-        impl FluidComponent for CoriolisFlowmeter {
+        impl <'coriolis_lifetime> FluidComponent for 
+            CoriolisFlowmeter <'coriolis_lifetime>{
             fn set_internal_pressure_source(
                 &mut self,
                 internal_pressure: Pressure) {
@@ -894,11 +931,6 @@ pub mod fluid_component_tests_and_examples {
 
             }
 
-            fn get_custom_component_absolute_roughness(&mut self) -> Length {
-
-                return self.absolute_roughness;
-
-            }
 
             fn get_pressure_loss(&mut self) -> Pressure {
 
@@ -989,7 +1021,51 @@ pub mod fluid_component_tests_and_examples {
                     + hydrostatic_pressure_change
                     + internal_pressure_source;
 
-                self.fluid_custom_component_calc_mass_flowrate_from_pressure_change(pressure_change, cross_sectional_area, hydraulic_diameter, fluid_viscosity, fluid_density, component_length, absolute_roughness, incline_angle, source_pressure, pressure_change, pressure_change)
+                let custom_darcy = 
+                    self.get_custom_darcy();
+
+                let custom_k =
+                    self.get_custom_k();
+
+
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area();
+
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter();
+
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity();
+
+                let fluid_density = 
+                    self.get_fluid_density();
+
+                let component_length = 
+                    self.get_component_length();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness();
+
+                let source_pressure = 
+                    self.get_internal_pressure_source();
+
+                let mass_flowrate =
+                    self.fluid_custom_component_calc_mass_flowrate_from_pressure_change(
+                    pressure_change, 
+                    cross_sectional_area, 
+                    hydraulic_diameter, 
+                    fluid_viscosity, 
+                    fluid_density, 
+                    component_length, 
+                    absolute_roughness, 
+                    incline_angle, 
+                    source_pressure, 
+                    custom_darcy, 
+                    custom_k);
+
+                self.mass_flowrate = mass_flowrate;
+
+                return mass_flowrate;
             }
         }
 
