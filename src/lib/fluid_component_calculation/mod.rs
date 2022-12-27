@@ -1115,15 +1115,40 @@ pub mod fluid_component_tests_and_examples {
         let absolute_roughness = 
             Length::new::<millimeter>(0.001);
 
-        fn custom_darcy(reynolds_number: f64,
-                        roughness_ratio:f64) -> f64 {
+        fn custom_darcy(_reynolds_number: f64,
+                        _roughness_ratio:f64) -> f64 {
 
             return 0.0;
         }
 
         fn custom_k(reynolds_number: f64) -> f64 {
 
-            return 5.0;
+            // the correlation is:
+            // 18.0 + 93000/Re^1.35
+            //
+
+            if reynolds_number > 0.0 {
+
+                return 18.0 + 93000_f64/reynolds_number.powf(1.35);
+            }
+
+            if reynolds_number < 0.0 {
+
+                let abs_reynolds_number = reynolds_number.abs();
+                let fldk = 18.0 + 93000_f64/abs_reynolds_number.powf(1.35);
+
+                return -fldk;
+
+            }
+
+            // return no fldk = 0 for no flow, doesn't really matter anyway
+            // because Be_D = 0.5 fldk * Re^2
+            // Re = 0
+            // and we expect Be_D = 0
+            // so fldk can be 0 and it still makes physical sense
+            // ie Be_D = 0 when Re = 0
+            return 0.0;
+
         }
 
         let mut flowmeter_object = 
@@ -1135,6 +1160,35 @@ pub mod fluid_component_tests_and_examples {
                 &custom_darcy, 
                 &custom_k);
 
+        
+        // set mass flowrate at 0.2 kg/s
+
+        let mut mass_flowrate = MassRate::new::<kilogram_per_second>(0.2);
+
+        flowmeter_object.set_mass_flowrate(mass_flowrate);
+
+        let mut pressure_change = 
+            flowmeter_object.get_pressure_loss();
+
+        // expected pressure change is 1430 pascals
+        approx::assert_relative_eq!(
+            1430_f64,
+            pressure_change.value,
+            max_relative=0.01);
+
+        // we'll now test the mass flowrate portion
+
+        pressure_change = Pressure::new::<pascal>(1430_f64);
+
+        flowmeter_object.set_pressure_change(pressure_change);
+
+        mass_flowrate = flowmeter_object.get_mass_flowrate();
+
+
+        approx::assert_relative_eq!(
+            0.2,
+            mass_flowrate.value,
+            max_relative=0.01);
 
 
     }
