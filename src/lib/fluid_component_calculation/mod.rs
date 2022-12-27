@@ -824,7 +824,7 @@ pub mod fluid_component_tests_and_examples {
             <'coriolis_lifetime> for 
             CoriolisFlowmeter <'coriolis_lifetime> {
 
-            }
+        }
 
         impl <'coriolis_lifetime> FluidCustomComponentCalcPressureLoss
             <'coriolis_lifetime> for 
@@ -957,11 +957,12 @@ pub mod fluid_component_tests_and_examples {
                 let absolute_roughness = 
                     self.get_custom_component_absolute_roughness();
 
-                let custom_darcy = 
-                    self.get_custom_darcy();
+                // i need to make some immutable borrows here...
+                let custom_darcy: &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
 
-                let custom_k =
-                    self.get_custom_k();
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
 
                 let pressure_loss =
                     self.fluid_custom_component_calc_pressure_loss(
@@ -1023,11 +1024,11 @@ pub mod fluid_component_tests_and_examples {
                     + hydrostatic_pressure_change
                     + internal_pressure_source;
 
-                let custom_darcy = 
-                    self.get_custom_darcy();
+                let custom_darcy : &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
 
-                let custom_k =
-                    self.get_custom_k();
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
 
 
                 let cross_sectional_area = 
