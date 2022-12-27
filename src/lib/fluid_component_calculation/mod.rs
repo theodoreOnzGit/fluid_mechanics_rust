@@ -173,13 +173,12 @@ pub mod fluid_component_tests_and_examples {
         ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
     use crate::therminol_component::
         dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
-    use uom::si::dynamic_viscosity::millipascal_second;
+    use uom::si::dynamic_viscosity::{millipascal_second, pascal_second,poise};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
     use uom::si::mass_density::kilogram_per_cubic_meter;
     use uom::si::mass_rate::kilogram_per_second;
     use uom::si::pressure::{pascal, kilopascal};
-    use uom::si::dynamic_viscosity::poise;
     use uom::si::angle::degree;
     
     /// Example 1: 
@@ -801,6 +800,9 @@ pub mod fluid_component_tests_and_examples {
     /// (f_darcy L/D + K) = 18 + 93000/Re^1.35
     ///
     /// we shall use water to push flow through this coriolis flowmeter
+    ///
+    /// also, the programming is rather tedious
+    /// because of lifetimes, but this is one example of how it can be done
     #[test]
     pub fn coriolis_flowmeter_empirical_custom_component_example_3(){
 
@@ -1071,6 +1073,67 @@ pub mod fluid_component_tests_and_examples {
                 return mass_flowrate;
             }
         }
+
+        impl <'coriolis_lifetime> CoriolisFlowmeter <'coriolis_lifetime> {
+
+            fn new(hydraulic_diameter: Length,
+                   incline_angle: Angle,
+                   component_length: Length,
+                   absolute_roughness: Length,
+                   custom_darcy: &'coriolis_lifetime dyn Fn(f64, f64) -> f64,
+                   custom_k: &'coriolis_lifetime dyn Fn(f64) -> f64 ) -> Self {
+
+                // by default, i set pressure loss and mass flowrate to 0 
+                // internal pressure also set to 0
+                return Self { 
+                    pressure_loss: Pressure::new::<pascal>(0.0), 
+                    mass_flowrate: MassRate::new::<kilogram_per_second>(0.0), 
+                    internal_pressure: Pressure::new::<pascal>(0.0),
+                    hydraulic_diameter: hydraulic_diameter, 
+                    incline_angle: incline_angle, 
+                    component_length: component_length, 
+                    fluid_density: MassDensity::new::<kilogram_per_cubic_meter>(1000.0), 
+                    fluid_viscosity: DynamicViscosity::new::<poise>(0.01),
+                    absolute_roughness: absolute_roughness,
+                    custom_darcy: custom_darcy, 
+                    custom_k: custom_k,
+                }
+            }
+        }
+
+        // now we have defined our coriolis flowmeter with water, we can start!
+
+        let hydraulic_diameter = 
+            Length::new::<inch>(1.0);
+
+        let incline_angle = 
+            Angle::new::<degree>(90.0);
+
+        let component_length = 
+            Length::new::<meter>(0.5);
+
+        let absolute_roughness = 
+            Length::new::<millimeter>(0.001);
+
+        fn custom_darcy(reynolds_number: f64,
+                        roughness_ratio:f64) -> f64 {
+
+            return 0.0;
+        }
+
+        fn custom_k(reynolds_number: f64) -> f64 {
+
+            return 5.0;
+        }
+
+        let mut flowmeter_object = 
+            CoriolisFlowmeter::new(
+                hydraulic_diameter, 
+                incline_angle, 
+                component_length, 
+                absolute_roughness, 
+                &custom_darcy, 
+                &custom_k);
 
 
 
