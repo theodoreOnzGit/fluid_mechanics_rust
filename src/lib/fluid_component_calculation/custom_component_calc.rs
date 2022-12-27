@@ -13,8 +13,8 @@ use super::FluidComponent;
 ///
 /// refer to examples in fluid_component_calculation
 /// to see how its used
-pub trait FluidCustomComponentCalcPressureChange :
-FluidCustomComponentCalcPressureLoss + FluidComponent{
+pub trait FluidCustomComponentCalcPressureChange<'trait_lifetime> :
+FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
 
     /// calculates the pressure change for a custom
     /// fluid component given a mass flowrate
@@ -135,7 +135,7 @@ FluidCustomComponentCalcPressureLoss + FluidComponent{
 /// inside it)
 /// given a custom darcy friction factor and
 /// custom form loss correlation
-pub trait FluidCustomComponentCalcPressureLoss {
+pub trait FluidCustomComponentCalcPressureLoss<'trait_lifetime> {
 
     /// returns the custom darcy friction factor function
     /// for the component
@@ -152,14 +152,14 @@ pub trait FluidCustomComponentCalcPressureLoss {
     /// for the component
     fn set_custom_darcy(
         &mut self,
-        custom_darcy: &dyn Fn(f64, f64) -> f64);
+        custom_darcy: &'trait_lifetime dyn Fn(f64, f64) -> f64);
 
     /// sets the custom form loss factors
     /// for the component, usually
     /// just a function of Re
     fn set_custom_k(
         &mut self,
-        custom_k: &dyn Fn(f64) -> f64);
+        custom_k: &'trait_lifetime dyn Fn(f64) -> f64);
 
 
     /// gets the component absolute roughness for

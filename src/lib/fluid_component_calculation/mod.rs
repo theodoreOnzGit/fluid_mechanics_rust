@@ -820,12 +820,14 @@ pub mod fluid_component_tests_and_examples {
 
         }
 
-        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureChange for 
+        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureChange
+            <'coriolis_lifetime> for 
             CoriolisFlowmeter <'coriolis_lifetime> {
 
             }
 
-        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureLoss for 
+        impl <'coriolis_lifetime> FluidCustomComponentCalcPressureLoss
+            <'coriolis_lifetime> for 
             CoriolisFlowmeter <'coriolis_lifetime>{
 
             fn get_custom_component_absolute_roughness(
@@ -850,7 +852,7 @@ pub mod fluid_component_tests_and_examples {
 
             fn set_custom_k(
                 &mut self,
-                custom_k: &dyn Fn(f64) -> f64){
+                custom_k: &'coriolis_lifetime dyn Fn(f64) -> f64){
 
                 self.custom_k = custom_k;
 
@@ -858,7 +860,7 @@ pub mod fluid_component_tests_and_examples {
 
             fn set_custom_darcy(
                 &mut self,
-                custom_darcy: &dyn Fn(f64,f64) -> f64){
+                custom_darcy: &'coriolis_lifetime dyn Fn(f64,f64) -> f64){
 
                 self.custom_darcy = custom_darcy;
             }
