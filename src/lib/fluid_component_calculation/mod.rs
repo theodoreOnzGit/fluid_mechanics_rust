@@ -1170,7 +1170,9 @@ pub mod fluid_component_tests_and_examples {
         let mut pressure_change = 
             flowmeter_object.get_pressure_change();
 
-        // expected pressure change is 1430 pascals
+        // expected pressure loss is 1430 pascals
+        // expected pressure change is -6335 pascals
+        // becuase of elevation
         approx::assert_relative_eq!(
             -6335_f64,
             pressure_change.value,
@@ -1206,6 +1208,10 @@ pub mod fluid_component_tests_and_examples {
         let pressure_loss_negative_direction = 
             flowmeter_object.get_pressure_loss();
 
+        approx::assert_relative_eq!(
+            pressure_loss_positive_direction.value,
+            1430_f64,
+            max_relative=0.01);
 
         approx::assert_relative_eq!(
             pressure_loss_positive_direction.value,
