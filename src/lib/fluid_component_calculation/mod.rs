@@ -948,6 +948,48 @@ pub mod fluid_component_tests_and_examples {
 
             fn get_mass_flowrate(&mut self) -> MassRate {
 
+                //i'll have to get the pressure change
+                //
+                // pressure_change = 
+                // - pressure_change
+                // + hydrostatic pressure change
+                // + internal pressure source
+                //
+                
+                // internal pressure source
+                let internal_pressure_source = 
+                    self.get_internal_pressure_source();
+
+                // hydrostatic pressure
+                let component_length =
+                    self.get_component_length();
+
+                let incline_angle = 
+                    self.get_incline_angle();
+
+                let fluid_density =
+                    self.get_fluid_density();
+
+                let hydrostatic_pressure_change =
+                    self.get_hydrostatic_pressure_change(
+                        component_length, 
+                        incline_angle, 
+                        fluid_density);
+
+                // pressure_loss term
+                //
+                //
+                let pressure_loss = 
+                    self.get_pressure_loss();
+
+                // now we get pressure change
+
+                let pressure_change =
+                    - pressure_loss
+                    + hydrostatic_pressure_change
+                    + internal_pressure_source;
+
+                self.fluid_custom_component_calc_mass_flowrate_from_pressure_change(pressure_change, cross_sectional_area, hydraulic_diameter, fluid_viscosity, fluid_density, component_length, absolute_roughness, incline_angle, source_pressure, pressure_change, pressure_change)
             }
         }
 
