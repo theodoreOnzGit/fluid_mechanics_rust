@@ -18,21 +18,21 @@ pub trait FluidComponentCollection<'trait_lifetime> {
     /// returns a copy of the fluid component vector
     /// containing immutable elements
     ///
-    /// Note that 
+    /// 
     fn get_fluid_component_vector(&mut self) 
         -> Vec<&dyn FluidComponent> ;
 
     /// sets the fluid component vector to a specific value
     fn set_fluid_component_vector(
         &mut self,
-        fluid_component_vector: Vec<&dyn FluidComponent>);
+        fluid_component_vector: Vec<&mut dyn FluidComponent>);
 
 
     /// adds a fluid component to the collection
 
     fn add_fluid_component(&mut self,
-                           fluid_component_vector: Vec<&'trait_lifetime dyn FluidComponent>,
-                           fluid_component_pointer: &'trait_lifetime dyn FluidComponent){
+                           fluid_component_vector: Vec<&'trait_lifetime mut dyn FluidComponent>,
+                           fluid_component_pointer: &'trait_lifetime mut dyn FluidComponent){
 
         // first i make a mutable copy of the component vector
         let mut fluid_component_vector_mutable =
@@ -50,7 +50,7 @@ pub trait FluidComponentCollection<'trait_lifetime> {
     /// removes a fluid component by index from the collection
 
     fn remove_fluid_component(&mut self,
-                              fluid_component_vector: Vec<&'trait_lifetime dyn FluidComponent>,
+                              fluid_component_vector: Vec<&'trait_lifetime mut dyn FluidComponent>,
                               component_index: usize){
 
         // first i make a mutable copy of the component vector
@@ -94,8 +94,8 @@ pub trait FluidComponentCollection<'trait_lifetime> {
     fn update_fluid_component(
         &mut self,
         component_index: usize,
-        fluid_component_vector: Vec<&'trait_lifetime dyn FluidComponent>,
-        fluid_component_pointer: &'trait_lifetime dyn FluidComponent){
+        fluid_component_vector: Vec<&'trait_lifetime mut dyn FluidComponent>,
+        fluid_component_pointer: &'trait_lifetime mut dyn FluidComponent){
 
         // first i make a mutable copy of the component vector
         let mut fluid_component_vector_mutable =
@@ -120,6 +120,8 @@ pub trait FluidComponentCollectionSeriesMethods {
 
     /// calculates pressure change from mass flowrate
     /// for a given fluid component collection
+    /// it needs a vector of mutable references to
+    /// any object which implements FluidComponent
     fn calculate_pressure_change_from_mass_flowrate(
         mass_flowrate: MassRate,
         fluid_component_vector: Vec<&mut dyn FluidComponent>) -> Pressure {
