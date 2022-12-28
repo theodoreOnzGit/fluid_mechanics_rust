@@ -16,11 +16,19 @@ pub trait FluidComponentCollection<'trait_lifetime> {
 
 
     /// returns a copy of the fluid component vector
-    /// containing immutable elements
+    /// containing mutable elements
     ///
     /// 
-    fn get_fluid_component_vector(&mut self) 
-        -> Vec<&dyn FluidComponent> ;
+    fn get_mutable_fluid_component_vector(&mut self) 
+        -> Vec<&mut dyn FluidComponent> ;
+
+    /// returns a copy of the fluid component vector
+    /// containing immutable elements
+    ///
+    /// you'll probably need some legwork to create a fresh
+    /// object
+    fn get_immutable_fluid_component_vector(&mut self) 
+        -> Vec<&dyn FluidComponent>;
 
     /// sets the fluid component vector to a specific value
     fn set_fluid_component_vector(
@@ -79,7 +87,7 @@ pub trait FluidComponentCollection<'trait_lifetime> {
         // first let's access the fluid component
 
         let fluid_component_vector =
-            self.get_fluid_component_vector();
+            self.get_immutable_fluid_component_vector();
 
         let fluid_component_pointer = 
             fluid_component_vector[component_index];
@@ -179,4 +187,7 @@ pub trait FluidComponentCollectionSeriesMethods {
         return final_pressure_change;
 
     }
+
+
+
 }
