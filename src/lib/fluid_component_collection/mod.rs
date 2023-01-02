@@ -1,3 +1,4 @@
+use uom::num_traits::Float;
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
@@ -268,6 +269,20 @@ pub trait FluidComponentCollectionSeriesMethods {
                 zero_mass_flow, 
                 fluid_component_vector);
 
+        // now we will check if the difference is about 9 Pa
+        // from zero flow
+        // which is that manometer reading error
+        //
+        // if that is so, then return mass flowrate = 0
+
+        let error_pascals = 
+            (pressure_change - pressure_change_0kg_per_second).value
+            .abs();
+
+        if error_pascals < 10_f64 {
+            return zero_mass_flow;
+        }
+
 
         // present issue: 
         // trait objects can be moved (ie used once)
@@ -317,13 +332,69 @@ pub trait FluidComponentCollectionSeriesMethods {
                 zero_mass_flow, 
                 fluid_component_vector);
 
+        // now we want to check if pressure change is more than 1 kg/s
+        // To do so, we first check the direction of pressure change
+        // ie does increase mass give more or less pressure change
+        //
+        // to do so, i check the sign of the pressure gradient
+
+
+        let pressure_gradient_1kg = 
+            (pressure_change_1kg_per_second - 
+             pressure_change_0kg_per_second).value /
+            (one_kg_per_second_mass_flow - 
+             zero_mass_flow).value ;
+
+        // if we have a positive pressure gradient that 
+        // means pressure change increases with mass flowrate
+        // we can then test if the mass flowrate is greater than 1kg
+        // assuming more mass flow means more pressure change
+        
+        let pressure_diff_vs_1kg =
+            pressure_change_1kg_per_second - 
+            pressure_change;
+
+        let pressure_diff_less_than_1kg_bound: bool =
+            pressure_diff_vs_1kg.is_sign_positive();
+
         let minus_one_kg_per_second_mass_flow: MassRate
             = MassRate::new::<kilogram_per_second>(-1.0);
+        
+        // we also do the converse for the negative case
+        //
+        // if the pressure change magnitude is less than that for 1kg/s
 
         let pressure_change_minus_1kg_per_second: Pressure 
             = Self::calculate_pressure_change_from_mass_flowrate(
                 zero_mass_flow, 
                 fluid_component_vector);
+
+        let pressure_diff_vs_minus_1kg = 
+            pressure_change_minus_1kg_per_second - 
+            pressure_change;
+
+        let pressure_diff_magnitude_less_than_minus_1kg_bound: bool = 
+            pressure_diff_vs_minus_1kg.is_sign_negative();
+
+
+        // if the pressure diff is greater than
+        // zero, the pressure change is lower
+        // than that for 1kg per second
+
+
+        if pressure_gradient_1kg.is_sign_positive() && pressure_diff_less_than_1kg_bound{
+
+            // if pressure gradient is greater than zero
+            // and pressure diff at 1kg is more than the supplied pressure change
+            // we can be sure that pressure change is below 1kg/s
+
+
+        }
+
+
+        let mut pressure_change_error 
+            = pressure_change_1kg_per_second - pressure_change;
+
 
         unimplemented!();
     }
