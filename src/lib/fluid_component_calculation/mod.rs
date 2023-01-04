@@ -702,6 +702,19 @@ pub mod fluid_component_tests_and_examples {
             pipe_mass_flowrate.value,
             max_relative=0.01);
 
+        // last but not least, i want to check our immutable versions
+        // of these functions and see if they work well
+        //
+        // the immutable versions of the methods take in &self rather
+        // than &mut self, this enables safety in terms of parallelism
+        // and may help with the use of peroxide iteration libraries
+        // which are numerical root finders. These root finders 
+        // cannot use mutable functions
+
+
+        assert_eq!(pipe_mass_flowrate,
+                   air_pipe_1.get_mass_flowrate_from_pressure_loss_immutable(pressure_loss));
+
         return;
 
     }
@@ -1118,16 +1131,31 @@ pub mod fluid_component_tests_and_examples {
 
 
 
-        let mass_flowrate = 
-            water_pipe_1.get_mass_flowrate();
 
         water_pipe_1.set_pressure_change(
             Pressure::new::<pascal>(-4861_f64));
+
+        let mass_flowrate = 
+            water_pipe_1.get_mass_flowrate();
 
         approx::assert_relative_eq!(
             mass_flowrate.value,
             0.5,
             max_relative = 0.01 );
+
+        // last but not least, i want to check our immutable versions
+        // of these functions and see if they work well
+        //
+        // the immutable versions of the methods take in &self rather
+        // than &mut self, this enables safety in terms of parallelism
+        // and may help with the use of peroxide iteration libraries
+        // which are numerical root finders. These root finders 
+        // cannot use mutable functions
+
+
+        assert_eq!(mass_flowrate,
+                   water_pipe_1.get_mass_flowrate_from_pressure_change_immutable(
+                       Pressure::new::<pascal>(-4861_f64)));
 
         // and that concludes the example! You can now set 
         // the water pipe to anything you want.
@@ -1738,6 +1766,22 @@ pub mod fluid_component_tests_and_examples {
             mass_flowrate.value,
             max_relative=0.01);
 
+        // of these functions and see if they work well
+        //
+        // the immutable versions of the methods take in &self rather
+        // than &mut self, this enables safety in terms of parallelism
+        // and may help with the use of peroxide iteration libraries
+        // which are numerical root finders. These root finders 
+        // cannot use mutable functions
+
+
+        approx::assert_relative_eq!(
+            mass_flowrate.value,
+            flowmeter_object.
+            get_mass_flowrate_from_pressure_change_immutable(pressure_change)
+            .value,
+            max_relative=0.01);
+
         // now we can get pressure loss in both direction
         // one should be the negative value of the other if
         // done correctly...
@@ -1763,7 +1807,6 @@ pub mod fluid_component_tests_and_examples {
             pressure_loss_positive_direction.value,
             -pressure_loss_negative_direction.value,
             max_relative=0.01);
-
 
     }
 }
