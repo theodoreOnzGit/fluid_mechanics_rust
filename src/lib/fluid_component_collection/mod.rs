@@ -1,9 +1,15 @@
+use peroxide::fuga::RootFind::Newton;
 use uom::num_traits::Float;
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
 
 use crate::fluid_component_calculation::FluidComponent;
+
+
+extern crate peroxide;
+use peroxide::prelude::*;
+
 
 /// a fluid component collection,
 /// which contains fluid components stored into a vector
@@ -275,11 +281,10 @@ pub trait FluidComponentCollectionSeriesMethods {
         //
         // if that is so, then return mass flowrate = 0
 
-        let error_pascals = 
-            (pressure_change - pressure_change_0kg_per_second).value
-            .abs();
+        let pressure_loss_pascals = 
+            -(pressure_change - pressure_change_0kg_per_second).value;
 
-        if error_pascals < 10_f64 {
+        if pressure_loss_pascals.abs() < 10_f64 {
             return zero_mass_flow;
         }
 
@@ -332,68 +337,104 @@ pub trait FluidComponentCollectionSeriesMethods {
                 zero_mass_flow, 
                 fluid_component_vector);
 
-        // now we want to check if pressure change is more than 1 kg/s
-        // To do so, we first check the direction of pressure change
-        // ie does increase mass give more or less pressure change
+        let pressure_loss_1kg_per_second: Pressure = 
+            -(pressure_change_1kg_per_second - pressure_change_0kg_per_second);
+
+        // now we want to check if pressure change is positive or negative
         //
-        // to do so, i check the sign of the pressure gradient
-
-
-        let pressure_gradient_1kg = 
-            (pressure_change_1kg_per_second - 
-             pressure_change_0kg_per_second).value /
-            (one_kg_per_second_mass_flow - 
-             zero_mass_flow).value ;
-
-        // if we have a positive pressure gradient that 
-        // means pressure change increases with mass flowrate
-        // we can then test if the mass flowrate is greater than 1kg
-        // assuming more mass flow means more pressure change
-        
-        let pressure_diff_vs_1kg =
-            pressure_change_1kg_per_second - 
-            pressure_change;
-
-        let pressure_diff_less_than_1kg_bound: bool =
-            pressure_diff_vs_1kg.is_sign_positive();
-
-        let minus_one_kg_per_second_mass_flow: MassRate
-            = MassRate::new::<kilogram_per_second>(-1.0);
-        
-        // we also do the converse for the negative case
+        // to do so, i compare it against a baseline pressure change
+        // where mass flowrate is zero
+        // if pressure loss is positive, we have forward flow
+        // if pressure loss is negative, we have backflow
         //
-        // if the pressure change magnitude is less than that for 1kg/s
 
-        let pressure_change_minus_1kg_per_second: Pressure 
-            = Self::calculate_pressure_change_from_mass_flowrate(
-                zero_mass_flow, 
-                fluid_component_vector);
+        let forward_flow_true: bool =
+            pressure_loss_pascals > 0.0 ;
 
-        let pressure_diff_vs_minus_1kg = 
-            pressure_change_minus_1kg_per_second - 
-            pressure_change;
-
-        let pressure_diff_magnitude_less_than_minus_1kg_bound: bool = 
-            pressure_diff_vs_minus_1kg.is_sign_negative();
-
-
-        // if the pressure diff is greater than
-        // zero, the pressure change is lower
-        // than that for 1kg per second
+        // if the flow is forward flow, then we can check we can then check if
+        // it is in bounds, (between 0.0 kg/s and 1.0 kg/s)
+        // if out of bounds, we can panic or increase the bound
+        //
+        // to check this, i want to see if the magnitude of
+        // pressure loss at 1kg per second
+        // is greater than the magnitude of pressure loss 
+        // caused by the flow
 
 
-        if pressure_gradient_1kg.is_sign_positive() && pressure_diff_less_than_1kg_bound{
+        let positive_flow_above_1kg_per_second: bool = 
+            pressure_loss_1kg_per_second.value.abs() >
+            pressure_loss_pascals.abs();
 
-            // if pressure gradient is greater than zero
-            // and pressure diff at 1kg is more than the supplied pressure change
-            // we can be sure that pressure change is below 1kg/s
-
+        if positive_flow_above_1kg_per_second {
+            // if the flow is above 1kg/s, then temporarily
+            // panic
+            unimplemented!();
 
         }
 
+        if forward_flow_true != true {
 
-        let mut pressure_change_error 
-            = pressure_change_1kg_per_second - pressure_change;
+            // if the flow is below 0kg/s
+            // temporarily 
+            // panic
+            unimplemented!();
+
+        }
+
+        // if forward flow is true, then i want to iteratively calculate 
+        // pressure changes using mass flowrates until the limit is reached
+
+        // i'm going to use the peroxide library 
+        //
+
+        let mass_flow_from_pressure_chg_root = 
+            |mass_flow_kg_per_s: AD| -> AD {
+
+            let mass_flow_kg_per_s_double: f64 =
+                mass_flow_kg_per_s.x();
+
+            let mass_rate = 
+                MassRate::new::<kilogram_per_second>(
+                    mass_flow_kg_per_s_double);
+
+
+            let pressure_change = 
+                Self::calculate_pressure_change_from_mass_flowrate(
+                mass_rate, 
+                fluid_component_vector);
+
+            // now i've obtained the pressure change, i convert it to f64
+
+            let pressure_change_pascals_f64 = 
+                pressure_change.value;
+
+            // since we are finding root, then we must also
+            // subtract it from our pressure change value
+
+
+            let pressure_change_error: f64 =
+                pressure_change_pascals_f64 - 
+                pressure_change.value;
+
+            return AD0(pressure_change_error);
+
+        };
+
+        // note: this function mutates the value of fluid_component_vector,
+        // and is thus incompatible with peroxide libraries...
+        // I'll need to rewrite the libraries in terms of immutable functions
+        let mass_flowrate_result 
+            = newton(
+                mass_flow_from_pressure_chg_root,
+                0.5, // initial guess 0.5 kg/s
+                100,
+                1e-8);
+
+
+
+
+
+
 
 
         unimplemented!();
