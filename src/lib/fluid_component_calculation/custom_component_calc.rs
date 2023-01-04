@@ -129,6 +129,14 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
         return mass_flowrate;
     }
 
+    /// calculates hydrostatic pressure change
+    /// kind of boilerplate code but i want
+    /// to use it as an associated function rather 
+    /// than a method
+    ///
+    /// this is because i want the method in FluidComponent
+    /// to take &mut self or &self
+    /// so that we can have object safety (or something like that)
     fn get_hydrostatic_pressure_change(
         pipe_length: Length,
         incline_angle: Angle,

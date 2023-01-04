@@ -3,6 +3,7 @@
 use crate::churchill_friction_factor;
 use crate::dimensionalisation;
 use crate::fluid_component_calculation::FluidComponent;
+use uom::si::acceleration::meter_per_second_squared;
 
 use uom::si::f64::*;
 
@@ -20,7 +21,6 @@ FluidComponent{
     /// pressure_change = pressure_loss + hydrostatic_pressure + 
     /// internal_source_pressure
     fn pipe_calc_pressure_change(
-        &mut self,
         fluid_mass_flowrate: MassRate,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
@@ -37,7 +37,7 @@ FluidComponent{
         // given a flat surface
 
         let pressure_loss = 
-            self.pipe_calc_pressure_loss(
+            <Self as FluidPipeCalcPressureLoss>::pipe_calc_pressure_loss(
                 fluid_mass_flowrate,
                 cross_sectional_area,
                 hydraulic_diameter,
@@ -48,7 +48,7 @@ FluidComponent{
                 form_loss_k);
 
         let hydrostatic_pressure_increase: Pressure = 
-            self.get_hydrostatic_pressure_change(
+            <Self as FluidPipeCalcPressureChange>::get_hydrostatic_pressure_change(
                 pipe_length,
                 incline_angle,
                 fluid_density);
@@ -66,7 +66,6 @@ FluidComponent{
     /// calculates a mass flowrate given a pressure change
     /// for a fluid pipe
     fn pipe_calculate_mass_flowrate_from_pressure_change(
-        &mut self,
         pressure_change: Pressure,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
@@ -92,7 +91,7 @@ FluidComponent{
         // g is earth gravity at 9.81
         // delta H is positive upwards
         let hydrostatic_pressure_increase: Pressure =
-            self.get_hydrostatic_pressure_change(
+            <Self as FluidPipeCalcPressureChange>::get_hydrostatic_pressure_change(
                 pipe_length,
                 incline_angle,
                 fluid_density);
@@ -104,7 +103,7 @@ FluidComponent{
             source_pressure;
 
         let mass_rate = 
-            self.pipe_calc_mass_flowrate(
+            <Self as FluidPipeCalcPressureLoss>::pipe_calc_mass_flowrate(
                 pressure_loss,
                 cross_sectional_area,
                 hydraulic_diameter,
@@ -118,6 +117,29 @@ FluidComponent{
 
     }
 
+    /// calculates hydrostatic pressure change
+    /// kind of boilerplate code but i want
+    /// to use it as an associated function rather 
+    /// than a method
+    ///
+    /// this is because i want the method in FluidComponent
+    /// to take &mut self or &self
+    /// so that we can have object safety (or something like that)
+    fn get_hydrostatic_pressure_change(
+        pipe_length: Length,
+        incline_angle: Angle,
+        fluid_density: MassDensity) -> Pressure {
+
+        let g: Acceleration = 
+            Acceleration::new::<meter_per_second_squared>(-9.81);
+        let delta_h: Length = pipe_length*incline_angle.sin();
+
+        let hydrostatic_pressure_increase: Pressure =
+            fluid_density * g * delta_h;
+
+        return hydrostatic_pressure_increase;
+    }
+
 }
 
 /// provides generic methods to calculate mass flowrate
@@ -129,21 +151,30 @@ pub trait FluidPipeCalcPressureLoss {
     /// gets form loss k for a pipe
     fn get_pipe_form_loss_k(&mut self) -> f64;
 
+    /// gets form loss k for a pipe
+    /// using an immutable reference to self
+    fn get_pipe_form_loss_k_immutable(&self) -> f64;
+
     /// gets absolute roughness for a pipe
     fn get_pipe_absolute_roughness(&mut self) -> Length;
+
+
+    /// gets absolute roughness for a pipe
+    /// using an immutable reference to self
+    fn get_pipe_absolute_roughness_immutable(&self) -> Length;
     
 
     /// a function calculates pressure
     /// loss given a mass flowrate and pipe properties
-    fn pipe_calc_pressure_loss(&mut self,
-                               mut fluid_mass_flowrate: MassRate,
-                               cross_sectional_area: Area,
-                               hydraulic_diameter: Length,
-                               fluid_viscosity: DynamicViscosity,
-                               fluid_density: MassDensity,
-                               pipe_length: Length,
-                               absolute_roughness: Length,
-                               form_loss_k: f64) -> Pressure {
+    fn pipe_calc_pressure_loss(
+        mut fluid_mass_flowrate: MassRate,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        pipe_length: Length,
+        absolute_roughness: Length,
+        form_loss_k: f64) -> Pressure {
         // first let's calculate roughness ratio
 
         let roughness_ratio_quantity = absolute_roughness/hydraulic_diameter;
@@ -205,15 +236,15 @@ pub trait FluidPipeCalcPressureLoss {
 
     /// a function which calculates pressure
     /// loss given a mass flowrate and pipe properties
-    fn pipe_calc_mass_flowrate(&mut self,
-                               pressure_loss: Pressure,
-                               cross_sectional_area: Area,
-                               hydraulic_diameter: Length,
-                               fluid_viscosity: DynamicViscosity,
-                               fluid_density: MassDensity,
-                               pipe_length: Length,
-                               absolute_roughness: Length,
-                               form_loss_k: f64) -> MassRate {
+    fn pipe_calc_mass_flowrate(
+        pressure_loss: Pressure,
+        cross_sectional_area: Area,
+        hydraulic_diameter: Length,
+        fluid_viscosity: DynamicViscosity,
+        fluid_density: MassDensity,
+        pipe_length: Length,
+        absolute_roughness: Length,
+        form_loss_k: f64) -> MassRate {
 
         // first let's get our relevant ratios:
         let roughness_ratio_quantity = absolute_roughness/hydraulic_diameter;

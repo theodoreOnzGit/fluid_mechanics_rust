@@ -367,7 +367,7 @@ pub mod fluid_component_tests_and_examples {
                 let pressure_loss = self.pressure_loss;
 
                 let mass_flowrate = 
-                    self.pipe_calc_mass_flowrate(
+                    AirPipe::pipe_calc_mass_flowrate(
                         pressure_loss, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
@@ -393,16 +393,16 @@ pub mod fluid_component_tests_and_examples {
                 pressure_loss: Pressure) -> MassRate {
                 // get pipe parameters and flow conditions
                 // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let fluid_viscosity = self.get_fluid_viscosity();
-                let fluid_density = self.get_fluid_density();
-                let pipe_length = self.get_component_length();
+                let form_loss_k = self.get_pipe_form_loss_k_immutable();
+                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
+                let cross_sectional_area = self.get_cross_sectional_area_immutable();
+                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
+                let fluid_viscosity = self.get_fluid_viscosity_immutable();
+                let fluid_density = self.get_fluid_density_immutable();
+                let pipe_length = self.get_component_length_immutable();
 
                 let mass_flowrate = 
-                    self.pipe_calc_mass_flowrate(
+                    AirPipe::pipe_calc_mass_flowrate(
                         pressure_loss, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
@@ -415,8 +415,6 @@ pub mod fluid_component_tests_and_examples {
                 // you can return the mass flowrate straightaway
                 // or set the struct variable first and then
                 // return it
-
-                self.set_mass_flowrate(mass_flowrate);
 
                 return self.mass_flowrate;
             }
@@ -467,7 +465,7 @@ pub mod fluid_component_tests_and_examples {
                 // calculate the pressure loss
 
                 let pressure_loss = 
-                    self.pipe_calc_pressure_loss(
+                    AirPipe::pipe_calc_pressure_loss(
                         mass_flowrate,
                         cross_sectional_area,
                         hydraulic_diameter,
@@ -491,19 +489,19 @@ pub mod fluid_component_tests_and_examples {
 
                 // get pipe parameters and flow conditions
                 // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let viscosity = self.get_fluid_viscosity();
-                let density = self.get_fluid_density();
-                let pipe_legnth = self.get_component_length();
+                let form_loss_k = self.get_pipe_form_loss_k_immutable();
+                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
+                let cross_sectional_area = self.get_cross_sectional_area_immutable();
+                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
+                let viscosity = self.get_fluid_viscosity_immutable();
+                let density = self.get_fluid_density_immutable();
+                let pipe_legnth = self.get_component_length_immutable();
 
 
                 // calculate the pressure loss
 
                 let pressure_loss = 
-                    self.pipe_calc_pressure_loss(
+                    AirPipe::pipe_calc_pressure_loss(
                         mass_flowrate,
                         cross_sectional_area,
                         hydraulic_diameter,
@@ -516,8 +514,6 @@ pub mod fluid_component_tests_and_examples {
                 // you can return the pressure loss straightaway
                 // or set the struct variable first and then
                 // return it
-
-                self.pressure_loss = pressure_loss;
 
                 return self.pressure_loss;
             }
@@ -638,12 +634,20 @@ pub mod fluid_component_tests_and_examples {
                 return 5.0;
             }
 
+            fn get_pipe_form_loss_k_immutable(&self) -> f64 {
+                return 5.0;
+            }
+
             /// return absolute roughness for pipe
             /// for a typical copper pipe
             /// it is 0.002 mm 
             /// i did a web search
             ///
             fn get_pipe_absolute_roughness(&mut self) -> Length {
+                return Length::new::<millimeter>(0.002);
+            }
+
+            fn get_pipe_absolute_roughness_immutable(&self) -> Length {
                 return Length::new::<millimeter>(0.002);
             }
         }
@@ -751,7 +755,15 @@ pub mod fluid_component_tests_and_examples {
                 return self.form_loss_k;
             }
 
+            fn get_pipe_form_loss_k_immutable(&self) -> f64 {
+                return self.form_loss_k;
+            }
+
             fn get_pipe_absolute_roughness(&mut self) -> Length {
+                return self.absolute_roughness;
+            }
+
+            fn get_pipe_absolute_roughness_immutable(&self) -> Length {
                 return self.absolute_roughness;
             }
         }
@@ -819,8 +831,8 @@ pub mod fluid_component_tests_and_examples {
             }
 
             fn get_cross_sectional_area_immutable(&self) -> Area {
-                return self.get_hydraulic_diameter()*
-                    self.get_hydraulic_diameter()*
+                return self.get_hydraulic_diameter_immutable()*
+                    self.get_hydraulic_diameter_immutable()*
                     PI/4.0_f64;
             }
 
@@ -855,7 +867,7 @@ pub mod fluid_component_tests_and_examples {
                         fluid_density);
 
                 let mass_flowrate = 
-                    self.pipe_calculate_mass_flowrate_from_pressure_change(
+                    WaterPipe::pipe_calculate_mass_flowrate_from_pressure_change(
                         pressure_change, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
@@ -882,27 +894,27 @@ pub mod fluid_component_tests_and_examples {
                 pressure_loss: Pressure) -> MassRate {
                 // get pipe parameters and flow conditions
                 // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let fluid_viscosity = self.get_fluid_viscosity();
-                let fluid_density = self.get_fluid_density();
-                let pipe_length = self.get_component_length();
-                let pressure_loss = self.pressure_loss;
-                let incline_angle = self.get_incline_angle();
-                let internal_pressure_source = self.get_internal_pressure_source();
+                let form_loss_k = self.get_pipe_form_loss_k_immutable();
+                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
+                let cross_sectional_area = self.get_cross_sectional_area_immutable();
+                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
+                let fluid_viscosity = self.get_fluid_viscosity_immutable();
+                let fluid_density = self.get_fluid_density_immutable();
+                let pipe_length = self.get_component_length_immutable();
+                let incline_angle = self.get_incline_angle_immutable();
+                let internal_pressure_source = self.get_internal_pressure_source_immutable();
 
                 let pressure_change = 
                     -pressure_loss 
                     + internal_pressure_source 
-                    + self.get_hydrostatic_pressure_change(
+                    + <WaterPipe as FluidPipeCalcPressureChange>::
+                    get_hydrostatic_pressure_change(
                         pipe_length,
                         incline_angle,
                         fluid_density);
 
                 let mass_flowrate = 
-                    self.pipe_calculate_mass_flowrate_from_pressure_change(
+                    WaterPipe::pipe_calculate_mass_flowrate_from_pressure_change(
                         pressure_change, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
@@ -918,7 +930,6 @@ pub mod fluid_component_tests_and_examples {
                 // or set the struct variable first and then
                 // return it
 
-                self.set_mass_flowrate(mass_flowrate);
 
                 return self.mass_flowrate;
 
@@ -942,7 +953,7 @@ pub mod fluid_component_tests_and_examples {
                 // calculate the pressure loss
 
                 let pressure_loss = 
-                    self.pipe_calc_pressure_loss(
+                    WaterPipe::pipe_calc_pressure_loss(
                         mass_flowrate,
                         cross_sectional_area,
                         hydraulic_diameter,
@@ -968,20 +979,19 @@ pub mod fluid_component_tests_and_examples {
 
                 // get pipe parameters and flow conditions
                 // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let mass_flowrate = self.mass_flowrate;
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let viscosity = self.get_fluid_viscosity();
-                let density = self.get_fluid_density();
-                let pipe_legnth = self.get_component_length();
+                let form_loss_k = self.get_pipe_form_loss_k_immutable();
+                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
+                let cross_sectional_area = self.get_cross_sectional_area_immutable();
+                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
+                let viscosity = self.get_fluid_viscosity_immutable();
+                let density = self.get_fluid_density_immutable();
+                let pipe_legnth = self.get_component_length_immutable();
 
 
                 // calculate the pressure loss
 
                 let pressure_loss = 
-                    self.pipe_calc_pressure_loss(
+                    WaterPipe::pipe_calc_pressure_loss(
                         mass_flowrate,
                         cross_sectional_area,
                         hydraulic_diameter,
@@ -995,7 +1005,6 @@ pub mod fluid_component_tests_and_examples {
                 // or set the struct variable first and then
                 // return it
 
-                self.pressure_loss = pressure_loss;
 
                 return self.pressure_loss;
             }
@@ -1038,7 +1047,7 @@ pub mod fluid_component_tests_and_examples {
 
 
                 // return the pressure change value
-                let pressure_change = self.pipe_calc_pressure_change(
+                let pressure_change = WaterPipe::pipe_calc_pressure_change(
                     mass_flowrate,
                     cross_sectional_area,
                     hydraulic_diameter,
@@ -1349,8 +1358,8 @@ pub mod fluid_component_tests_and_examples {
 
             fn get_cross_sectional_area_immutable(&self) -> Area {
 
-                return self.get_hydraulic_diameter()*
-                    self.get_hydraulic_diameter()*
+                return self.get_hydraulic_diameter_immutable()*
+                    self.get_hydraulic_diameter_immutable()*
                     PI/4.0_f64;
 
             }
@@ -1417,22 +1426,22 @@ pub mod fluid_component_tests_and_examples {
                     self.mass_flowrate;
 
                 let cross_sectional_area = 
-                    self.get_cross_sectional_area();
+                    self.get_cross_sectional_area_immutable();
 
                 let hydraulic_diameter = 
-                    self.get_hydraulic_diameter();
+                    self.get_hydraulic_diameter_immutable();
 
                 let fluid_viscosity = 
-                    self.get_fluid_viscosity();
+                    self.get_fluid_viscosity_immutable();
 
                 let fluid_density = 
-                    self.get_fluid_density();
+                    self.get_fluid_density_immutable();
 
                 let component_length = 
-                    self.get_component_length();
+                    self.get_component_length_immutable();
 
                 let absolute_roughness = 
-                    self.get_custom_component_absolute_roughness();
+                    self.get_custom_component_absolute_roughness_immutable();
 
                 // i need to make some immutable borrows here...
                 let custom_darcy: &dyn Fn(f64, f64) -> f64 = 
@@ -1453,7 +1462,6 @@ pub mod fluid_component_tests_and_examples {
                     absolute_roughness, 
                     custom_darcy, custom_k);
 
-                self.pressure_loss = pressure_loss;
 
                 return pressure_loss;
 
@@ -1569,20 +1577,20 @@ pub mod fluid_component_tests_and_examples {
                 
                 // internal pressure source
                 let internal_pressure_source = 
-                    self.get_internal_pressure_source();
+                    self.get_internal_pressure_source_immutable();
 
                 // hydrostatic pressure
                 let component_length =
-                    self.get_component_length();
+                    self.get_component_length_immutable();
 
                 let incline_angle = 
-                    self.get_incline_angle();
+                    self.get_incline_angle_immutable();
 
                 let fluid_density =
-                    self.get_fluid_density();
+                    self.get_fluid_density_immutable();
 
                 let hydrostatic_pressure_change =
-                    self.get_hydrostatic_pressure_change(
+                    self.get_hydrostatic_pressure_change_immutable(
                         component_length, 
                         incline_angle, 
                         fluid_density);
@@ -1618,7 +1626,7 @@ pub mod fluid_component_tests_and_examples {
                     self.get_component_length_immutable();
 
                 let absolute_roughness = 
-                    self.get_custom_component_absolute_roughness();
+                    self.get_custom_component_absolute_roughness_immutable();
 
                 let source_pressure = 
                     self.get_internal_pressure_source_immutable();
