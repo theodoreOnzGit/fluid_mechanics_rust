@@ -423,12 +423,12 @@ pub trait FluidComponentCollectionSeriesMethods {
         // note: this function mutates the value of fluid_component_vector,
         // and is thus incompatible with peroxide libraries...
         // I'll need to rewrite the libraries in terms of immutable functions
-        let mass_flowrate_result 
-            = newton(
-                mass_flow_from_pressure_chg_root,
-                0.5, // initial guess 0.5 kg/s
-                100,
-                1e-8);
+        //let mass_flowrate_result 
+        //    = newton(
+        //        mass_flow_from_pressure_chg_root,
+        //        0.5, // initial guess 0.5 kg/s
+        //        100,
+        //        1e-8);
 
 
 
