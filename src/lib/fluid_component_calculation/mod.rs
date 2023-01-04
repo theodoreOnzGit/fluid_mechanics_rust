@@ -265,7 +265,7 @@ pub trait FluidComponent {
     ///
     /// h = pipe_length * sin (incline_angle)
     fn get_hydrostatic_pressure_change_immutable(
-        &self, 
+        &self,
         pipe_length: Length,
         incline_angle: Angle,
         fluid_density: MassDensity) -> Pressure {
@@ -1194,6 +1194,12 @@ pub mod fluid_component_tests_and_examples {
                 return self.absolute_roughness;
             }
 
+            fn get_custom_component_absolute_roughness_immutable(
+                &self) -> Length {
+
+                return self.absolute_roughness;
+            }
+
             fn get_custom_darcy(&mut self) 
                 -> &dyn Fn(f64, f64) -> f64 {
 
@@ -1201,7 +1207,22 @@ pub mod fluid_component_tests_and_examples {
 
             }
 
+
+            fn get_custom_darcy_immutable(&self) 
+                -> &dyn Fn(f64, f64) -> f64 {
+
+                    return self.custom_darcy.clone();
+
+            }
+
             fn get_custom_k(&mut self) 
+                -> &dyn Fn(f64) -> f64 {
+
+                    return self.custom_k.clone();
+
+            }
+            
+            fn get_custom_k_immutable(&self) 
                 -> &dyn Fn(f64) -> f64 {
 
                     return self.custom_k.clone();
@@ -1368,7 +1389,8 @@ pub mod fluid_component_tests_and_examples {
                     self.custom_k;
 
                 let pressure_loss =
-                    self.fluid_custom_component_calc_pressure_loss(
+                    CoriolisFlowmeter::<'coriolis_lifetime>::
+                    fluid_custom_component_calc_pressure_loss(
                     fluid_mass_flowrate, 
                     cross_sectional_area, 
                     hydraulic_diameter, 
@@ -1420,7 +1442,8 @@ pub mod fluid_component_tests_and_examples {
                     self.custom_k;
 
                 let pressure_loss =
-                    self.fluid_custom_component_calc_pressure_loss(
+                    CoriolisFlowmeter::<'coriolis_lifetime>::
+                    fluid_custom_component_calc_pressure_loss(
                     fluid_mass_flowrate, 
                     cross_sectional_area, 
                     hydraulic_diameter, 
@@ -1510,7 +1533,9 @@ pub mod fluid_component_tests_and_examples {
                     self.get_internal_pressure_source();
 
                 let mass_flowrate =
-                    self.fluid_custom_component_calc_mass_flowrate_from_pressure_change(
+                    CoriolisFlowmeter::
+                    <'coriolis_lifetime>::
+                    fluid_custom_component_calc_mass_flowrate_from_pressure_change(
                     pressure_change, 
                     cross_sectional_area, 
                     hydraulic_diameter, 
@@ -1590,16 +1615,18 @@ pub mod fluid_component_tests_and_examples {
                     self.get_fluid_density_immutable();
 
                 let component_length = 
-                    self.get_component_length();
+                    self.get_component_length_immutable();
 
                 let absolute_roughness = 
                     self.get_custom_component_absolute_roughness();
 
                 let source_pressure = 
-                    self.get_internal_pressure_source();
+                    self.get_internal_pressure_source_immutable();
 
                 let mass_flowrate =
-                    self.fluid_custom_component_calc_mass_flowrate_from_pressure_change(
+                    CoriolisFlowmeter::
+                    <'coriolis_lifetime>::
+                    fluid_custom_component_calc_mass_flowrate_from_pressure_change(
                     pressure_change, 
                     cross_sectional_area, 
                     hydraulic_diameter, 

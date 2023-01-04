@@ -4,6 +4,7 @@ use crate::custom_fldk;
 use crate::dimensionalisation;
 
 use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
 
 use super::FluidComponent;
 
@@ -19,7 +20,6 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
     /// fluid component given a mass flowrate
     /// and other fluid component parameters
     fn fluid_custom_component_calc_pressure_change(
-        &mut self,
         fluid_mass_flowrate: MassRate,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
@@ -43,8 +43,8 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
         // source pressure
         //
 
-        let pressure_loss = 
-            self.fluid_custom_component_calc_pressure_loss(
+        let pressure_loss = <Self as FluidCustomComponentCalcPressureLoss>::
+            fluid_custom_component_calc_pressure_loss(
                 fluid_mass_flowrate, 
                 cross_sectional_area, 
                 hydraulic_diameter, 
@@ -57,7 +57,8 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
 
 
         let hydrostatic_pressre =
-            self.get_hydrostatic_pressure_change(
+            <Self as FluidCustomComponentCalcPressureChange>::
+            get_hydrostatic_pressure_change(
                 component_length, 
                 incline_angle, 
                 fluid_density);
@@ -75,7 +76,6 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
     /// and other parameters of the component
     ///
     fn fluid_custom_component_calc_mass_flowrate_from_pressure_change(
-        &mut self,
         pressure_change: Pressure,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
@@ -99,7 +99,8 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
         // source pressure
 
         let hydrostatic_pressure = 
-            self.get_hydrostatic_pressure_change(
+            <Self as FluidCustomComponentCalcPressureChange>::
+            get_hydrostatic_pressure_change(
                 component_length, 
                 incline_angle, 
                 fluid_density);
@@ -113,7 +114,8 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
         // we can get mass flowrate
 
         let mass_flowrate: MassRate 
-            = self.fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
+            = <Self as FluidCustomComponentCalcPressureLoss>::
+            fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
                 pressure_loss, 
                 cross_sectional_area, 
                 hydraulic_diameter, 
@@ -127,6 +129,20 @@ FluidCustomComponentCalcPressureLoss<'trait_lifetime> + FluidComponent{
         return mass_flowrate;
     }
 
+    fn get_hydrostatic_pressure_change(
+        pipe_length: Length,
+        incline_angle: Angle,
+        fluid_density: MassDensity) -> Pressure {
+
+        let g: Acceleration = 
+            Acceleration::new::<meter_per_second_squared>(-9.81);
+        let delta_h: Length = pipe_length*incline_angle.sin();
+
+        let hydrostatic_pressure_increase: Pressure =
+            fluid_density * g * delta_h;
+
+        return hydrostatic_pressure_increase;
+    }
 }
 
 /// provides generic methods to calculate pressure
@@ -141,9 +157,21 @@ pub trait FluidCustomComponentCalcPressureLoss<'trait_lifetime> {
     fn get_custom_darcy(&mut self) ->
         &dyn Fn(f64, f64) -> f64 ;
 
+    /// returns the custom darcy friction factor function
+    /// for the component
+    /// using an immutable reference to self
+    fn get_custom_darcy_immutable(&self) ->
+        &dyn Fn(f64, f64) -> f64 ;
+
     /// returns the custom form loss factors
     /// for the component
     fn get_custom_k(&mut self) ->
+        &dyn Fn(f64) -> f64;
+
+    /// returns the custom form loss factors
+    /// for the component
+    /// using an immutable reference to self
+    fn get_custom_k_immutable(&self) ->
         &dyn Fn(f64) -> f64;
 
     /// sets the custom darcy friction factor function
@@ -166,12 +194,16 @@ pub trait FluidCustomComponentCalcPressureLoss<'trait_lifetime> {
     fn get_custom_component_absolute_roughness(
         &mut self) -> Length;
 
+    /// gets the custom component absolute roughness 
+    /// using an immutable reference to self
+    fn get_custom_component_absolute_roughness_immutable(
+        &self) -> Length;
+
     /// calculates pressure loss for a component given 
     /// pipe parameter inputs and
     /// custom darcy friction factor and custom form loss
     /// correlations
     fn fluid_custom_component_calc_pressure_loss(
-        &mut self,
         fluid_mass_flowrate: MassRate,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
@@ -236,7 +268,6 @@ pub trait FluidCustomComponentCalcPressureLoss<'trait_lifetime> {
 
     /// calculates mass flowrate using input parameters
     fn fluid_custom_component_calc_mass_flowrate_from_pressure_loss(
-        &mut self,
         pressure_loss: Pressure,
         cross_sectional_area: Area,
         hydraulic_diameter: Length,
