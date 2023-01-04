@@ -143,7 +143,7 @@ pub trait FluidComponentCollectionSeriesMethods {
     /// any object which implements FluidComponent
     fn calculate_pressure_change_from_mass_flowrate(
         mass_flowrate: MassRate,
-        fluid_component_vector: &mut Vec<&mut dyn FluidComponent>) -> Pressure {
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
 
 
         // we instantiate a pressure vector to store
@@ -167,16 +167,14 @@ pub trait FluidComponentCollectionSeriesMethods {
             );
 
         for (index,fluid_component_pointer) in 
-            fluid_component_vector.iter_mut().enumerate() {
+            fluid_component_vector.iter().enumerate() {
 
             let fluid_component = 
-                &mut *fluid_component_pointer;
+                &*fluid_component_pointer;
 
-            fluid_component.set_mass_flowrate(
-                mass_flowrate);
 
             let fluid_component_pressure_change = 
-                fluid_component.get_pressure_change();
+                fluid_component.get_pressure_change_immutable(mass_flowrate);
 
             pressure_vector[index] = 
                 fluid_component_pressure_change;
@@ -203,7 +201,7 @@ pub trait FluidComponentCollectionSeriesMethods {
     /// any object which implements FluidComponent
     fn calculate_mass_flowrate_from_pressure_change(
         pressure_change: Pressure,
-        fluid_component_vector: &mut Vec<&mut dyn FluidComponent>) -> MassRate {
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> MassRate {
 
         // a few key issues here:
         //
@@ -423,12 +421,12 @@ pub trait FluidComponentCollectionSeriesMethods {
         // note: this function mutates the value of fluid_component_vector,
         // and is thus incompatible with peroxide libraries...
         // I'll need to rewrite the libraries in terms of immutable functions
-        //let mass_flowrate_result 
-        //    = newton(
-        //        mass_flow_from_pressure_chg_root,
-        //        0.5, // initial guess 0.5 kg/s
-        //        100,
-        //        1e-8);
+        let mass_flowrate_result 
+            = newton(
+                mass_flow_from_pressure_chg_root,
+                0.5, // initial guess 0.5 kg/s
+                100,
+                1e-8);
 
 
 
