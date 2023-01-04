@@ -49,22 +49,11 @@ pub trait FluidComponent {
         // + pressure source
         //
 
-        let pipe_length = 
-            self.get_component_length_immutable();
-
-        let incline_angle = 
-            self.get_incline_angle_immutable();
-
-        let fluid_density = 
-            self.get_fluid_density_immutable();
 
 
 
         let pressure_loss = -pressure_change +
-            self.get_hydrostatic_pressure_change_immutable(
-                pipe_length, 
-                incline_angle, 
-                fluid_density)+
+            self.get_hydrostatic_pressure_change_immutable()+
             self.get_internal_pressure_source_immutable();
 
 
@@ -140,15 +129,9 @@ pub trait FluidComponent {
 
         // this is the second component: hydrostatic pressure
 
-        let component_length = self.get_component_length();
-        let incline_angle = self.get_incline_angle();
-        let fluid_density = self.get_fluid_density();
 
         let hydrostatic_pressure_increase = 
-            self.get_hydrostatic_pressure_change(
-                component_length,
-                incline_angle,
-                fluid_density);
+            self.get_hydrostatic_pressure_change();
 
         // third component is pressure source
 
@@ -176,15 +159,8 @@ pub trait FluidComponent {
 
         // this is the second component: hydrostatic pressure
 
-        let component_length = self.get_component_length_immutable();
-        let incline_angle = self.get_incline_angle_immutable();
-        let fluid_density = self.get_fluid_density_immutable();
-
         let hydrostatic_pressure_increase = 
-            self.get_hydrostatic_pressure_change_immutable(
-                component_length,
-                incline_angle,
-                fluid_density);
+            self.get_hydrostatic_pressure_change_immutable();
 
         // third component is pressure source
 
@@ -203,15 +179,8 @@ pub trait FluidComponent {
         // + pressure source
         //
 
-        let component_length = self.get_component_length();
-        let incline_angle = self.get_incline_angle();
-        let fluid_density = self.get_fluid_density();
-
         let hydrostatic_pressure_increase = 
-            self.get_hydrostatic_pressure_change(
-                component_length,
-                incline_angle,
-                fluid_density);
+            self.get_hydrostatic_pressure_change();
 
         // third component is pressure source
         // for any internal pressure source or external, eg pumps
@@ -240,16 +209,28 @@ pub trait FluidComponent {
     ///
     /// the height increase is equal
     ///
-    /// h = pipe_length * sin (incline_angle)
+    /// h = component_length * sin (incline_angle)
+    ///
+    /// component length is the shortest or straight line
+    /// distance between
+    /// inlet and outlet
+    /// and incline angle is the angle that straight line makes
+    /// with the horizontal plane
     fn get_hydrostatic_pressure_change(
-        &mut self, 
-        pipe_length: Length,
-        incline_angle: Angle,
-        fluid_density: MassDensity) -> Pressure {
+        &mut self) -> Pressure {
+
+        let component_length =
+            self.get_component_length();
+
+        let incline_angle = 
+            self.get_incline_angle();
+
+        let fluid_density = 
+            self.get_fluid_density();
 
         let g: Acceleration = 
             Acceleration::new::<meter_per_second_squared>(-9.81);
-        let delta_h: Length = pipe_length*incline_angle.sin();
+        let delta_h: Length = component_length*incline_angle.sin();
 
         let hydrostatic_pressure_increase: Pressure =
             fluid_density * g * delta_h;
@@ -264,15 +245,28 @@ pub trait FluidComponent {
     /// the height increase is equal
     ///
     /// h = pipe_length * sin (incline_angle)
+    ///
+    /// component length is the shortest or straight line
+    /// distance between
+    /// inlet and outlet
+    /// and incline angle is the angle that straight line makes
+    /// with the horizontal plane
     fn get_hydrostatic_pressure_change_immutable(
-        &self,
-        pipe_length: Length,
-        incline_angle: Angle,
-        fluid_density: MassDensity) -> Pressure {
+        &self) -> Pressure {
+
+        let component_length =
+            self.get_component_length_immutable();
+
+        let incline_angle = 
+            self.get_incline_angle_immutable();
+
+        let fluid_density = 
+            self.get_fluid_density_immutable();
+
 
         let g: Acceleration = 
             Acceleration::new::<meter_per_second_squared>(-9.81);
-        let delta_h: Length = pipe_length*incline_angle.sin();
+        let delta_h: Length = component_length*incline_angle.sin();
 
         let hydrostatic_pressure_increase: Pressure =
             fluid_density * g * delta_h;
@@ -310,7 +304,7 @@ pub mod fluid_component_tests_and_examples {
         ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
     use crate::therminol_component::
         dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
-    use uom::si::dynamic_viscosity::{millipascal_second, pascal_second,poise};
+    use uom::si::dynamic_viscosity::{millipascal_second, poise};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
     use uom::si::mass_density::kilogram_per_cubic_meter;
@@ -416,7 +410,7 @@ pub mod fluid_component_tests_and_examples {
                 // or set the struct variable first and then
                 // return it
 
-                return self.mass_flowrate;
+                return mass_flowrate;
             }
 
             /// sets the mass flowrate of the component
@@ -515,7 +509,7 @@ pub mod fluid_component_tests_and_examples {
                 // or set the struct variable first and then
                 // return it
 
-                return self.pressure_loss;
+                return pressure_loss;
             }
 
             /// sets the pressure loss of the component
@@ -861,10 +855,7 @@ pub mod fluid_component_tests_and_examples {
                 let pressure_change = 
                     -pressure_loss 
                     + internal_pressure_source 
-                    + self.get_hydrostatic_pressure_change(
-                        pipe_length,
-                        incline_angle,
-                        fluid_density);
+                    + self.get_hydrostatic_pressure_change();
 
                 let mass_flowrate = 
                     WaterPipe::pipe_calculate_mass_flowrate_from_pressure_change(
@@ -931,7 +922,7 @@ pub mod fluid_component_tests_and_examples {
                 // return it
 
 
-                return self.mass_flowrate;
+                return mass_flowrate;
 
             }
 
@@ -1006,7 +997,7 @@ pub mod fluid_component_tests_and_examples {
                 // return it
 
 
-                return self.pressure_loss;
+                return pressure_loss;
             }
 
             fn set_pressure_change(&mut self, pressure_change: Pressure){
@@ -1018,15 +1009,9 @@ pub mod fluid_component_tests_and_examples {
                 // pressure loss
                 //
 
-                let pipe_length = self.get_component_length();
-                let incline_angle = self.get_incline_angle();
-                let fluid_density = self.get_fluid_density();
 
                 let pressure_loss = -pressure_change +
-                    self.get_hydrostatic_pressure_change(
-                        pipe_length,
-                        incline_angle,
-                        fluid_density) +
+                    self.get_hydrostatic_pressure_change() +
                     self.get_internal_pressure_source();
 
                 self.set_pressure_loss(pressure_loss);
@@ -1423,7 +1408,7 @@ pub mod fluid_component_tests_and_examples {
                 mass_flowrate: MassRate) -> Pressure {
 
                 let fluid_mass_flowrate = 
-                    self.mass_flowrate;
+                    mass_flowrate;
 
                 let cross_sectional_area = 
                     self.get_cross_sectional_area_immutable();
@@ -1484,20 +1469,11 @@ pub mod fluid_component_tests_and_examples {
                     self.get_internal_pressure_source();
 
                 // hydrostatic pressure
-                let component_length =
-                    self.get_component_length();
-
                 let incline_angle = 
                     self.get_incline_angle();
 
-                let fluid_density =
-                    self.get_fluid_density();
-
                 let hydrostatic_pressure_change =
-                    self.get_hydrostatic_pressure_change(
-                        component_length, 
-                        incline_angle, 
-                        fluid_density);
+                    self.get_hydrostatic_pressure_change();
 
                 // pressure_loss term
                 //
@@ -1580,20 +1556,13 @@ pub mod fluid_component_tests_and_examples {
                     self.get_internal_pressure_source_immutable();
 
                 // hydrostatic pressure
-                let component_length =
-                    self.get_component_length_immutable();
 
                 let incline_angle = 
                     self.get_incline_angle_immutable();
 
-                let fluid_density =
-                    self.get_fluid_density_immutable();
 
                 let hydrostatic_pressure_change =
-                    self.get_hydrostatic_pressure_change_immutable(
-                        component_length, 
-                        incline_angle, 
-                        fluid_density);
+                    self.get_hydrostatic_pressure_change_immutable();
 
 
                 // now we get pressure change
