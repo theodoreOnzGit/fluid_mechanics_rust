@@ -327,48 +327,12 @@ pub trait FluidComponentCollectionSeriesMethods {
         // where we change object state before invoking a get()
         // function
 
-        let one_kg_per_second_mass_flow: MassRate
-            = MassRate::new::<kilogram_per_second>(1.0);
-
-        let pressure_change_1kg_per_second: Pressure 
-            = Self::calculate_pressure_change_from_mass_flowrate(
-                one_kg_per_second_mass_flow, 
-                fluid_component_vector);
-
-        let pressure_loss_1kg_per_second: Pressure = 
-            -(pressure_change_1kg_per_second - pressure_change_0kg_per_second);
-
-        // now we want to check if pressure change is positive or negative
-        //
-        // to do so, i compare it against a baseline pressure change
-        // where mass flowrate is zero
         // if pressure loss is positive, we have forward flow
         // if pressure loss is negative, we have backflow
         //
 
         let forward_flow_true: bool =
             pressure_loss_pascals > 0.0 ;
-
-        // if the flow is forward flow, then we can check we can then check if
-        // it is in bounds, (between 0.0 kg/s and 1.0 kg/s)
-        // if out of bounds, we can panic or increase the bound
-        //
-        // to check this, i want to see if the magnitude of
-        // pressure loss at 1kg per second
-        // is greater than the magnitude of pressure loss 
-        // caused by the flow
-
-
-        let positive_flow_above_1kg_per_second: bool = 
-            pressure_loss_1kg_per_second.value.abs() >
-            pressure_loss_pascals.abs();
-
-        if positive_flow_above_1kg_per_second {
-            // if the flow is above 1kg/s, then temporarily
-            // panic
-            unimplemented!();
-
-        }
 
 
         // if forward flow is true, then i want to iteratively calculate 
@@ -498,6 +462,10 @@ pub trait FluidComponentCollectionSeriesMethods {
     ///
     /// If we cannot find a root in this range,
     /// then it's likely there is no possible root at all
+    ///
+    /// the inline thingy here is just to help the code
+    /// speed up a bit
+    #[inline]
     fn calc_mass_flowrate_from_pressure_chg_bisection_fallback
         <F: Fn(AD) -> AD >(
             f: F) -> Result<MassRate, String> {
