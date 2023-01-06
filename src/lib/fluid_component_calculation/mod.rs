@@ -302,8 +302,6 @@ pub mod fluid_component_tests_and_examples {
         custom_component_calc::{FluidCustomComponentCalcPressureChange, FluidCustomComponentCalcPressureLoss};
     use crate::fluid_component_calculation::standard_pipe_calc
         ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
-    use crate::therminol_component::
-        dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
     use uom::si::dynamic_viscosity::{millipascal_second, poise};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};

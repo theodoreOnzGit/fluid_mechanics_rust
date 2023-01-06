@@ -1,5 +1,3 @@
-use peroxide::fuga::RootFind::Newton;
-use uom::num_traits::Float;
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
@@ -308,6 +306,7 @@ pub trait FluidComponentCollectionSeriesMethods {
         //
         // if that is so, then return mass flowrate = 0
 
+
         let pressure_loss_pascals = 
             -(pressure_change - pressure_change_0kg_per_second).value;
 
@@ -531,19 +530,15 @@ pub mod fluid_component_collection_test_and_examples {
     use std::f64::consts::PI;
 
     use crate::fluid_component_calculation::FluidComponent;
-    use crate::fluid_component_calculation::
-        custom_component_calc::{FluidCustomComponentCalcPressureChange, FluidCustomComponentCalcPressureLoss};
     use crate::fluid_component_calculation::standard_pipe_calc
-        ::{FluidPipeCalcPressureLoss,FluidPipeCalcPressureChange};
+        ::{FluidPipeCalcPressureLoss};
     use crate::fluid_component_collection::{FluidComponentCollection, FluidComponentCollectionSeriesMethods};
-    use crate::therminol_component::
-        dowtherm_a_properties::getDowthermAConstantPressureSpecificHeatCapacity;
-    use uom::si::dynamic_viscosity::{millipascal_second, poise};
+    use uom::si::dynamic_viscosity::{millipascal_second};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
     use uom::si::mass_density::kilogram_per_cubic_meter;
     use uom::si::mass_rate::kilogram_per_second;
-    use uom::si::pressure::{pascal, kilopascal};
+    use uom::si::pressure::{pascal};
     use uom::si::angle::degree;
 
 
@@ -895,8 +890,6 @@ pub mod fluid_component_collection_test_and_examples {
         // with the AirPipe struct setup, you can caluclate
         // the pressure loss easily
 
-        let mut pipe_mass_flowrate = 
-            MassRate::new::<kilogram_per_second>(0.5);
 
         let air_pipe_1 = AirPipe::new();
         let air_pipe_2 = AirPipe::new();
