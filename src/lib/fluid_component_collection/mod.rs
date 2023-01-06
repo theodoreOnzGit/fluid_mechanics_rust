@@ -159,8 +159,44 @@ pub trait FluidComponentCollectionMethods {
 
     /// calculates pressure change when given a mass flowrate
     fn get_pressure_change(
-        &self
-        , fluid_mass_flowrate: MassRate) -> Pressure;
+        &self, 
+        fluid_mass_flowrate: MassRate) -> Pressure;
+
+    /// calculates mass flowrate from pressure change
+
+    fn get_mass_flowrate_from_pressure_change(
+        &self,
+        pressure_change: Pressure) -> MassRate;
+
+    /// calculates mass flowrate from pressure loss
+    
+    fn get_mass_flowrate_from_pressure_loss(
+        &self,
+        pressure_loss: Pressure) -> MassRate {
+
+        // for this, the default implementation is
+        // to obtain pressure change
+        //
+        // pressure_change = -pressure_loss +
+        // hydrostatic pressure
+        // + internal pressure
+        //
+        // to get the latter two terms, i can obtain
+        // pressure change when mass flowrate is zero
+        let zero_mass_flow = MassRate::new::<kilogram_per_second>(0.0);
+
+        let reference_pressure_change = 
+            self.get_pressure_change(zero_mass_flow);
+
+        let pressure_change = 
+            -pressure_loss + reference_pressure_change;
+
+        // now let's calculate the mass flowrate
+
+        return self.get_mass_flowrate_from_pressure_change(pressure_change);
+    }
+
+
 }
 
 /// contains associated functions which take a fluid component
@@ -307,6 +343,7 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
                 zero_mass_flow, 
                 fluid_component_vector);
 
+
         // now we will check if the difference is about 9 Pa
         // from zero flow
         // which is that manometer reading error
@@ -317,9 +354,6 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         let pressure_loss_pascals = 
             -(pressure_change - pressure_change_0kg_per_second).value;
 
-        if pressure_loss_pascals.abs() < 10_f64 {
-            return zero_mass_flow;
-        }
 
 
         // present issue: 
@@ -408,6 +442,19 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
             return AD0(pressure_change_error);
 
         };
+
+        let mass_flowrate_result 
+            = bisection(
+                mass_flow_from_pressure_chg_root,
+                (0.05, 0.15), // initial guess 0.5 kg/s
+                300,
+                1e-8);
+
+        let mass_flowrate = 
+            MassRate::new::<kilogram_per_second>(
+                mass_flowrate_result.unwrap());
+
+        return mass_flowrate;
 
         // note: this function mutates the value of fluid_component_vector,
         // and is thus incompatible with peroxide libraries...
@@ -959,6 +1006,28 @@ pub mod fluid_component_collection_test_and_examples {
 
                     return pressure_change;
                 }
+
+                fn get_mass_flowrate_from_pressure_change(
+                    &self,
+                    pressure_change: Pressure) -> MassRate {
+
+
+                    // first we get the vector
+
+                    let immutable_vector_ref = 
+                        self.get_immutable_fluid_component_vector();
+
+                    // second we use the associated function
+
+                    let mass_flowrate = 
+                        Self::calculate_mass_flowrate_from_pressure_change(
+                            pressure_change, immutable_vector_ref);
+
+                    return mass_flowrate;
+
+                }
+
+
             }
 
         impl<'air_pipe_collection_lifetime> FluidComponentCollectionSeriesAssociatedFunctions
@@ -995,9 +1064,9 @@ pub mod fluid_component_collection_test_and_examples {
 
         air_pipe_series.set_fluid_component_vector(air_pipe_vec);
 
-        // now let's push a 0.001kg/s airflow through this pipe series
+        // now let's push a 0.1kg/s airflow through this pipe series
         //
-        let pipe_airflow = MassRate::new::<kilogram_per_second>(0.001);
+        let pipe_airflow = MassRate::new::<kilogram_per_second>(0.1);
 
         // and then let's get the pressure change
 
@@ -1007,7 +1076,7 @@ pub mod fluid_component_collection_test_and_examples {
         // the pressure losses are about -1144 Pa
         approx::assert_relative_eq!(
             pipe_pressure_change.value,
-            -1144.0,
+            -174650.0,
             max_relative=0.001);
 
         // i will also test the get pressure loss function
@@ -1020,6 +1089,21 @@ pub mod fluid_component_collection_test_and_examples {
         // be the same as the inverse of the pressure change
         assert_eq!(-pipe_pressure_change,
                    pipe_pressure_loss);
+
+        // all right, so now we want to check if the same pressure loss
+        // will yield us 0.001 kg/s
+
+        let test_pressure_loss = 
+            Pressure::new::<pascal>(174650.0);
+
+        let pipe_test_air_mass_flowrate = 
+            air_pipe_series.get_mass_flowrate_from_pressure_change(
+                -test_pressure_loss);
+
+        approx::assert_relative_eq!(
+            pipe_airflow.value,
+            pipe_test_air_mass_flowrate.value,
+            max_relative=0.001);
 
         return;
 
