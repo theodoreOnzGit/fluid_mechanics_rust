@@ -18,7 +18,7 @@ use peroxide::prelude::*;
 /// Update
 /// Delete
 ///
-pub trait FluidComponentCollection<'trait_lifetime> {
+pub trait FluidComponentCollection<'trait_lifetime> : FluidComponentCollectionMethods{
 
 
 
@@ -118,6 +118,14 @@ pub trait FluidComponentCollection<'trait_lifetime> {
         self.set_fluid_component_vector(fluid_component_vector_mutable);
     }
 
+
+}
+
+/// contains methods to get pressure loss 
+/// and pressure change and mass flowrate based on 
+/// current state of the fluid component collection
+pub trait FluidComponentCollectionMethods {
+
     /// calculates pressure loss when given a mass flowrate
     fn get_pressure_loss(
         &self, 
@@ -153,16 +161,15 @@ pub trait FluidComponentCollection<'trait_lifetime> {
     fn get_pressure_change(
         &self
         , fluid_mass_flowrate: MassRate) -> Pressure;
-
 }
 
-/// contains methods which take a fluid component
+/// contains associated functions which take a fluid component
 /// vector and calculate mass flowrates and pressure changes
 /// and losses from it
 ///
 /// this assumes that all the components in the vector
 /// are connected in series
-pub trait FluidComponentCollectionSeriesMethods {
+pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
     /// calculates pressure change from mass flowrate
     /// for a given fluid component collection
@@ -443,7 +450,7 @@ pub trait FluidComponentCollectionSeriesMethods {
             match mass_flowrate_result {
             Ok(_mass_flowrate) => 
                 return MassRate::new::<kilogram_per_second>(_mass_flowrate),
-            Err(_error_msg) => <Self as FluidComponentCollectionSeriesMethods>::
+            Err(_error_msg) => <Self as FluidComponentCollectionSeriesAssociatedFunctions>::
                 calc_mass_flowrate_from_pressure_chg_bisection_fallback(
                 mass_flow_from_pressure_chg_root)
         };
@@ -532,7 +539,9 @@ pub mod fluid_component_collection_test_and_examples {
     use crate::fluid_component_calculation::FluidComponent;
     use crate::fluid_component_calculation::standard_pipe_calc
         ::{FluidPipeCalcPressureLoss};
-    use crate::fluid_component_collection::{FluidComponentCollection, FluidComponentCollectionSeriesMethods};
+    use crate::fluid_component_collection::{
+        FluidComponentCollection, FluidComponentCollectionMethods,
+        FluidComponentCollectionSeriesAssociatedFunctions};
     use uom::si::dynamic_viscosity::{millipascal_second};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
@@ -929,27 +938,30 @@ pub mod fluid_component_collection_test_and_examples {
 
             }
 
-            fn get_pressure_change(
-                &self,
-                fluid_mass_flowrate: MassRate) -> Pressure {
-
-                // first we get the vector
-
-                let immutable_vector_ref = 
-                    self.get_immutable_fluid_component_vector();
-
-                // second we use the associated function
-
-                let pressure_change = 
-                    Self::calculate_pressure_change_from_mass_flowrate(
-                        fluid_mass_flowrate, immutable_vector_ref);
-
-                return pressure_change;
-            }
-
         }
 
-        impl<'air_pipe_collection_lifetime> FluidComponentCollectionSeriesMethods
+        impl<'air_pipe_collection_lifetime> FluidComponentCollectionMethods for
+            AirPipeCollectionSeries<'air_pipe_collection_lifetime> {
+                fn get_pressure_change(
+                    &self,
+                    fluid_mass_flowrate: MassRate) -> Pressure {
+
+                    // first we get the vector
+
+                    let immutable_vector_ref = 
+                        self.get_immutable_fluid_component_vector();
+
+                    // second we use the associated function
+
+                    let pressure_change = 
+                        Self::calculate_pressure_change_from_mass_flowrate(
+                            fluid_mass_flowrate, immutable_vector_ref);
+
+                    return pressure_change;
+                }
+            }
+
+        impl<'air_pipe_collection_lifetime> FluidComponentCollectionSeriesAssociatedFunctions
             for AirPipeCollectionSeries<'air_pipe_collection_lifetime> {}
 
         // constructor is here
