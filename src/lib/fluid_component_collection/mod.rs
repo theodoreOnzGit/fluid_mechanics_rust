@@ -332,7 +332,7 @@ pub trait FluidComponentCollectionSeriesMethods {
 
         let pressure_change_1kg_per_second: Pressure 
             = Self::calculate_pressure_change_from_mass_flowrate(
-                zero_mass_flow, 
+                one_kg_per_second_mass_flow, 
                 fluid_component_vector);
 
         let pressure_loss_1kg_per_second: Pressure = 
@@ -370,14 +370,6 @@ pub trait FluidComponentCollectionSeriesMethods {
 
         }
 
-        if forward_flow_true != true {
-
-            // if the flow is below 0kg/s
-            // temporarily 
-            // panic
-            unimplemented!();
-
-        }
 
         // if forward flow is true, then i want to iteratively calculate 
         // pressure changes using mass flowrates until the limit is reached
@@ -421,21 +413,117 @@ pub trait FluidComponentCollectionSeriesMethods {
         // note: this function mutates the value of fluid_component_vector,
         // and is thus incompatible with peroxide libraries...
         // I'll need to rewrite the libraries in terms of immutable functions
-        let mass_flowrate_result 
-            = newton(
-                mass_flow_from_pressure_chg_root,
-                0.5, // initial guess 0.5 kg/s
-                100,
-                1e-8);
+        //
+        // But having done so, I want to use the newton raphson method to
+        // try and converge this result, hopefully within 30 iterations
+
+        let mass_flowrate_result =
+            if forward_flow_true != true {
+
+                let mass_flowrate_result 
+                    = newton(
+                        mass_flow_from_pressure_chg_root,
+                        -0.5, // initial guess 0.5 kg/s
+                        30,
+                        1e-8);
+
+                // if loop returns this mass flowrate result
+                mass_flowrate_result
+
+            } else {
+                let mass_flowrate_result 
+                    = newton(
+                        mass_flow_from_pressure_chg_root,
+                        0.5, // initial guess 0.5 kg/s
+                        30,
+                        1e-8);
+                
+                // if loop returns this mass flowrate result
+                mass_flowrate_result
+            };
+
+        // now if the newton raphson method does not converge within the
+        // set number of iterations, I want it to use bisection
+        // which should fall back to bisection
+
+
+        let mass_flowrate = 
+            match mass_flowrate_result {
+            Ok(_mass_flowrate) => 
+                return MassRate::new::<kilogram_per_second>(_mass_flowrate),
+            Err(_error_msg) => <Self as FluidComponentCollectionSeriesMethods>::
+                calc_mass_flowrate_from_pressure_chg_bisection_fallback(
+                mass_flow_from_pressure_chg_root)
+        };
 
 
 
 
 
 
+        return mass_flowrate.unwrap();
+    }
 
+    /// This function is not meant ot be used by the end user
+    /// but is instead called by another function
+    ///
+    ///
+    /// this function is expected to take in an automatic
+    /// differentiation function
+    ///
+    /// which takes the following form
+    ///
+    /// function(mass_flowrate_kg_per_second) -> pressure_pascals
+    ///
+    /// both mass flowrate and pressure are f64 but in SI units
+    /// as i'm trying to solve pipe network problems and flow in series
+    /// i consider the highest volume of flow possible for such a system
+    ///
+    /// the pressure actually measures the difference between the
+    /// guessed pressure loss in the iteration
+    /// and the actual pressure loss specified by the user
+    ///
+    /// The guiness book of world records shows that the amazon
+    /// river has a flowrate of about 200,000 m3/s
+    /// https://www.guinnessworldrecords.com/world-records/greatest-river-flow
+    ///
+    /// in other words about 200,000,000 kg/s
+    ///
+    /// We never expect man made 
+    /// piping systems to have this much flow 
+    ///
+    /// But this would be a good upper bound for bisection solver.
+    ///
+    ///
+    ///
+    /// If we cannot find a root in this range,
+    /// then it's likely there is no possible root at all
+    fn calc_mass_flowrate_from_pressure_chg_bisection_fallback
+        <F: Fn(AD) -> AD >(
+            f: F) -> Result<MassRate, String> {
 
-        unimplemented!();
+            // the result enum packages two things
+            // and you must return 
+
+            let tol: f64 = 1e-8;
+            let times: usize = 10_000;
+            let interval: (f64,f64) = (-20_000_000.0, 20_000_000.0);
+
+            let bisection_result =
+                bisection(f, interval, times, tol);
+            
+            // the result type demands that we provide if statements to capture
+            // two return types
+            //
+            // you need to return an Ok
+            match bisection_result {
+
+                Ok(mass_flowrate_f64_kg_per_s) => 
+                    return Ok(
+                        MassRate::new::<kilogram_per_second>(mass_flowrate_f64_kg_per_s)),
+                Err(e) => return Err(e.to_string()),
+            };
+
     }
 
 }
