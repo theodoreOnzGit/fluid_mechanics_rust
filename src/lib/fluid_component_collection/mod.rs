@@ -29,7 +29,7 @@ pub trait FluidComponentCollection<'trait_lifetime> {
     ///
     /// you'll probably need some legwork to create a fresh
     /// object
-    fn get_immutable_fluid_component_vector(&mut self) 
+    fn get_immutable_fluid_component_vector(&self) 
         -> &Vec<&'trait_lifetime dyn FluidComponent>;
 
     /// sets the fluid component vector to a specific value
@@ -120,7 +120,41 @@ pub trait FluidComponentCollection<'trait_lifetime> {
         self.set_fluid_component_vector(fluid_component_vector_mutable);
     }
 
+    /// calculates pressure loss when given a mass flowrate
+    fn get_pressure_loss(
+        &self, 
+        fluid_mass_flowrate: MassRate) -> Pressure {
 
+        // for pressure losses, we compare the pressure change at
+        // zero mass flowrate to pressure change at the desired
+        // mass flowrate
+        // noting that 
+        //
+        // pressure_change = - pressure_loss + hydrostatic pressure +
+        // internal pressure
+
+
+        let zero_mass_flow = MassRate::new::<kilogram_per_second>(0.0);
+
+        let reference_pressure_change = 
+            self.get_pressure_change(zero_mass_flow);
+
+        let current_pressure_change = 
+            self.get_pressure_change(fluid_mass_flowrate);
+
+        let pressure_change_due_to_losses = 
+            current_pressure_change - reference_pressure_change;
+
+        let pressure_loss = -pressure_change_due_to_losses;
+
+        return pressure_loss;
+
+    }
+
+    /// calculates pressure change when given a mass flowrate
+    fn get_pressure_change(
+        &self
+        , fluid_mass_flowrate: MassRate) -> Pressure;
 
 }
 
@@ -886,7 +920,7 @@ pub mod fluid_component_collection_test_and_examples {
             for AirPipeCollectionSeries<'air_pipe_collection_lifetime> {
 
 
-            fn get_immutable_fluid_component_vector(&mut self)
+            fn get_immutable_fluid_component_vector(&self)
                 -> &Vec<&'air_pipe_collection_lifetime dyn FluidComponent> {
 
                     return &self.fluid_component_vector_immutable;
@@ -902,11 +936,85 @@ pub mod fluid_component_collection_test_and_examples {
 
             }
 
+            fn get_pressure_change(
+                &self,
+                fluid_mass_flowrate: MassRate) -> Pressure {
+
+                // first we get the vector
+
+                let immutable_vector_ref = 
+                    self.get_immutable_fluid_component_vector();
+
+                // second we use the associated function
+
+                let pressure_change = 
+                    Self::calculate_pressure_change_from_mass_flowrate(
+                        fluid_mass_flowrate, immutable_vector_ref);
+
+                return pressure_change;
+            }
+
         }
 
         impl<'air_pipe_collection_lifetime> FluidComponentCollectionSeriesMethods
             for AirPipeCollectionSeries<'air_pipe_collection_lifetime> {}
 
+        // constructor is here
+
+        impl<'air_pipe_collection_lifetime>
+            AirPipeCollectionSeries<'air_pipe_collection_lifetime> {
+            fn new() -> Self {
+                return Self { 
+                    fluid_component_vector_immutable:  vec![]
+                };
+            }
+        }
+
+        
+        let mut air_pipe_vec: Vec<&dyn FluidComponent> = vec![];
+
+        air_pipe_vec.push(&air_pipe_1);
+        air_pipe_vec.push(&air_pipe_2);
+        air_pipe_vec.push(&air_pipe_3);
+        air_pipe_vec.push(&air_pipe_4);
+        air_pipe_vec.push(&air_pipe_5);
+        air_pipe_vec.push(&air_pipe_6);
+        air_pipe_vec.push(&air_pipe_7);
+        air_pipe_vec.push(&air_pipe_8);
+        air_pipe_vec.push(&air_pipe_9);
+        air_pipe_vec.push(&air_pipe_10);
+
+        // now i've made my air pipe vector, i can push it into the air pipe collection
+        let mut air_pipe_series = 
+            AirPipeCollectionSeries::new();
+
+        air_pipe_series.set_fluid_component_vector(air_pipe_vec);
+
+        // now let's push a 0.001kg/s airflow through this pipe series
+        //
+        let pipe_airflow = MassRate::new::<kilogram_per_second>(0.001);
+
+        // and then let's get the pressure change
+
+        let pipe_pressure_change = air_pipe_series.
+            get_pressure_change(pipe_airflow);
+
+        // the pressure losses are about -1144 Pa
+        approx::assert_relative_eq!(
+            pipe_pressure_change.value,
+            -1144.0,
+            max_relative=0.001);
+
+        // i will also test the get pressure loss function
+
+        let pipe_pressure_loss = air_pipe_series.
+            get_pressure_loss(pipe_airflow);
+
+        // in this case, there is no elevation or internal
+        // pressure source, so the pipe pressure losses should
+        // be the same as the inverse of the pressure change
+        assert_eq!(-pipe_pressure_change,
+                   pipe_pressure_loss);
 
         return;
 
