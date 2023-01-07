@@ -432,14 +432,14 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
                     mass_flow_kg_per_s_double);
 
 
-            let pressure_change = 
+            let pressure_change_tested = 
                 Self::calculate_pressure_change_from_mass_flowrate(
                 mass_rate, 
                 fluid_component_vector);
 
             // now i've obtained the pressure change, i convert it to f64
 
-            let pressure_change_pascals_f64 = 
+            let pressure_change_user_stipulated_pascals = 
                 pressure_change.value;
 
             // since we are finding root, then we must also
@@ -447,8 +447,8 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
 
             let pressure_change_error: f64 =
-                pressure_change_pascals_f64 - 
-                pressure_change.value;
+                pressure_change_user_stipulated_pascals - 
+                pressure_change_tested.value;
 
             return AD0(pressure_change_error);
 
@@ -472,7 +472,7 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
             // now i've obtained the pressure change, i convert it to f64
 
-            let pressure_change_pascals_f64 = 
+            let pressure_change_user_stipulated_pascals_f64 = 
                 pressure_change.value;
 
             // since we are finding root, then we must also
@@ -480,7 +480,7 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
 
             let pressure_change_error: f64 =
-                pressure_change_pascals_f64 - 
+                pressure_change_user_stipulated_pascals_f64 - 
                 pressure_change_tested.value;
 
             return pressure_change_error;
