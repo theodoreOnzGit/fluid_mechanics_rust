@@ -4,9 +4,16 @@ use uom::si::pressure::pascal;
 
 use crate::fluid_component_calculation::FluidComponent;
 
-
+// the peroxide crate for root finders
 extern crate peroxide;
 use peroxide::prelude::*;
+
+// another crate for root finders, in fact this package specialises in root
+// finding
+extern crate roots;
+use roots::Roots;
+use roots::find_root_brent;
+use roots::SimpleConvergency;
 
 
 /// a fluid component collection,
@@ -207,6 +214,7 @@ pub trait FluidComponentCollectionMethods {
 /// are connected in series
 pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
+
     /// calculates pressure change from mass flowrate
     /// for a given fluid component collection
     /// it needs a vector of mutable references to
@@ -354,6 +362,9 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         let pressure_loss_pascals = 
             -(pressure_change - pressure_change_0kg_per_second).value;
 
+        if pressure_loss_pascals.abs() < 9_f64 {
+            return zero_mass_flow;
+        }
 
 
         // present issue: 
@@ -410,7 +421,7 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         // i'm going to use the peroxide library 
         //
 
-        let mass_flow_from_pressure_chg_root = 
+        let mass_flow_from_pressure_chg_root_peroxide = 
             |mass_flow_kg_per_s: AD| -> AD {
 
             let mass_flow_kg_per_s_double: f64 =
@@ -443,18 +454,38 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
         };
 
-        let mass_flowrate_result 
-            = bisection(
-                mass_flow_from_pressure_chg_root,
-                (0.05, 0.15), // initial guess 0.5 kg/s
-                300,
-                1e-8);
+        // this is for use in the roots library
+        let mass_flow_from_pressure_chg_root = 
+            |mass_flow_kg_per_s: f64| -> f64 {
 
-        let mass_flowrate = 
-            MassRate::new::<kilogram_per_second>(
-                mass_flowrate_result.unwrap());
+            let mass_flow_kg_per_s_double = mass_flow_kg_per_s; 
 
-        return mass_flowrate;
+            let mass_rate = 
+                MassRate::new::<kilogram_per_second>(
+                    mass_flow_kg_per_s_double);
+
+
+            let pressure_change_tested = 
+                Self::calculate_pressure_change_from_mass_flowrate(
+                mass_rate, 
+                fluid_component_vector);
+
+            // now i've obtained the pressure change, i convert it to f64
+
+            let pressure_change_pascals_f64 = 
+                pressure_change.value;
+
+            // since we are finding root, then we must also
+            // subtract it from our pressure change value
+
+
+            let pressure_change_error: f64 =
+                pressure_change_pascals_f64 - 
+                pressure_change_tested.value;
+
+            return pressure_change_error;
+
+        };
 
         // note: this function mutates the value of fluid_component_vector,
         // and is thus incompatible with peroxide libraries...
@@ -463,51 +494,59 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         // But having done so, I want to use the newton raphson method to
         // try and converge this result, hopefully within 30 iterations
 
+        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+
         let mass_flowrate_result =
             if forward_flow_true != true {
 
+                // i will search between -10 and 0 for the bracketing
                 let mass_flowrate_result 
-                    = newton(
-                        mass_flow_from_pressure_chg_root,
-                        -0.5, // initial guess 0.5 kg/s
-                        30,
-                        1e-8);
+                    = find_root_brent(
+                        -15_f64,
+                        -0.0001_f64,
+                        &mass_flow_from_pressure_chg_root,
+                        &mut convergency);
+
 
                 // if loop returns this mass flowrate result
                 mass_flowrate_result
 
             } else {
                 let mass_flowrate_result 
-                    = newton(
-                        mass_flow_from_pressure_chg_root,
-                        0.5, // initial guess 0.5 kg/s
-                        30,
-                        1e-8);
+                    = find_root_brent(
+                        15_f64,
+                        0.0001_f64,
+                        &mass_flow_from_pressure_chg_root,
+                        &mut convergency);
                 
                 // if loop returns this mass flowrate result
                 mass_flowrate_result
             };
+
+        // the above results only work for ranges of 15 kg/s and
+        // -15 kg/s
 
         // now if the newton raphson method does not converge within the
         // set number of iterations, I want it to use bisection
         // which should fall back to bisection
 
 
-        let mass_flowrate = 
-            match mass_flowrate_result {
-            Ok(_mass_flowrate) => 
-                return MassRate::new::<kilogram_per_second>(_mass_flowrate),
-            Err(_error_msg) => <Self as FluidComponentCollectionSeriesAssociatedFunctions>::
-                calc_mass_flowrate_from_pressure_chg_bisection_fallback(
-                mass_flow_from_pressure_chg_root)
-        };
+        //let mass_flowrate = 
+        //    match mass_flowrate_result {
+        //    Ok(_mass_flowrate) => 
+        //        return MassRate::new::<kilogram_per_second>(_mass_flowrate),
+        //    Err(_error_msg) => <Self as FluidComponentCollectionSeriesAssociatedFunctions>::
+        //        calc_mass_flowrate_from_pressure_chg_bisection_fallback(
+        //        mass_flow_from_pressure_chg_root_peroxide)
+        //};
 
 
 
 
 
 
-        return mass_flowrate.unwrap();
+        //return mass_flowrate.unwrap();
+        return MassRate::new::<kilogram_per_second>(mass_flowrate_result.unwrap());
     }
 
     /// This function is not meant ot be used by the end user

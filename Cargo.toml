@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 approx = "0.5.1"
 peroxide = "0.31.6"
+roots = "0.0.8"
 uom = { git = "https://github.com/iliekturtles/uom", version = "0.33.0" }
 
 # library and binary key
