@@ -5,13 +5,10 @@ use uom::si::pressure::pascal;
 use crate::fluid_component_calculation::FluidComponent;
 
 // the peroxide crate for root finders
-extern crate peroxide;
-use peroxide::prelude::*;
 
 // another crate for root finders, in fact this package specialises in root
 // finding
 extern crate roots;
-use roots::{Roots, SearchError};
 use roots::find_root_brent;
 use roots::SimpleConvergency;
 
@@ -211,6 +208,73 @@ pub trait FluidComponentCollectionMethods {
 /// and losses from it
 ///
 /// this assumes that all the components in the vector
+/// are connected in parallel
+pub trait FluidComponentCollectionParallelAssociatedFunctions {
+
+
+    /// calculates mass flowrate given a pressure change
+    /// across each pipe or component in the parallel
+    /// arrangement
+    fn calculate_mass_flowrate_from_pressure_change(
+        pressure_change: Pressure,
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> MassRate {
+        // we instantiate a mass_flowrate vector to store
+        // the values of the mass_flowrate changes
+
+        let mut mass_flowrate_vector: Vec<MassRate> =
+            vec![];
+
+        // the mass_flowrate vector will have a length
+        // equal to the fluid_component vector
+
+        let new_vector_length =
+            fluid_component_vector.len();
+
+        let default_mass_flowrate_value = 
+            MassRate::new::<kilogram_per_second>(0.0);
+
+        mass_flowrate_vector.resize(
+            new_vector_length,
+            default_mass_flowrate_value
+            );
+
+        for (index,fluid_component_pointer) in 
+            fluid_component_vector.iter().enumerate() {
+                
+                // first we get an immutable reference from
+                // the mutable reference
+
+                let fluid_component = 
+                    &*fluid_component_pointer;
+
+
+                let fluid_component_mass_flowrate = 
+                    fluid_component.get_mass_flowrate_from_pressure_change_immutable(
+                        pressure_change);
+
+                mass_flowrate_vector[index] = 
+                    fluid_component_mass_flowrate;
+
+            }
+
+        let mut final_mass_flowrate = 
+            default_mass_flowrate_value;
+
+        for mass_flowrate in mass_flowrate_vector {
+
+            final_mass_flowrate += mass_flowrate;
+
+        }
+
+        return final_mass_flowrate;
+    }
+}
+
+/// contains associated functions which take a fluid component
+/// vector and calculate mass flowrates and pressure changes
+/// and losses from it
+///
+/// this assumes that all the components in the vector
 /// are connected in series
 pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
@@ -246,18 +310,21 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
         for (index,fluid_component_pointer) in 
             fluid_component_vector.iter().enumerate() {
+                
+                // first we get an immutable reference from
+                // the mutable reference
 
-            let fluid_component = 
-                &*fluid_component_pointer;
+                let fluid_component = 
+                    &*fluid_component_pointer;
 
 
-            let fluid_component_pressure_change = 
-                fluid_component.get_pressure_change_immutable(mass_flowrate);
+                let fluid_component_pressure_change = 
+                    fluid_component.get_pressure_change_immutable(mass_flowrate);
 
-            pressure_vector[index] = 
-                fluid_component_pressure_change;
+                pressure_vector[index] = 
+                    fluid_component_pressure_change;
 
-        }
+            }
 
         let mut final_pressure_change: Pressure =
             default_pressure_value;
