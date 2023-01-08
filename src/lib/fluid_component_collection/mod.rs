@@ -1108,6 +1108,23 @@ pub mod fluid_component_collection_test_and_examples {
             pipe_test_air_mass_flowrate.value,
             max_relative=0.001);
 
+
+        // the last thing to assert is whether the pressure loss of 1 pipe
+        // is equal to 1/10 of the pipes in series
+
+        let pressure_loss_1_pipe =
+            air_pipe_1.get_pressure_change_immutable(pipe_airflow);
+
+        let pressure_loss_10_pipe_series =
+            air_pipe_series.get_pressure_change(pipe_airflow);
+
+        approx::assert_relative_eq!(
+            pressure_loss_1_pipe.value,
+            pressure_loss_10_pipe_series.value/10.0,
+            max_relative=1e-3);
+
+
+
         return;
 
     }
