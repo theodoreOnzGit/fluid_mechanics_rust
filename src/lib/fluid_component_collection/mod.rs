@@ -11,7 +11,7 @@ use peroxide::prelude::*;
 // another crate for root finders, in fact this package specialises in root
 // finding
 extern crate roots;
-use roots::Roots;
+use roots::{Roots, SearchError};
 use roots::find_root_brent;
 use roots::SimpleConvergency;
 
@@ -421,38 +421,6 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         // i'm going to use the peroxide library 
         //
 
-        let mass_flow_from_pressure_chg_root_peroxide = 
-            |mass_flow_kg_per_s: AD| -> AD {
-
-            let mass_flow_kg_per_s_double: f64 =
-                mass_flow_kg_per_s.x();
-
-            let mass_rate = 
-                MassRate::new::<kilogram_per_second>(
-                    mass_flow_kg_per_s_double);
-
-
-            let pressure_change_tested = 
-                Self::calculate_pressure_change_from_mass_flowrate(
-                mass_rate, 
-                fluid_component_vector);
-
-            // now i've obtained the pressure change, i convert it to f64
-
-            let pressure_change_user_stipulated_pascals = 
-                pressure_change.value;
-
-            // since we are finding root, then we must also
-            // subtract it from our pressure change value
-
-
-            let pressure_change_error: f64 =
-                pressure_change_user_stipulated_pascals - 
-                pressure_change_tested.value;
-
-            return AD0(pressure_change_error);
-
-        };
 
         // this is for use in the roots library
         let mass_flow_from_pressure_chg_root = 
@@ -496,14 +464,14 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
         let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
 
-        let mass_flowrate_result =
+        let mut mass_flowrate_result =
             if forward_flow_true != true {
 
                 // i will search between -10 and 0 for the bracketing
                 let mass_flowrate_result 
                     = find_root_brent(
-                        -15_f64,
-                        -0.0001_f64,
+                        -10_f64,
+                        -0_f64,
                         &mass_flow_from_pressure_chg_root,
                         &mut convergency);
 
@@ -514,8 +482,8 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
             } else {
                 let mass_flowrate_result 
                     = find_root_brent(
-                        15_f64,
-                        0.0001_f64,
+                        10_f64,
+                        0_f64,
                         &mass_flow_from_pressure_chg_root,
                         &mut convergency);
                 
@@ -529,90 +497,86 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
         // now if the newton raphson method does not converge within the
         // set number of iterations, I want it to use bisection
         // which should fall back to bisection
+        // This function is not meant ot be used by the end user
+        // but is instead called by another function
+        //
+        //
+        // this function is expected to take in an automatic
+        // differentiation function
+        //
+        // which takes the following form
+        //
+        // function(mass_flowrate_kg_per_second) -> pressure_pascals
+        //
+        // both mass flowrate and pressure are f64 but in SI units
+        // as i'm trying to solve pipe network problems and flow in series
+        // i consider the highest volume of flow possible for such a system
+        //
+        // the pressure actually measures the difference between the
+        // guessed pressure loss in the iteration
+        // and the actual pressure loss specified by the user
+        //
+        // The guiness book of world records shows that the amazon
+        // river has a flowrate of about 200,000 m3/s
+        // https://www.guinnessworldrecords.com/world-records/greatest-river-flow
+        //
+        // in other words about 200,000,000 kg/s
+        //
+        // We never expect man made 
+        // piping systems to have this much flow 
+        //
+        // But this would be a good upper bound for bisection solver.
+        //
+        //
+        //
+        // If we cannot find a root in this range,
+        // then it's likely there is no possible root at all
+        //
+        // the inline thingy here is just to help the code
+        // speed up a bit
+        //
+        // However, I don't want to go to such an upper limit so
+        // quickly,
+        //
+        // I'll do 10,000 kg/s in each flow branch first
+        // then 200,000,000
 
 
-        //let mass_flowrate = 
-        //    match mass_flowrate_result {
-        //    Ok(_mass_flowrate) => 
-        //        return MassRate::new::<kilogram_per_second>(_mass_flowrate),
-        //    Err(_error_msg) => <Self as FluidComponentCollectionSeriesAssociatedFunctions>::
-        //        calc_mass_flowrate_from_pressure_chg_bisection_fallback(
-        //        mass_flow_from_pressure_chg_root_peroxide)
-        //};
+        mass_flowrate_result = 
+            match mass_flowrate_result {
+                Ok(_mass_flowrate) => 
+                    return MassRate::new::<kilogram_per_second>(_mass_flowrate),
+                Err(_error_msg) => {
 
+                    mass_flowrate_result 
+                        = find_root_brent(
+                            10_000_f64,
+                            -10_000_f64,
+                            &mass_flow_from_pressure_chg_root,
+                            &mut convergency);
 
-
-
-
-
-        //return mass_flowrate.unwrap();
-        return MassRate::new::<kilogram_per_second>(mass_flowrate_result.unwrap());
-    }
-
-    /// This function is not meant ot be used by the end user
-    /// but is instead called by another function
-    ///
-    ///
-    /// this function is expected to take in an automatic
-    /// differentiation function
-    ///
-    /// which takes the following form
-    ///
-    /// function(mass_flowrate_kg_per_second) -> pressure_pascals
-    ///
-    /// both mass flowrate and pressure are f64 but in SI units
-    /// as i'm trying to solve pipe network problems and flow in series
-    /// i consider the highest volume of flow possible for such a system
-    ///
-    /// the pressure actually measures the difference between the
-    /// guessed pressure loss in the iteration
-    /// and the actual pressure loss specified by the user
-    ///
-    /// The guiness book of world records shows that the amazon
-    /// river has a flowrate of about 200,000 m3/s
-    /// https://www.guinnessworldrecords.com/world-records/greatest-river-flow
-    ///
-    /// in other words about 200,000,000 kg/s
-    ///
-    /// We never expect man made 
-    /// piping systems to have this much flow 
-    ///
-    /// But this would be a good upper bound for bisection solver.
-    ///
-    ///
-    ///
-    /// If we cannot find a root in this range,
-    /// then it's likely there is no possible root at all
-    ///
-    /// the inline thingy here is just to help the code
-    /// speed up a bit
-    #[inline]
-    fn calc_mass_flowrate_from_pressure_chg_bisection_fallback
-        <F: Fn(AD) -> AD >(
-            f: F) -> Result<MassRate, String> {
-
-            // the result enum packages two things
-            // and you must return 
-
-            let tol: f64 = 1e-8;
-            let times: usize = 10_000;
-            let interval: (f64,f64) = (-20_000_000.0, 20_000_000.0);
-
-            let bisection_result =
-                bisection(f, interval, times, tol);
-            
-            // the result type demands that we provide if statements to capture
-            // two return types
-            //
-            // you need to return an Ok
-            match bisection_result {
-
-                Ok(mass_flowrate_f64_kg_per_s) => 
-                    return Ok(
-                        MassRate::new::<kilogram_per_second>(mass_flowrate_f64_kg_per_s)),
-                Err(e) => return Err(e.to_string()),
+                    mass_flowrate_result
+                }
             };
 
+        mass_flowrate_result = 
+            match mass_flowrate_result {
+                Ok(_mass_flowrate) => 
+                    return MassRate::new::<kilogram_per_second>(_mass_flowrate),
+                Err(_error_msg) => {
+
+                    mass_flowrate_result 
+                        = find_root_brent(
+                            20_000_000_f64,
+                            -20_000_000_f64,
+                            &mass_flow_from_pressure_chg_root,
+                            &mut convergency);
+
+                    mass_flowrate_result
+                }
+            };
+        //return mass_flowrate.unwrap();
+        return MassRate::new::<kilogram_per_second>(mass_flowrate_result.unwrap());
     }
 
 }
