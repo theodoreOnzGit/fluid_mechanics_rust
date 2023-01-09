@@ -1,6 +1,5 @@
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
-use uom::si::pressure::pascal;
 
 use crate::fluid_component_calculation::FluidComponent;
 
