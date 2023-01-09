@@ -633,15 +633,7 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
             obtain_average_pressure_from_vector(
                 &user_specified_flow_pressure_loss_est_vector);
 
-        let max_pressure_loss_due_to_flow = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_maximum_pressure_from_vector(
-                &user_specified_flow_pressure_loss_est_vector);
 
-        let min_pressure_change_at_zero_flow = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_minimum_pressure_from_vector(
-                &zero_flow_pressure_change_est_vector);
 
         // now i can compare the magnitude of the internal driving force
         // to the user_specified_average_pressure_drop
