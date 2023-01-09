@@ -433,6 +433,9 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
         // if the mass flowrate is almost zero (1e-9 kg/s)
         // we assume flow is zero 
+        // this is zero NET flow through the parallel structure
+        // the branches themselves may still have flow going 
+        // through them
         if user_requested_mass_flowrate.value.abs() < 1e-9_f64 {
 
             let zero_pressure_upper_bound = 
@@ -446,17 +449,17 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
             let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
 
-            let pressure_change_pascals_result
+            let pressure_change_pascals_result_zero_flow
                 = find_root_brent(
                     zero_pressure_upper_bound.value,
                     zero_pressure_lower_bound.value,
                     &pressure_change_from_mass_flowrate_root,
                     &mut convergency);
 
-            let pressure_change_pascals: f64 = 
-                pressure_change_pascals_result.unwrap();
+            let pressure_change_pascals_zero_flow: f64 = 
+                pressure_change_pascals_result_zero_flow.unwrap();
 
-            return Pressure::new::<pascal>(pressure_change_pascals);
+            return Pressure::new::<pascal>(pressure_change_pascals_zero_flow);
         }
 
         // now let's find out the pressure variation_estimate at the user requested
@@ -2171,9 +2174,19 @@ pub mod fluid_component_collection_test_and_examples {
         // difference between the fluid component collection at zero flow
         // and the fluid component collection at user specified net flow
 
-        //let pipe_parallel_collection_pressure_change = 
-        //    air_pipe_parallel
-        //    .get_pressure_change(pipe_parallel_collection_mass_flowrate);
+        // getting guesses for this is complex, so i want to test for 
+        // zero flow first
+        let pipe_parallel_collection_pressure_change = 
+            air_pipe_parallel
+            .get_pressure_change(MassRate::new::<kilogram_per_second>(0.0));
+
+        // pressure change should be zero here
+
+        approx::assert_relative_eq!(
+            0.0,
+            pipe_parallel_collection_pressure_change.value,
+            max_relative=0.001);
+        
 
 
 
