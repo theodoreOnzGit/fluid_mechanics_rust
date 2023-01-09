@@ -462,6 +462,34 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
             return Pressure::new::<pascal>(pressure_change_pascals_zero_flow);
         }
 
+        // if flow is non zero, then we will have to deal with 3 bounding cases
+        // so that we can guess the bounds of root finding
+        //
+        // First case is where 
+        // the external flow >> internal circulation effect
+        //
+        // in this case a flow estimate is the mass flowrate
+        // divided by a number of branches and plus or minus the
+        // internal circulation
+        //
+        // How can we know this is the case?
+        //
+        // this can happen if we compare the largest pressure differences
+        // between the inside of the loop at zero flow
+        // 
+        // if we can compare magnitude of largest pressure difference inside
+        // the loop and find that it is much smaller (10% maybe?) than
+        // the external supplied pressure difference, this would be the case
+        // 
+        // in such a case, we can expect all fluid components across each
+        // branch to have some positive flow.
+        //
+        // The average of the flows would be 
+        //
+        // m_ext/number_of_branches
+        //
+        // 
+
         // now let's find out the pressure variation_estimate at the user requested
         // mass flowrate
         //
@@ -532,6 +560,134 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
         return Pressure::new::<pascal>(pressure_change_pascals);
 
+    }
+
+    /// calculates pressure change at zero mass flowrate
+    #[inline]
+    fn calculate_pressure_change_at_zero_mass_flowrate(
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
+
+
+        // step 1: let's first get the pressure changes at
+        // mass flowrate = 0.0
+        //
+
+        let zero_mass_flowrate = 
+            MassRate::new::<kilogram_per_second>(0.0);
+
+        // first i am applying zero flowrate through all branches
+        // this is the trivial solution
+        //
+        // After that I can see the pressure change at each of these
+        // branches when i apply zero mass flowrate through them
+        //
+        //
+        // if the pressure change across each branch is unequal, then
+        // we know we have internal flow
+        //
+        // therefore, the pressure change across all branches is somewhere
+        // in between the minimum and maximum pressure difference
+        //
+        // so that there is the sum of positive flows will equal the
+        // sum of the negative flows
+        //
+        // we will use this knowledge to decide the bounds of our solver
+        //
+        // the technique to obtain the an average pressure change
+        // is simply to find the arithmetic average of pressure change
+        // across all the branches
+        //
+        // The error bar so to speak is the difference between the
+        // minimum and maximum flowrate
+
+        let pressure_change_est_vector = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_pressure_estimate_vector(
+                zero_mass_flowrate, 
+                fluid_component_vector);
+
+        let average_pressure_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_average_pressure_from_vector(
+                &pressure_change_est_vector);
+
+
+        let max_pressure_change_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_maximum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let min_pressure_change_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_minimum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let pressure_diff_at_zero_flow = 
+            max_pressure_change_at_zero_flow -
+            min_pressure_change_at_zero_flow;
+
+
+
+        let static_pressure_variation_estimate = 
+            pressure_diff_at_zero_flow;
+
+
+        // with my upper and lower bounds
+        // i can now define the root function for pressure
+        // we are iterating pressure across each branch
+
+
+        // this is for use in the roots library
+        let pressure_change_from_mass_flowrate_root = 
+            |branch_pressure_change_pascals: f64| -> f64 {
+
+                // we obtain an iterated branch pressure change
+                // obtain a mass flowrate from it, by applying it to each branch
+                //
+                // then compare it to the user supplied mass flowrate
+                //
+
+                let iterated_pressure = 
+                    Pressure::new::<pascal>(branch_pressure_change_pascals);
+
+                let iterated_mass_flowrate =
+                    <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                    calculate_mass_flowrate_from_pressure_change(
+                        iterated_pressure, 
+                        fluid_component_vector);
+
+                let mass_flowrate_error = 
+                    iterated_mass_flowrate -
+                    zero_mass_flowrate;
+
+                return mass_flowrate_error.value;
+
+        };
+
+        // if the mass flowrate is considered zero
+
+        let zero_pressure_upper_bound = 
+            average_pressure_at_zero_flow 
+            + static_pressure_variation_estimate;
+
+        let zero_pressure_lower_bound =
+            average_pressure_at_zero_flow 
+            - static_pressure_variation_estimate;
+
+
+        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+
+        let pressure_change_pascals_result_zero_flow
+            = find_root_brent(
+                zero_pressure_upper_bound.value,
+                zero_pressure_lower_bound.value,
+                &pressure_change_from_mass_flowrate_root,
+                &mut convergency);
+
+        let pressure_change_pascals_zero_flow: f64 = 
+            pressure_change_pascals_result_zero_flow.unwrap();
+
+        return Pressure::new::<pascal>(pressure_change_pascals_zero_flow);
     }
 
     /// This function takes a mass flowrate and applies it to each
