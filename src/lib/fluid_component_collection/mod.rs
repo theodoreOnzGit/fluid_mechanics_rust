@@ -497,6 +497,7 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
                 user_requested_mass_flowrate
                 /number_of_branches;
 
+
             return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
                 calculate_pressure_change_using_guessed_branch_mass_flowrate(
                     guess_average_mass_flowrate, 
@@ -511,132 +512,68 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
         //
         // in such a case, we expect the pressure change to be large enough
         // to be able to block flow in any one of the tubes
-
-
-        // if internal circulation is dominant, then the average mass flow 
-        // that we can guess through each pipe is close to zero
-        // however the desired mass flowrate is nonzero
-
-
-        // for safety sake, i'll just add
-        // the the maximum and minimum
-        // pressure changes together
-        // for minimum pressure, i'll take the absolute value
+        
+        // so it may be likely that flow in any one of those tubes is zero or
+        // close to zero because some of the flow in those tubes are blocked by
+        // the external pressure drop
         //
-        // So if maximum value is above zero and minimum
-        // value is above zero, we get extra positive values to enlarge
-        // our bounds
+        // if scales are similar (and non zero, because we already handled the
+        // zero case)
         //
-        // if maximum value is below zero, then minimum value should
-        // be less or equal to maximum value,
-        // then we should still get a value greater or equal to zero
+        // we can take the internal driving force as a reference scale
+        // calculate then 
+
+        let pressure_deviation_percentage_from_internal_driving_force =
+            (internal_circulation_driving_force_scale - 
+             user_specified_average_pressure_drop).value.abs()
+            /internal_circulation_driving_force_scale.value.abs()
+            *100.0_f64;
+
+        // if the deviation percentage is less than 80%, we can say they are quite
+        // in the same order of magnitude or similar
+
+        if pressure_deviation_percentage_from_internal_driving_force < 80.0 {
+
+
+            // in this case, the guessed mass flowrate through each of these
+            // loops can be very close to zero,
+            // therefore zero flowrate is supplied
+            // as a guess
+            // the algorithm is similar to the internal pressure dominant
+            // case,
+            // but the reasoning is different
+
+            let guess_average_mass_flowrate =
+                zero_mass_flowrate;
+
+            return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                calculate_pressure_change_using_guessed_branch_mass_flowrate(
+                    guess_average_mass_flowrate, 
+                    user_requested_mass_flowrate, 
+                    fluid_component_vector);
+
+
+        }
+
+        // now if all of the cases are exhausted, we will just resort to a generic
+        // method where the guessed flowrate for each branch is the 
+        // user supplied mass flowrate/number of branches
         //
-        // we don't want to overdo adding range bounds here because
-        // of timing
+        // hopefully this will supply the correct pressure bounds to
+        // guess the pressure change
 
+        let number_of_branches: f64 =
+            fluid_component_vector.len() as f64;
 
-        let static_pressure_variation_estimate = 
-            internal_circulation_driving_force_scale;
+        let guess_average_mass_flowrate =
+            user_requested_mass_flowrate
+            /number_of_branches;
 
-
-        // with my upper and lower bounds
-        // i can now define the root function for pressure
-        // we are iterating pressure across each branch
-
-
-        // this is for use in the roots library
-        let pressure_change_from_mass_flowrate_root = 
-            |branch_pressure_change_pascals: f64| -> f64 {
-
-                // we obtain an iterated branch pressure change
-                // obtain a mass flowrate from it, by applying it to each branch
-                //
-                // then compare it to the user supplied mass flowrate
-                //
-
-                let iterated_pressure = 
-                    Pressure::new::<pascal>(branch_pressure_change_pascals);
-
-                let iterated_mass_flowrate =
-                    <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-                    calculate_mass_flowrate_from_pressure_change(
-                        iterated_pressure, 
-                        fluid_component_vector);
-
-                let mass_flowrate_error = 
-                    iterated_mass_flowrate -
-                    user_requested_mass_flowrate;
-
-                return mass_flowrate_error.value;
-
-        };
-
-
-
-
-
-        let pressure_change_est_vector = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_pressure_estimate_vector(
+        return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            calculate_pressure_change_using_guessed_branch_mass_flowrate(
+                guess_average_mass_flowrate, 
                 user_requested_mass_flowrate, 
                 fluid_component_vector);
-
-        let max_pressure_change_at_user_requested_mass_flowrate = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_maximum_pressure_from_vector(
-                &pressure_change_est_vector);
-
-        let min_pressure_change_at_user_requested_mass_flowrate = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_minimum_pressure_from_vector(
-                &pressure_change_est_vector);
-
-        // i'll use the same tricks as before to get my pressure variation_estimate
-        // in the dynamic flow situations
-
-        let pressure_diff_at_user_requested_mass_flowrate = 
-            max_pressure_change_at_user_requested_mass_flowrate -
-            min_pressure_change_at_user_requested_mass_flowrate;
-
-        let pressure_sum_at_user_requested_mass_flowrate = 
-            max_pressure_change_at_user_requested_mass_flowrate +
-            Pressure::new::<pascal>(
-                min_pressure_change_at_user_requested_mass_flowrate.value.abs());
-
-        let dynamic_pressure_variation_estimate = 
-            pressure_diff_at_user_requested_mass_flowrate +
-            pressure_sum_at_user_requested_mass_flowrate;
-
-        // now let's get my pressure variation estimates
-        // and upper and lower pressure bounds
-
-        let pressure_variation_estimate 
-            = static_pressure_variation_estimate
-            + dynamic_pressure_variation_estimate;
-
-        let pressure_upper_bound_estimate = 
-            max_pressure_change_at_zero_flow +
-            pressure_variation_estimate;
-
-        let pressure_lower_bound_estimate = 
-            max_pressure_change_at_zero_flow - 
-            pressure_variation_estimate;
-
-        // now we are ready to try our brent method
-
-        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
-
-        let pressure_change_pascals_result
-            = find_root_brent(
-                pressure_upper_bound_estimate.value,
-                pressure_lower_bound_estimate.value,
-                &pressure_change_from_mass_flowrate_root,
-                &mut convergency);
-
-        let pressure_change_pascals: f64 = 
-            pressure_change_pascals_result.unwrap();
-
-        return Pressure::new::<pascal>(pressure_change_pascals);
 
     }
 
@@ -849,15 +786,31 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
         // now we use the guessed average flowrates to decide upper
         // and lower bounds for the pressure loss
+        //
+        
 
-        let user_specified_pressure_upper_bound = 
+        let mut user_specified_pressure_upper_bound = 
             average_pressure_at_guessed_average_flow 
             + static_pressure_variation_estimate;
 
-        let user_specified_pressure_lower_bound =
+        let mut user_specified_pressure_lower_bound =
             average_pressure_at_guessed_average_flow 
             - static_pressure_variation_estimate;
 
+        // now if the upper and lower bounds are the same,
+        // then we will add a 5 Pa difference to them
+        //
+
+        if user_specified_pressure_lower_bound.value ==
+            user_specified_pressure_upper_bound.value {
+
+                user_specified_pressure_lower_bound.value -= 5.0;
+                user_specified_pressure_upper_bound.value += 5.0;
+
+
+            }
+
+        //panic!("{:?}", user_specified_pressure_upper_bound);
 
         let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
 
@@ -2531,6 +2484,13 @@ pub mod fluid_component_collection_test_and_examples {
             &air_pipe_1.get_pressure_loss_immutable(pipe_reference_mass_flowrate).value,
             max_relative=0.001);
         
+        // now i also want to push a -1000 Pa pressure loss through one of the pipes
+        // and see  the results
+        //
+        approx::assert_relative_eq!(
+            -pressure_loss_specified.value,
+            &air_pipe_1.get_pressure_loss_immutable(-pipe_reference_mass_flowrate).value,
+            max_relative=0.001);
 
         
 
@@ -2585,7 +2545,15 @@ pub mod fluid_component_collection_test_and_examples {
             max_relative=0.001);
         
 
+        // since the zero mass flow situation works,
+        // we can proceed
+        //
+        // and the pressure should be about -1000 Pa
 
+        let pipe_parallel_collection_pressure_change =
+            air_pipe_parallel
+            .get_pressure_change(
+                MassRate::new::<kilogram_per_second>(0.0841));
 
 
 
