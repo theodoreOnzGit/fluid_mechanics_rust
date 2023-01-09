@@ -1,3 +1,4 @@
+use uom::num_traits::ToPrimitive;
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
@@ -614,6 +615,48 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
 
         return Pressure::new::<pascal>(minimum_pressure_value_pascals);
+
+    }
+
+    /// this function returns the minimum pressure change within
+    /// a pressure vector
+    #[inline]
+    fn obtain_average_pressure_from_vector(
+        pressure_vector: &Vec<Pressure>) -> Pressure {
+
+        // let's get an f64 vector from the pressure vector
+
+        let mut f64_vector: Vec<f64> =vec![];
+
+        f64_vector.resize(
+            pressure_vector.len(), 
+            0.0);
+
+        for (index,pressure_obj_pointer) in 
+            pressure_vector.iter().enumerate() {
+
+                f64_vector[index] = 
+                    pressure_obj_pointer.value;
+
+            }
+        
+        // now we have obtained a f64 vector from the pressure vector,
+        // we can then use the max values from it
+        // https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.max
+
+        let sum_pressure_value_pascals: f64 = 
+            f64_vector
+            .into_iter()
+            .sum();
+
+        let average_pressure_value_pascals = 
+            sum_pressure_value_pascals
+            /pressure_vector.len().to_f64().unwrap();
+
+
+
+
+        return Pressure::new::<pascal>(average_pressure_value_pascals);
 
     }
 
@@ -2065,6 +2108,18 @@ pub mod fluid_component_collection_test_and_examples {
             pipe_parallel_collection_mass_flowrate.value,
             max_relative=0.001);
 
+        // this result should be the same as specifying a -1000 Pa pressure change
+        // becuase i set no elevation for this
+
+        let pipe_parallel_collection_mass_flowrate_2 = air_pipe_parallel.
+            get_mass_flowrate_from_pressure_change(
+                -pressure_loss_specified);
+
+        approx::assert_relative_eq!(
+            0.0841,
+            pipe_parallel_collection_mass_flowrate_2.value,
+            max_relative=0.001);
+
         // now we can get the pressure change from mass flowrate
         // which should be -1000 Pa approximately
         //
@@ -2072,9 +2127,9 @@ pub mod fluid_component_collection_test_and_examples {
         // difference between the fluid component collection at zero flow
         // and the fluid component collection at user specified net flow
 
-        let pipe_parallel_collection_pressure_change = 
-            air_pipe_parallel
-            .get_pressure_change(pipe_parallel_collection_mass_flowrate);
+        //let pipe_parallel_collection_pressure_change = 
+        //    air_pipe_parallel
+        //    .get_pressure_change(pipe_parallel_collection_mass_flowrate);
 
 
 
