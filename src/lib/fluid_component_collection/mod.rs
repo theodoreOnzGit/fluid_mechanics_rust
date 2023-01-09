@@ -1321,25 +1321,55 @@ pub mod fluid_component_collection_test_and_examples {
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(-1000.0));
 
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                0.0841,
+                max_relative=0.001);
+
             let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(-995.0));
+
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                0.0837,
+                max_relative=0.001);
 
             let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(-1005.0));
 
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                0.0845,
+                max_relative=0.001);
+
             let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(1000.0));
+
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                -0.0841,
+                max_relative=0.001);
 
             let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(995.0));
 
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                -0.0837,
+                max_relative=0.001);
+
             let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
                 get_mass_flowrate_from_pressure_change(
                     Pressure::new::<pascal>(1005.0));
+
+            approx::assert_relative_eq!(
+                pipe_parallel_collection_mass_flowrate.value,
+                -0.0845,
+                max_relative=0.001);
         }
 
         //let pipe_parallel_collection_pressure_change =
