@@ -444,7 +444,78 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
             obtain_minimum_pressure_from_vector(
                 &zero_flow_pressure_change_est_vector);
 
-        // probably continue another time... am too tired at this point...
+        // now i can compare the magnitude of the internal driving force
+        // to the user_specified_average_pressure_drop
+        //
+        // if the average pressure drop is <10% or the internal driving force,
+        // then we can consider this a internal circulation dominant case
+
+        let internal_circulation_dominant = 
+            internal_circulation_driving_force_scale.value * 10.0 
+            > user_specified_average_pressure_drop.value.abs();
+
+        if internal_circulation_dominant {
+
+            // in this case, the average mass flowrate through each of these
+            // loops is very close to zero,
+            // therefore zero flowrate is supplied
+            // as a guess
+
+            let guess_average_mass_flowrate =
+                zero_mass_flowrate;
+
+            return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                calculate_pressure_change_using_guessed_branch_mass_flowrate(
+                    guess_average_mass_flowrate, 
+                    user_requested_mass_flowrate, 
+                    fluid_component_vector);
+        }
+
+        // next we can go to the other extreme, where external flowrate is 
+        // dominant,
+        //
+        // in such a case, the internal circulation driving force (at zero flow)
+        // is much smaller <10% of the external pressure driving force
+        // which can be specified by the user specified average pressure drop
+        // value
+        //
+
+
+        let external_circulation_dominant = 
+            internal_circulation_driving_force_scale.value * 10.0 
+            < user_specified_average_pressure_drop.value.abs();
+
+        if external_circulation_dominant {
+
+            // in such a case, the average guessed flowrate should be 
+            // the total mass flowrate divided by the number of branches
+
+            let number_of_branches: f64 =
+                fluid_component_vector.len() as f64;
+
+            let guess_average_mass_flowrate =
+                user_requested_mass_flowrate
+                /number_of_branches;
+
+            return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                calculate_pressure_change_using_guessed_branch_mass_flowrate(
+                    guess_average_mass_flowrate, 
+                    user_requested_mass_flowrate, 
+                    fluid_component_vector);
+
+        }
+
+        // now that we've covered both of the extreme cases, we can check the third
+        // case where the internal circulation force and external circulation force
+        // both cannot be neglected
+        //
+        // in such a case, we expect the pressure change to be large enough
+        // to be able to block flow in any one of the tubes
+
+
+        // if internal circulation is dominant, then the average mass flow 
+        // that we can guess through each pipe is close to zero
+        // however the desired mass flowrate is nonzero
 
 
         // for safety sake, i'll just add
@@ -695,6 +766,112 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
             pressure_change_pascals_result_zero_flow.unwrap();
 
         return Pressure::new::<pascal>(pressure_change_pascals_zero_flow);
+    }
+
+    /// calculates pressure change at user specified mass flowrate
+    /// given a guessed flowrate through each branch
+    /// and user specified flowrate
+    ///
+    #[inline]
+    fn calculate_pressure_change_using_guessed_branch_mass_flowrate(
+        guess_average_mass_flowrate: MassRate,
+        user_specified_mass_flowrate: MassRate,
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
+
+
+        // first i am applying the average gussed flowrate through all branches
+        // this is the trivial solution
+        //
+
+        let pressure_change_est_vector = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_pressure_estimate_vector(
+                guess_average_mass_flowrate, 
+                fluid_component_vector);
+
+        let average_pressure_at_guessed_average_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_average_pressure_from_vector(
+                &pressure_change_est_vector);
+
+
+        let max_pressure_change_at_guessed_average_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_maximum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let min_pressure_change_at_guessed_average_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_minimum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let pressure_diff_at_guessed_average_flow = 
+            max_pressure_change_at_guessed_average_flow -
+            min_pressure_change_at_guessed_average_flow;
+
+
+
+        let static_pressure_variation_estimate = 
+            pressure_diff_at_guessed_average_flow;
+
+
+        // with my upper and lower bounds
+        // i can now define the root function for pressure
+        // we are iterating pressure across each branch
+
+
+        // this is for use in the roots library
+        let pressure_change_from_mass_flowrate_root = 
+            |branch_pressure_change_pascals: f64| -> f64 {
+
+                // we obtain an iterated branch pressure change
+                // obtain a mass flowrate from it, by applying it to each branch
+                //
+                // then compare it to the user supplied mass flowrate
+                //
+
+                let iterated_pressure = 
+                    Pressure::new::<pascal>(branch_pressure_change_pascals);
+
+                let iterated_mass_flowrate =
+                    <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                    calculate_mass_flowrate_from_pressure_change(
+                        iterated_pressure, 
+                        fluid_component_vector);
+
+                let mass_flowrate_error = 
+                    iterated_mass_flowrate -
+                    user_specified_mass_flowrate;
+
+                return mass_flowrate_error.value;
+
+        };
+
+        // now we use the guessed average flowrates to decide upper
+        // and lower bounds for the pressure loss
+
+        let user_specified_pressure_upper_bound = 
+            average_pressure_at_guessed_average_flow 
+            + static_pressure_variation_estimate;
+
+        let user_specified_pressure_lower_bound =
+            average_pressure_at_guessed_average_flow 
+            - static_pressure_variation_estimate;
+
+
+        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+
+        let pressure_change_pascals_result_user_specified_flow
+            = find_root_brent(
+                user_specified_pressure_upper_bound.value,
+                user_specified_pressure_lower_bound.value,
+                &pressure_change_from_mass_flowrate_root,
+                &mut convergency);
+
+        let pressure_change_pascals_user_specified_flow: f64 = 
+            pressure_change_pascals_result_user_specified_flow.unwrap();
+
+        return Pressure::new::<pascal>(pressure_change_pascals_user_specified_flow);
     }
 
     /// This function takes a mass flowrate and applies it to each
