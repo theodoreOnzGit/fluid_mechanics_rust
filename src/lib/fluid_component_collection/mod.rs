@@ -1372,10 +1372,11 @@ pub mod fluid_component_collection_test_and_examples {
                 max_relative=0.001);
         }
 
-        //let pipe_parallel_collection_pressure_change =
-        //    air_pipe_parallel
-        //    .get_pressure_change(
-        //        MassRate::new::<kilogram_per_second>(0.0841));
+        
+        let pipe_parallel_collection_pressure_change =
+            air_pipe_parallel
+            .get_pressure_change(
+                MassRate::new::<kilogram_per_second>(0.0841));
 
 
         return;

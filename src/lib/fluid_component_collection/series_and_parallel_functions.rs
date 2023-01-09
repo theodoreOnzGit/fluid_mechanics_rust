@@ -882,9 +882,13 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
             }
 
+        // i was using panic macros to debug during development
+        // may wanna delete later
         //panic!("{:?}", user_specified_pressure_upper_bound);
 
-        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+        // i can't use a convergency value too strict, perhaps 1e-9 will do!
+        //
+        let mut convergency = SimpleConvergency { eps:1e-9_f64, max_iter:30 };
 
         let pressure_change_pascals_result_user_specified_flow
             = find_root_brent(
