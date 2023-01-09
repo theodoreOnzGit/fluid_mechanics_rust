@@ -339,6 +339,50 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
         // and this should provide decent-ish initial guesses
         //
         
+        // if mass flowrate over this series is zero, then we can calculate the bound
+        // straightaway
+
+        let user_requested_mass_flowrate = 
+            mass_flowrate;
+
+        // if the mass flowrate is almost zero (1e-9 kg/s)
+        // we assume flow is zero 
+        // this is zero NET flow through the parallel structure
+        // the branches themselves may still have flow going 
+        // through them
+        if user_requested_mass_flowrate.value.abs() < 1e-9_f64 {
+
+            return <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                calculate_pressure_change_at_zero_mass_flowrate(
+                    fluid_component_vector);
+        }
+
+        // if flow is non zero, then we will have to deal with 3 bounding cases
+        // so that we can guess the bounds of root finding
+        //
+        // First case is where 
+        // the internal circulation effect >> external flow 
+        //
+        // This will be similar to the zero pressure mass flowrate algorithm
+        //
+        // in that one can simply apply that mass flowrate
+        // to all the branches, 
+        //
+        // assume that the pressure change will lie somewhere between
+        // the pressure changes obtained in the various branches
+        //
+        // and use the maximum and minimum pressure changes to obtain bounds
+        // and the solution to the equation
+        //
+        // For this to work, we know that the scale of the internal circulation
+        // driving force is perhaps (max pressure change - min pressure change)
+        //
+        // if the maximum pressure loss caused by the flow is within 10% of
+        // this driving force, i can say that case 1 applies. This is just
+        // a guestimate
+        //
+        // So let's first get the zero mass flowrate pressure force measured
+
 
         // step 1: let's first get the pressure changes at
         // mass flowrate = 0.0
@@ -347,31 +391,61 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
         let zero_mass_flowrate = 
             MassRate::new::<kilogram_per_second>(0.0);
 
-        let mut pressure_change_est_vector = 
+        let zero_flow_pressure_change_est_vector = 
             <Self as FluidComponentCollectionParallelAssociatedFunctions>::
             obtain_pressure_estimate_vector(
                 zero_mass_flowrate, 
                 fluid_component_vector);
 
-        let average_pressure_at_zero_flow = 
-            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
-            obtain_average_pressure_from_vector(
-                &pressure_change_est_vector);
 
 
         let max_pressure_change_at_zero_flow = 
             <Self as FluidComponentCollectionParallelAssociatedFunctions>::
             obtain_maximum_pressure_from_vector(
-                &pressure_change_est_vector);
+                &zero_flow_pressure_change_est_vector);
 
         let min_pressure_change_at_zero_flow = 
             <Self as FluidComponentCollectionParallelAssociatedFunctions>::
             obtain_minimum_pressure_from_vector(
-                &pressure_change_est_vector);
+                &zero_flow_pressure_change_est_vector);
 
-        let pressure_diff_at_zero_flow = 
+        let internal_circulation_driving_force_scale = 
             max_pressure_change_at_zero_flow -
             min_pressure_change_at_zero_flow;
+
+        // step 2: now i'll apply the user_specified flowrate to all the branches
+        // and calculate pressure loss
+
+        let user_specified_flow_pressure_loss_est_vector = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_pressure_loss_estimate_vector(
+                user_requested_mass_flowrate, 
+                fluid_component_vector);
+
+        // note that these pressure loss values are likely positive
+        // even if not though, what i'm looking for here is the
+        // largest magnitude of all these pressure losses
+
+        // to get a sense of the scale, i'm going to look for the average,
+        // minimum and maximum pressure drop
+
+        let user_specified_average_pressure_drop =
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_average_pressure_from_vector(
+                &user_specified_flow_pressure_loss_est_vector);
+
+        let max_pressure_loss_due_to_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_maximum_pressure_from_vector(
+                &user_specified_flow_pressure_loss_est_vector);
+
+        let min_pressure_change_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_minimum_pressure_from_vector(
+                &zero_flow_pressure_change_est_vector);
+
+        // probably continue another time... am too tired at this point...
+
 
         // for safety sake, i'll just add
         // the the maximum and minimum
@@ -391,13 +465,8 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
 
         let static_pressure_variation_estimate = 
-            pressure_diff_at_zero_flow;
+            internal_circulation_driving_force_scale;
 
-        // if mass flowrate over this series is zero, then we can calculate the bound
-        // straightaway
-
-        let user_requested_mass_flowrate = 
-            mass_flowrate;
 
         // with my upper and lower bounds
         // i can now define the root function for pressure
@@ -431,73 +500,11 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
         };
 
-        // if the mass flowrate is almost zero (1e-9 kg/s)
-        // we assume flow is zero 
-        // this is zero NET flow through the parallel structure
-        // the branches themselves may still have flow going 
-        // through them
-        if user_requested_mass_flowrate.value.abs() < 1e-9_f64 {
-
-            let zero_pressure_upper_bound = 
-                average_pressure_at_zero_flow 
-                + static_pressure_variation_estimate;
-            
-            let zero_pressure_lower_bound =
-                average_pressure_at_zero_flow 
-                - static_pressure_variation_estimate;
-
-
-            let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
-
-            let pressure_change_pascals_result_zero_flow
-                = find_root_brent(
-                    zero_pressure_upper_bound.value,
-                    zero_pressure_lower_bound.value,
-                    &pressure_change_from_mass_flowrate_root,
-                    &mut convergency);
-
-            let pressure_change_pascals_zero_flow: f64 = 
-                pressure_change_pascals_result_zero_flow.unwrap();
-
-            return Pressure::new::<pascal>(pressure_change_pascals_zero_flow);
-        }
-
-        // if flow is non zero, then we will have to deal with 3 bounding cases
-        // so that we can guess the bounds of root finding
-        //
-        // First case is where 
-        // the external flow >> internal circulation effect
-        //
-        // in this case a flow estimate is the mass flowrate
-        // divided by a number of branches and plus or minus the
-        // internal circulation
-        //
-        // How can we know this is the case?
-        //
-        // this can happen if we compare the largest pressure differences
-        // between the inside of the loop at zero flow
-        // 
-        // if we can compare magnitude of largest pressure difference inside
-        // the loop and find that it is much smaller (10% maybe?) than
-        // the external supplied pressure difference, this would be the case
-        // 
-        // in such a case, we can expect all fluid components across each
-        // branch to have some positive flow.
-        //
-        // The average of the flows would be 
-        //
-        // m_ext/number_of_branches
-        //
-        // 
-
-        // now let's find out the pressure variation_estimate at the user requested
-        // mass flowrate
-        //
-        // I'll then repeat the methods to get variation_estimate
 
 
 
-        pressure_change_est_vector = 
+
+        let pressure_change_est_vector = 
             <Self as FluidComponentCollectionParallelAssociatedFunctions>::
             obtain_pressure_estimate_vector(
                 user_requested_mass_flowrate, 
@@ -737,6 +744,63 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
                 let fluid_component_pressure_change = 
                     fluid_component.get_pressure_change_immutable(mass_flowrate);
+
+                pressure_vector[index] = 
+                    fluid_component_pressure_change;
+
+            }
+
+        return pressure_vector;
+
+    }
+
+    /// This function takes a mass flowrate and applies it to each
+    /// branch of the pipes in parallel
+    ///
+    /// The resulting pressure loss in each pipe is returned
+    /// as a vector
+    #[inline]
+    fn obtain_pressure_loss_estimate_vector(
+        mass_flowrate: MassRate,
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Vec<Pressure> {
+
+        // first we obtain pressure changes at zero mass flow
+        // over each branch
+        //
+        // we instantiate a pressure vector to store
+        // the values of the pressure changes
+
+        let mut pressure_vector: Vec<Pressure> =
+            vec![];
+
+        // the pressure vector will have a length
+        // equal to the fluid_component vector
+
+        let new_vector_length =
+            fluid_component_vector.len();
+
+        let default_pressure_value = 
+            Pressure::new::<pascal>(0.0);
+
+        pressure_vector.resize(
+            new_vector_length,
+            default_pressure_value
+            );
+
+
+
+        for (index,fluid_component_pointer) in 
+            fluid_component_vector.iter().enumerate() {
+                
+                // first we get an immutable reference from
+                // the mutable reference
+
+                let fluid_component = 
+                    &*fluid_component_pointer;
+
+
+                let fluid_component_pressure_change = 
+                    fluid_component.get_pressure_loss_immutable(mass_flowrate);
 
                 pressure_vector[index] = 
                     fluid_component_pressure_change;
