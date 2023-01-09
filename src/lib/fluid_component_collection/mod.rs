@@ -1313,11 +1313,39 @@ pub mod fluid_component_collection_test_and_examples {
         //
         // and the pressure should be about -1000 Pa
 
+        // this section tests if my get mass flowrate from pressure change works
+        // for front flow and backflow
+        {
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(-1000.0));
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(-995.0));
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(-1005.0));
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(1000.0));
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(995.0));
+
+            let pipe_parallel_collection_mass_flowrate = air_pipe_parallel.
+                get_mass_flowrate_from_pressure_change(
+                    Pressure::new::<pascal>(1005.0));
+        }
+
         //let pipe_parallel_collection_pressure_change =
         //    air_pipe_parallel
         //    .get_pressure_change(
         //        MassRate::new::<kilogram_per_second>(0.0841));
-
 
 
         return;
