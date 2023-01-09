@@ -268,6 +268,352 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
         return final_mass_flowrate;
     }
+
+    fn calculate_pressure_change_from_mass_flowrate(
+        mass_flowrate: MassRate,
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
+
+        // for calculating pressure change in a parallel collection from
+        // mass flowrate, 
+        // i will need to iteratively guess the pressure change
+        // across each pipe to get the specified mass flowrate
+
+        // only thing is how do i do so?
+        //
+        // First thing first, I will need to guess some bounds for the brent
+        // calculator, ie what pressure change bounds are appropriate?
+        //
+        // There are no standardised pressure change bounds for any of
+        // these
+        //
+        // Nevertheless, they can be calculated,
+        //
+        // For reference, at zero mass flowrate, each parallel branch would
+        // have a default pressure change. This may differ for each
+        // branch. 
+        //
+        //
+        // And then, when I supply a mass flowrate for each of these branches
+        // there would be some pressure losses associated with that
+        // mass flowrate
+        // Again, the pressure losses expected from each branch would
+        // be different
+        //
+        // since i supply a mass flowrate here already, I can use this
+        // combined mass flowrate through all pipes
+        //
+        // the minimum pressure loss from any one of these branches
+        // and subtract that from the maximum pressure loss
+        //
+        //
+        //
+        // This will form a pressure bound which i can plus and minus
+        // minus from my default pressure change
+        // 
+        // Lastly, I need to add the difference between the maximum
+        // and minimum of the pressure change at zero flow
+        // perhaps multiply that by 1.5 to obtain pressure bounds as
+        // well
+        //
+        // In this way, both flows due to pressure changes outside the      
+        // parallel branches
+        // and changes inside the parallel branches are accounted for
+        //
+        // in dynamic setting of bounds. 
+        // and this should provide decent-ish initial guesses
+        //
+        
+
+        // step 1: let's first get the pressure changes at
+        // mass flowrate = 0.0
+        //
+
+        let zero_mass_flowrate = 
+            MassRate::new::<kilogram_per_second>(0.0);
+
+        let mut pressure_change_est_vector = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_pressure_estimate_vector(
+                zero_mass_flowrate, 
+                fluid_component_vector);
+
+        let max_pressure_change_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_maximum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let min_pressure_change_at_zero_flow = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_minimum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let pressure_diff_at_zero_flow = 
+            max_pressure_change_at_zero_flow -
+            min_pressure_change_at_zero_flow;
+
+        // for safety sake, i'll just add
+        // the the maximum and minimum
+        // pressure changes together
+        // for minimum pressure, i'll take the absolute value
+        //
+        // So if maximum value is above zero and minimum
+        // value is above zero, we get extra positive values to enlarge
+        // our bounds
+        //
+        // if maximum value is below zero, then minimum value should
+        // be less or equal to maximum value,
+        // then we should still get a value greater or equal to zero
+        //
+        // we don't want to overdo adding range bounds here because
+        // of timing
+
+        let pressure_sum_at_zero_flow = 
+            max_pressure_change_at_zero_flow +
+            Pressure::new::<pascal>(
+                min_pressure_change_at_zero_flow.value.abs());
+
+        let static_pressure_variation_estimate = 
+            pressure_diff_at_zero_flow +
+            pressure_sum_at_zero_flow;
+
+        // now let's find out the pressure variation_estimate at the user requested
+        // mass flowrate
+        //
+        // I'll then repeat the methods to get variation_estimate
+
+        let user_requested_mass_flowrate = 
+            mass_flowrate;
+
+
+        pressure_change_est_vector = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_pressure_estimate_vector(
+                user_requested_mass_flowrate, 
+                fluid_component_vector);
+
+
+        let max_pressure_change_at_user_requested_mass_flowrate = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_maximum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        let min_pressure_change_at_user_requested_mass_flowrate = 
+            <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+            obtain_minimum_pressure_from_vector(
+                &pressure_change_est_vector);
+
+        // i'll use the same tricks as before to get my pressure variation_estimate
+        // in the dynamic flow situations
+
+        let pressure_diff_at_user_requested_mass_flowrate = 
+            max_pressure_change_at_user_requested_mass_flowrate -
+            min_pressure_change_at_user_requested_mass_flowrate;
+
+        let pressure_sum_at_user_requested_mass_flowrate = 
+            max_pressure_change_at_user_requested_mass_flowrate +
+            Pressure::new::<pascal>(
+                min_pressure_change_at_user_requested_mass_flowrate.value.abs());
+
+        let dynamic_pressure_variation_estimate = 
+            pressure_diff_at_user_requested_mass_flowrate +
+            pressure_sum_at_user_requested_mass_flowrate;
+
+        // now let's get my pressure variation estimates
+        // and upper and lower pressure bounds
+
+        let pressure_variation_estimate 
+            = static_pressure_variation_estimate
+            + dynamic_pressure_variation_estimate;
+
+        let pressure_upper_bound_estimate = 
+            max_pressure_change_at_zero_flow +
+            pressure_variation_estimate;
+
+        let pressure_lower_bound_estimate = 
+            max_pressure_change_at_zero_flow - 
+            pressure_variation_estimate;
+
+        // with my upper and lower bounds
+        // i can now define the root function for pressure
+        // we are iterating pressure across each branch
+
+
+        // this is for use in the roots library
+        let pressure_change_from_mass_flowrate_root = 
+            |branch_pressure_change_pascals: f64| -> f64 {
+
+                // we obtain an iterated branch pressure change
+                // obtain a mass flowrate from it, by applying it to each branch
+                //
+                // then compare it to the user supplied mass flowrate
+                //
+
+                let iterated_pressure = 
+                    Pressure::new::<pascal>(branch_pressure_change_pascals);
+
+                let iterated_mass_flowrate =
+                    <Self as FluidComponentCollectionParallelAssociatedFunctions>::
+                    calculate_mass_flowrate_from_pressure_change(
+                        iterated_pressure, 
+                        fluid_component_vector);
+
+                let mass_flowrate_error = 
+                    iterated_mass_flowrate -
+                    user_requested_mass_flowrate;
+
+                return mass_flowrate_error.value;
+
+        };
+
+        // now we are ready to try our brent method
+
+        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+
+        let pressure_change_pascals_result
+            = find_root_brent(
+                pressure_upper_bound_estimate.value,
+                pressure_lower_bound_estimate.value,
+                &pressure_change_from_mass_flowrate_root,
+                &mut convergency);
+
+        let pressure_change_pascals: f64 = 
+            pressure_change_pascals_result.unwrap();
+
+        return Pressure::new::<pascal>(pressure_change_pascals);
+
+    }
+
+    /// This function takes a mass flowrate and applies it to each
+    /// branch of the pipes in parallel
+    ///
+    /// The resulting pressure change in each pipe is returned
+    /// as a vector
+    #[inline]
+    fn obtain_pressure_estimate_vector(
+        mass_flowrate: MassRate,
+        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Vec<Pressure> {
+
+        // first we obtain pressure changes at zero mass flow
+        // over each branch
+        //
+        // we instantiate a pressure vector to store
+        // the values of the pressure changes
+
+        let mut pressure_vector: Vec<Pressure> =
+            vec![];
+
+        // the pressure vector will have a length
+        // equal to the fluid_component vector
+
+        let new_vector_length =
+            fluid_component_vector.len();
+
+        let default_pressure_value = 
+            Pressure::new::<pascal>(0.0);
+
+        pressure_vector.resize(
+            new_vector_length,
+            default_pressure_value
+            );
+
+
+
+        for (index,fluid_component_pointer) in 
+            fluid_component_vector.iter().enumerate() {
+                
+                // first we get an immutable reference from
+                // the mutable reference
+
+                let fluid_component = 
+                    &*fluid_component_pointer;
+
+
+                let fluid_component_pressure_change = 
+                    fluid_component.get_pressure_change_immutable(mass_flowrate);
+
+                pressure_vector[index] = 
+                    fluid_component_pressure_change;
+
+            }
+
+        return pressure_vector;
+
+    }
+
+    /// this function returns the maximum pressure change within 
+    /// a pressure vector
+    #[inline]
+    fn obtain_maximum_pressure_from_vector(
+        pressure_vector: &Vec<Pressure>) -> Pressure {
+
+        // let's get an f64 vector from the pressure vector
+
+        let mut f64_vector: Vec<f64> =vec![];
+
+        f64_vector.resize(
+            pressure_vector.len(), 
+            0.0);
+
+        for (index,pressure_obj_pointer) in 
+            pressure_vector.iter().enumerate() {
+
+                f64_vector[index] = 
+                    pressure_obj_pointer.value;
+
+            }
+        
+        // now we have obtained a f64 vector from the pressure vector,
+        // we can then use the max values from it
+        // https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.max
+
+        let maximum_pressure_value_pascals = 
+            f64_vector
+            .into_iter()
+            .reduce(f64::max)
+            .unwrap();
+
+
+        return Pressure::new::<pascal>(maximum_pressure_value_pascals);
+
+    }
+
+    /// this function returns the minimum pressure change within
+    /// a pressure vector
+    #[inline]
+    fn obtain_minimum_pressure_from_vector(
+        pressure_vector: &Vec<Pressure>) -> Pressure {
+
+        // let's get an f64 vector from the pressure vector
+
+        let mut f64_vector: Vec<f64> =vec![];
+
+        f64_vector.resize(
+            pressure_vector.len(), 
+            0.0);
+
+        for (index,pressure_obj_pointer) in 
+            pressure_vector.iter().enumerate() {
+
+                f64_vector[index] = 
+                    pressure_obj_pointer.value;
+
+            }
+        
+        // now we have obtained a f64 vector from the pressure vector,
+        // we can then use the max values from it
+        // https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.max
+
+        let minimum_pressure_value_pascals = 
+            f64_vector
+            .into_iter()
+            .reduce(f64::min)
+            .unwrap();
+
+
+        return Pressure::new::<pascal>(minimum_pressure_value_pascals);
+
+    }
+
 }
 
 /// contains associated functions which take a fluid component
