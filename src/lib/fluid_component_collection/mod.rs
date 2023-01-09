@@ -1,17 +1,9 @@
-use uom::num_traits::ToPrimitive;
 use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
 
 use crate::fluid_component_calculation::FluidComponent;
 
-// the peroxide crate for root finders
-
-// another crate for root finders, in fact this package specialises in root
-// finding
-extern crate roots;
-use roots::find_root_brent;
-use roots::SimpleConvergency;
 
 
 /// a fluid component collection,
