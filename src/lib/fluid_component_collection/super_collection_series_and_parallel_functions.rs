@@ -53,15 +53,9 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
             default_pressure_value
             );
 
-        for (index,fluid_component_collection_pointer) in 
+        for (index,fluid_component_collection) in 
             fluid_component_collection_vector.iter().enumerate() {
                 
-                // first we get an immutable reference from
-                // the mutable reference
-
-                let fluid_component_collection = 
-                    &*fluid_component_collection_pointer;
-
 
                 let fluid_component_collection_pressure_change = 
                     fluid_component_collection.get_pressure_change(mass_flowrate);
@@ -95,32 +89,11 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
         pressure_change: Pressure,
         fluid_component_vector: &Vec<&dyn FluidComponentCollectionMethods>) -> MassRate {
 
-        // a few key issues here:
+        // To iteratively find mass flowrate from pressure change,
+        // I first need to find an initial guess of mass flowrates with which
+        // to iterate
         //
-        // the method i'm going to use here is iteration
-        //
-        // which means I have to guess a mass flowrate
-        // and obtain pressure change until the
-        // pressure change matches the desired pressure change
-        //
-        // How then can I guess it intelligently?
-        // without having the user set bounds?
-        // 
-        // First, we can get a baseline pressure change
-        // ie when mass flowrate = 0 
-        // 
-        // We can then set the mass flowrate > 0  to some amount
-        // and mass flowrate < 0 to some amount and 
-        // take a look at the trends
-        //
-        // for newtonian fluid flow, we should infer that
-        // higher pressure loss means higher flowrate all else equal
-        //
-        // for the most part, we don't have osciallting functions
-        // or inflexion points for pressure loss vs reynolds number
-        //
-        //
-        // Hence, Newton Raphson should be quite stable in theory
+        // [PENDING EDITS]
         // 
         //
         // The other method should be bisection, if all else fails
