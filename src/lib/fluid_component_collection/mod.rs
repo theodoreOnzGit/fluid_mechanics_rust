@@ -19,10 +19,16 @@ pub use fluid_component_super_collection::*;
 /// of fluid components in series and parallel
 ///
 /// note: multithreaded operations not included here
-pub mod series_and_parallel_functions;
+pub mod collection_series_and_parallel_functions;
+pub use collection_series_and_parallel_functions::*;
 
-pub use series_and_parallel_functions::FluidComponentCollectionParallelAssociatedFunctions;
-pub use series_and_parallel_functions::FluidComponentCollectionSeriesAssociatedFunctions;
+/// This module contains associated functions and algorithms
+/// for calculating pressure changes and mass flowrates
+/// of fluid components in series and parallel
+///
+/// note: multithreaded operations not included here
+pub mod super_collection_series_and_parallel_functions;
+pub use super_collection_series_and_parallel_functions::*;
 
 #[cfg(test)]
 pub mod fluid_component_collection_test_and_examples {
