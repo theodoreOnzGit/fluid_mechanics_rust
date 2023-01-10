@@ -53,6 +53,7 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
             default_pressure_value
             );
 
+
         for (index,fluid_component_collection) in 
             fluid_component_collection_vector.iter().enumerate() {
                 
@@ -83,6 +84,7 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
     /// for a given fluid component super collection
     /// it needs a vector of mutable references to
     /// any object which implements FluidComponent
+    ///
     ///
     /// [PENDING EDITS]
     fn calculate_mass_flowrate_from_pressure_change(
