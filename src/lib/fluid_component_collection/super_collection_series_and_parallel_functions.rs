@@ -14,6 +14,7 @@ extern crate roots;
 use roots::find_root_brent;
 use roots::SimpleConvergency;
 
+
 /// contains associated functions which take a fluid component collection
 /// vector and calculate mass flowrates and pressure changes
 /// and losses from it
@@ -100,119 +101,362 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
         // For this, i use the brent method from the roots crate in rust
         // as it seems quite efficient for what it's meant to do
         // it has the speed of secant but falls back to bisection
-        // if things go wrong
+        // if things go wrong.
         //
-        // The other method should be bisection, if all else fails
-        // I could use mass flowrate = 0 as one bound
+        // One of the main issues with brent or bisection method is
+        // that you need bounds for the solver to work. One of the ways
+        // I derive the bounds is by looking at physical phenomena for 
+        // mass flowrate.
         //
-        // and an initial bound of mass flowrate = 1kg/s
+        // First, i made this package specifically for industrial use
+        // cases where we talk about flow in man made pipes and fluid
+        // components.
         //
-        // if i find that mass flowrate is more than 1kg/s (unlikely)
+        // We don't expect that man made flow to exceed a certain 
+        // amount, eg. a water fall. Except for a hydroelectric dam.
         //
-        // increase bound by 10
-        // and then check again
+        // For the maximum possible fluid flowrate, i'm going to look
+        // at the Amazon River.
         //
-        // then use 1kg/s as the lower bound and 10 kg/s as the upper bound
-        // and then perform bisection (this is a fallback and may
-        // tend to be slow)
+        // The guiness book of world records shows that the amazon
+        // river has a flowrate of about 200,000 m3/s
+        // https://www.guinnessworldrecords.com/world-records/greatest-river-flow
         //
-        // The last issue is how much error to tolerate in terms of
-        // pressure change should the pressure change be zero
+        // in other words about 200,000,000 kg/s.
         //
-        // my take is that it should be an absolute value
-        // based on a real error scale
+        // This would in theory cover all scenarios pertaining to fluid flowrate.
         //
-        // it should be 1 mm h2o at room temp because
-        // this is usually absolute the manotmeter error
-        // This is about 9.8 pascals or 10 pascals
+        // However, this may make the solver quite slow as the bounds for fluid
+        // flow are so large!
+        //  
+        // To speed things up, we can use a small conservative bound.
+        // Eg. water carrying a thermal power rating of 3GWth
         //
-        // Therefore, my absolute tolerance should be within 
-        // 7 Pa
-
-
-        // first let's find the pressure change at zero, 1 kg/s
-        // and -1 kg/s
+        // the heat capacity for water is approx 4.2 KJ/kg.K
+        //
+        // For a typical PWR, the water is heated from 275C to 315C
+        // https://en.wikipedia.org/wiki/Pressurized_water_reactor
+        //
+        // This is a temp change of 40K
+        //
+        // Hence, the heat capacity of water going through this
+        // temp transition is about 168 kJ/kg
+        // or about 0.168 MJ/kg
+        // or about 1.68e-4 GJ/kg
+        //
+        // For such a calculation, 
+        // 3GWTh/0.168 GJ/kg = 17857 kg/s (approx)
+        // 
+        // Therefore, a more realistic upper bound is about 20,000 kg/s
+        // which bounds all possible flows in industrial scenarios
+        // 
+        // Now of course, a user is free to override these bounds for
+        // their application, but i leave it here.
+        // 
+        // 
+        //
+        // To speed applications up even faster, i'd like to skip the
+        // iteration process for a few special scenarios:
+        //
+        // (1) zero flow
+        //
+        // If flow is near zero, then i just want to return the
+        // mass flowrate as zero.
+        //
+        // By near i mean that the pressure reading is within
+        // measurement error for a manometer
+        // (about 1mm H2O or 9 Pa)
+        //
+        // 
+        //
 
 
         let zero_mass_flow: MassRate 
             = MassRate::new::<kilogram_per_second>(0.0);
 
+        let get_pressure_loss_from_pressure_change = |
+            pressure_change: Pressure| -> Result<Pressure, String> {
+
+            let zero_mass_flow: MassRate 
+                = MassRate::new::<kilogram_per_second>(0.0);
+
+            let pressure_change_0kg_per_second: Pressure 
+                = Self::calculate_pressure_change_from_mass_flowrate(
+                    zero_mass_flow, 
+                    fluid_component_vector);
+
+            let pressure_loss_pascals = 
+                -(pressure_change - pressure_change_0kg_per_second).value;
+
+            return Ok(Pressure::new::<pascal>(pressure_loss_pascals));
+
+        };
 
 
-        let pressure_change_0kg_per_second: Pressure 
-            = Self::calculate_pressure_change_from_mass_flowrate(
-                zero_mass_flow, 
-                fluid_component_vector);
 
-
-        // now we will check if the difference is about 9 Pa
+        // now we will check if the 
+        // pressure loss due to flowrate is about 9 Pa
         // from zero flow
         // which is that manometer reading error
         //
+        // For a piping system, this pressure change is tiny
+        //
         // if that is so, then return mass flowrate = 0
+        //
+        // Of course, i am also aware that there is sometimes
+        // that the function won't work when i introduce check valve
+        // behaviour in fluid collections
 
 
-        let pressure_loss_pascals = 
-            -(pressure_change - pressure_change_0kg_per_second).value;
+        let user_specified_pressure_loss_pascals = 
+            get_pressure_loss_from_pressure_change(
+                pressure_change).unwrap().value;
 
-        if pressure_loss_pascals.abs() < 9_f64 {
+
+        if user_specified_pressure_loss_pascals.abs() < 9_f64 {
             return zero_mass_flow;
         }
 
+        // (2) reducing algorithms for small flows
+        //
+        // If my flow is relatively small, eg, <10kg/s
+        // then i'd like to reduce the bounds
 
-        // present issue: 
-        // trait objects can be moved (ie used once)
-        // but after using, they are finished...
+        // so first i want to check the pressure loss at a certain
+        // mass flowrate value:
+        let check_flow_pressure_loss_pascals = |
+            mass_flowrate: MassRate| -> Pressure {
+
+                let zero_mass_flow: MassRate 
+                    = MassRate::new::<kilogram_per_second>(0.0);
+
+                let pressure_change_0kg_per_second: Pressure 
+                    = Self::calculate_pressure_change_from_mass_flowrate(
+                        zero_mass_flow, 
+                        fluid_component_vector);
+
+                let pressure_change_at_specified_mass_flow: Pressure 
+                    = Self::calculate_pressure_change_from_mass_flowrate(
+                        mass_flowrate, 
+                        fluid_component_vector);
+
+                let pressure_loss_pascals = 
+                    -(pressure_change_at_specified_mass_flow - pressure_change_0kg_per_second).value;
+
+                return Pressure::new::<pascal>(pressure_loss_pascals);
+
+            };
+
+        // then i want to compare it agains the specified pressure loss
+        // for both forward and backward flow
+        let check_mass_flowrate_smaller_magnitude_than_specified = 
+            |mass_flowrate: MassRate| -> Result<bool, String> {
+
+                let pressure_loss_at_specified_forward_flow
+                    = check_flow_pressure_loss_pascals(mass_flowrate);
+
+                let pressure_loss_at_specified_backward_flow
+                    = check_flow_pressure_loss_pascals(-mass_flowrate);
+
+                // i'll find the bigger pressure loss of the two
+
+                let max_pressure_loss_at_specified_flow = 
+                    f64::max(pressure_loss_at_specified_forward_flow.value.abs(),
+                             pressure_loss_at_specified_backward_flow.value.abs());
+
+
+                if user_specified_pressure_loss_pascals 
+                        < max_pressure_loss_at_specified_flow {
+
+                        return Ok(true);
+
+                    } else {
+
+                        return Ok(false);
+
+                    }
+
+
+                // now of course, for check valve behaviour, flow is always
+                // zero when i introduce a pressure change in the backflow
+                // in such a case, we will likely get an error by executing the
+                // above code
+            };
+
+        // in such a case for check value behaviour, then i'll need to 
+        // do something special
         //
-        // i cannot exactly clone them because this is not object
-        // safe. Ie, the cloning process cannot know the size
-        // of the struct at compile time 
-        // traits aren't exactly well suited for 
-        // methods which take in the mutable state
+
+        let check_for_check_valve_behaviour = 
+            |mass_flowrate: MassRate| -> Result<bool, String> {
+
+                // there are a number of ways one may do check valve behaviour
+                //
+                // perhaps one is to return a NaN value or f64::max when 
+                // mass flowrate is being passed through one or the other side
+                //
+                let pressure_loss_at_specified_forward_flow
+                    = check_flow_pressure_loss_pascals(mass_flowrate);
+
+                let pressure_loss_at_specified_backward_flow
+                    = check_flow_pressure_loss_pascals(-mass_flowrate);
+
+                // i'll find the bigger pressure loss of the two
+
+                let max_pressure_loss_at_specified_flow = 
+                    f64::max(pressure_loss_at_specified_forward_flow.value.abs(),
+                             pressure_loss_at_specified_backward_flow.value.abs());
+
+                let min_pressure_loss_at_specified_flow = 
+                    f64::min(pressure_loss_at_specified_forward_flow.value.abs(),
+                             pressure_loss_at_specified_backward_flow.value.abs());
+
+                // idk if this algorithm may produce errors in earlier part
+                // depending how i implement check valve behaviour
+                // but perhaps i'll sort that issue out later
+
+                // but yes now that i have the bigger loss of the two,
+                // i can check for max values, infinite values or NaN
+                // values... These might indicate check valve behaviour
+
+                if max_pressure_loss_at_specified_flow == f64::NAN {
+                    return Ok(true);
+                }
+
+                if min_pressure_loss_at_specified_flow == f64::NAN {
+                    return Ok(true);
+                }
+
+                if max_pressure_loss_at_specified_flow == f64::MAX {
+                    return Ok(true);
+                }
+
+                if max_pressure_loss_at_specified_flow == f64::INFINITY {
+                    return Ok(true);
+                }
+
+
+                // now, i also want to see if the pressure loss of
+                // one side is like 1000 times or more of the other
+                // side for the same pressure rate, this indicates almost
+                // that there is some sort of fluidic diode behaviour
+
+                if max_pressure_loss_at_specified_flow
+                    > min_pressure_loss_at_specified_flow*1000.0 {
+
+                        return Ok(true);
+
+                    }
+
+                // if smaller than the above value, we might not think
+                // there is check valve behaviour
+
+                if max_pressure_loss_at_specified_flow
+                    <= min_pressure_loss_at_specified_flow*1000.0 {
+
+                        return Ok(false);
+
+                    }
+
+                return Err("unable to ascertain if there is check valve \n
+                behaviour".to_string());
+
+            };
+
+        // now I can check for check valve behaviour
+        // perhaps using a small flowrate, 0.01 kg/s
+
+
+        let check_valve_behaviour_result = 
+            check_for_check_valve_behaviour(
+                MassRate::new::<kilogram_per_second>(0.01));
+
+        // now i should try to unwrap this result, if i cannot, then panic
+
+        let check_valve_behaviour_exists: bool = 
+            check_valve_behaviour_result.unwrap();
+
+        // if check valve behaviour exists,
+        // i want to check if the check valve or flow diode
+        // is forwards or backwards biased
         //
-        // nevertheless
+        // now if pressure loss is greater than 0, then forward flow is true
         //
-        // I can extract the state of an object and convert that
-        // into a vector with size known at compile time
-        //
-        // However, with many potential trait objects bearing the same
-        // kind of method with different size, and different required
-        // data
-        //
-        // eg. 3 pipes and 1 flowmeter  or variations of these
-        //
-        // i cannot really know the size of the trait object at compile
-        // time, or the required properties they contain
-        //
-        // The solution then is to use mutable borrows of
-        // these objects rather than the actual object itself 
-        // which then becomes deleted
-        //
-        // So then parallelism with trait objects becomes QUITE
-        // challenging due to the mutability requirement
-        //
-        // I just hope they are not really needed =(
-        //
-        // However, if the functions required do NOT need a mutable
-        // reference to self or anything, then we are in good shape
-        //
-        // Doing so however, we then do not have our usual OOP paradigms
-        // where we change object state before invoking a get()
-        // function
+        
+        let forward_flow_true: bool =
+            user_specified_pressure_loss_pascals > 0.0 ;
+
+        // in the case check valve behaviour exists,
+        // i check the biasing
+        if check_valve_behaviour_exists {
+
+            let check_valve_mass_flow = MassRate::new::<kilogram_per_second>(0.1);
+
+            let pressure_loss_at_specified_forward_flow
+                = check_flow_pressure_loss_pascals(check_valve_mass_flow);
+
+            let pressure_loss_at_specified_backward_flow
+                = check_flow_pressure_loss_pascals(-check_valve_mass_flow);
+
+            let forward_bias: bool = {
+                
+                let mut forward_bias = false;
+
+                // the the pressure loss at backward flow is NAN, infinity, max or
+                // 1000 times greater than the backflow, we have forward bias
+                if pressure_loss_at_specified_backward_flow.value.abs() 
+                    == f64::NAN {
+                        forward_bias = true;
+                    }
+
+                if pressure_loss_at_specified_backward_flow.value.abs() 
+                    == f64::MAX {
+                        forward_bias = true;
+                    }
+
+                if pressure_loss_at_specified_backward_flow.value.abs() 
+                    == f64::INFINITY {
+                        forward_bias = true;
+                    }
+
+                if pressure_loss_at_specified_forward_flow.value.abs() >
+                    1000.0 * pressure_loss_at_specified_backward_flow.value.abs() {
+                        forward_bias = true;
+                    }
+                // returns the forward bias boolean
+                forward_bias 
+
+            };
+
+            // the only times i want to return zero mass flowrate
+            // is if forward bias is true and there is reverse flow
+            //
+
+            if forward_bias && !forward_flow_true {
+                return zero_mass_flow;
+            }
+
+            // or there is forward flow and reverse bias
+
+            if !forward_bias && forward_flow_true {
+                return zero_mass_flow;
+            }
+
+            // if none of these is true, carry on the solving as per normal
+
+        }
+
+
+        // Now that i have a baseline pressure loss 
 
         // if pressure loss is positive, we have forward flow
         // if pressure loss is negative, we have backflow
         //
 
-        let forward_flow_true: bool =
-            pressure_loss_pascals > 0.0 ;
 
 
         // if forward flow is true, then i want to iteratively calculate 
         // pressure changes using mass flowrates until the limit is reached
-
-        // i'm going to use the peroxide library 
-        //
 
 
         // this is for use in the roots library
@@ -255,7 +499,7 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
         // But having done so, I want to use the newton raphson method to
         // try and converge this result, hopefully within 30 iterations
 
-        let mut convergency = SimpleConvergency { eps:1e-15f64, max_iter:30 };
+        let mut convergency = SimpleConvergency { eps:1e-9f64, max_iter:30 };
 
         let mut mass_flowrate_result =
             if forward_flow_true != true {
@@ -309,14 +553,6 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
         // guessed pressure loss in the iteration
         // and the actual pressure loss specified by the user
         //
-        // The guiness book of world records shows that the amazon
-        // river has a flowrate of about 200,000 m3/s
-        // https://www.guinnessworldrecords.com/world-records/greatest-river-flow
-        //
-        // in other words about 200,000,000 kg/s
-        //
-        // We never expect man made 
-        // piping systems to have this much flow 
         //
         // But this would be a good upper bound for bisection solver.
         //
