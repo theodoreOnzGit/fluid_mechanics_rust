@@ -96,7 +96,11 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
         // to iterate
         //
         // [PENDING EDITS]
-        // 
+        //
+        // For this, i use the brent method from the roots crate in rust
+        // as it seems quite efficient for what it's meant to do
+        // it has the speed of secant but falls back to bisection
+        // if things go wrong
         //
         // The other method should be bisection, if all else fails
         // I could use mass flowrate = 0 as one bound
