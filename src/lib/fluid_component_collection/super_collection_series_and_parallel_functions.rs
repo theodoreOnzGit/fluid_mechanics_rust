@@ -88,9 +88,11 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
     ///
     ///
     /// [PENDING EDITS]
+    /// 
     fn calculate_mass_flowrate_from_pressure_change(
         pressure_change: Pressure,
-        fluid_component_vector: &Vec<&dyn FluidComponentCollectionMethods>) -> MassRate {
+        fluid_component_collection_vector: 
+        &Vec<&dyn FluidComponentCollectionMethods>) -> MassRate {
 
         // To iteratively find mass flowrate from pressure change,
         // I first need to find an initial guess of mass flowrates with which
@@ -183,7 +185,7 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
             let pressure_change_0kg_per_second: Pressure 
                 = Self::calculate_pressure_change_from_mass_flowrate(
                     zero_mass_flow, 
-                    fluid_component_vector);
+                    fluid_component_collection_vector);
 
             let pressure_loss_pascals = 
                 -(pressure_change - pressure_change_0kg_per_second).value;
@@ -233,12 +235,12 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
                 let pressure_change_0kg_per_second: Pressure 
                     = Self::calculate_pressure_change_from_mass_flowrate(
                         zero_mass_flow, 
-                        fluid_component_vector);
+                        fluid_component_collection_vector);
 
                 let pressure_change_at_specified_mass_flow: Pressure 
                     = Self::calculate_pressure_change_from_mass_flowrate(
                         mass_flowrate, 
-                        fluid_component_vector);
+                        fluid_component_collection_vector);
 
                 let pressure_loss_pascals = 
                     -(pressure_change_at_specified_mass_flow - pressure_change_0kg_per_second).value;
@@ -473,7 +475,7 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
             let pressure_change_tested = 
                 Self::calculate_pressure_change_from_mass_flowrate(
                 mass_rate, 
-                fluid_component_vector);
+                fluid_component_collection_vector);
 
             // now i've obtained the pressure change, i convert it to f64
 
@@ -625,7 +627,8 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
     /// arrangement
     fn calculate_mass_flowrate_from_pressure_change(
         pressure_change: Pressure,
-        fluid_component_vector: &Vec<&dyn FluidComponent>) -> MassRate {
+        fluid_component_collection_vector: 
+        &Vec<&dyn FluidComponentCollectionMethods>) -> MassRate {
         // we instantiate a mass_flowrate vector to store
         // the values of the mass_flowrate changes
 
@@ -636,7 +639,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
         // equal to the fluid_component vector
 
         let new_vector_length =
-            fluid_component_vector.len();
+            fluid_component_collection_vector.len();
 
         let default_mass_flowrate_value = 
             MassRate::new::<kilogram_per_second>(0.0);
@@ -647,7 +650,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             );
 
         for (index,fluid_component_pointer) in 
-            fluid_component_vector.iter().enumerate() {
+            fluid_component_collection_vector.iter().enumerate() {
                 
                 // first we get an immutable reference from
                 // the mutable reference
@@ -657,7 +660,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
 
 
                 let fluid_component_mass_flowrate = 
-                    fluid_component.get_mass_flowrate_from_pressure_change_immutable(
+                    fluid_component.get_mass_flowrate_from_pressure_change(
                         pressure_change);
 
                 mass_flowrate_vector[index] = 
@@ -682,9 +685,11 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
     /// fluid pipes or components
     fn calculate_pressure_change_from_mass_flowrate(
         mass_flowrate: MassRate,
-        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
+        fluid_component_collection_vector: 
+        &Vec<&dyn FluidComponentCollectionMethods>) -> Pressure {
 
-        // for calculating pressure change in a parallel collection from
+        // for calculating pressure change in a parallel super
+        // collection from
         // mass flowrate, 
         // i will need to iteratively guess the pressure change
         // across each pipe to get the specified mass flowrate
@@ -774,7 +779,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                 calculate_pressure_change_using_guessed_branch_mass_flowrate(
                     guess_average_mass_flowrate, 
                     user_requested_mass_flowrate, 
-                    fluid_component_vector);
+                    fluid_component_collection_vector);
         }
 
         // if flow is non zero, then we will have to deal with 3 bounding cases
@@ -813,7 +818,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>::
             obtain_pressure_estimate_vector(
                 zero_mass_flowrate, 
-                fluid_component_vector);
+                fluid_component_collection_vector);
 
 
 
@@ -838,7 +843,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>::
             obtain_pressure_loss_estimate_vector(
                 user_requested_mass_flowrate, 
-                fluid_component_vector);
+                fluid_component_collection_vector);
 
         // note that these pressure loss values are likely positive
         // even if not though, what i'm looking for here is the
@@ -878,7 +883,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                 calculate_pressure_change_using_guessed_branch_mass_flowrate(
                     guess_average_mass_flowrate, 
                     user_requested_mass_flowrate, 
-                    fluid_component_vector);
+                    fluid_component_collection_vector);
         }
 
         // next we can go to the other extreme, where external flowrate is 
@@ -901,7 +906,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             // the total mass flowrate divided by the number of branches
 
             let number_of_branches: f64 =
-                fluid_component_vector.len() as f64;
+                fluid_component_collection_vector.len() as f64;
 
             let guess_average_mass_flowrate =
                 user_requested_mass_flowrate
@@ -912,7 +917,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                 calculate_pressure_change_using_guessed_branch_mass_flowrate(
                     guess_average_mass_flowrate, 
                     user_requested_mass_flowrate, 
-                    fluid_component_vector);
+                    fluid_component_collection_vector);
 
         }
 
@@ -960,7 +965,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                 calculate_pressure_change_using_guessed_branch_mass_flowrate(
                     guess_average_mass_flowrate, 
                     user_requested_mass_flowrate, 
-                    fluid_component_vector);
+                    fluid_component_collection_vector);
 
 
         }
@@ -973,7 +978,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
         // guess the pressure change
 
         let number_of_branches: f64 =
-            fluid_component_vector.len() as f64;
+            fluid_component_collection_vector.len() as f64;
 
         let guess_average_mass_flowrate =
             user_requested_mass_flowrate
@@ -983,7 +988,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             calculate_pressure_change_using_guessed_branch_mass_flowrate(
                 guess_average_mass_flowrate, 
                 user_requested_mass_flowrate, 
-                fluid_component_vector);
+                fluid_component_collection_vector);
 
     }
 
@@ -996,7 +1001,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
     fn calculate_pressure_change_using_guessed_branch_mass_flowrate(
         guess_average_mass_flowrate: MassRate,
         user_specified_mass_flowrate: MassRate,
-        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Pressure {
+        fluid_component_collection_vector: &Vec<&dyn FluidComponentCollectionMethods>) -> Pressure {
 
 
         // first i am applying the average gussed flowrate through all branches
@@ -1007,7 +1012,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
             <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>::
             obtain_pressure_estimate_vector(
                 guess_average_mass_flowrate, 
-                fluid_component_vector);
+                fluid_component_collection_vector);
 
         let average_pressure_at_guessed_average_flow = 
             <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>::
@@ -1057,7 +1062,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                     <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>::
                     calculate_mass_flowrate_from_pressure_change(
                         iterated_pressure, 
-                        fluid_component_vector);
+                        fluid_component_collection_vector);
 
                 let mass_flowrate_error = 
                     iterated_mass_flowrate -
@@ -1122,7 +1127,8 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
     #[inline]
     fn obtain_pressure_estimate_vector(
         mass_flowrate: MassRate,
-        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Vec<Pressure> {
+        fluid_component_collection_vector: 
+        &Vec<&dyn FluidComponentCollectionMethods>) -> Vec<Pressure> {
 
         // first we obtain pressure changes at zero mass flow
         // over each branch
@@ -1137,7 +1143,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
         // equal to the fluid_component vector
 
         let new_vector_length =
-            fluid_component_vector.len();
+            fluid_component_collection_vector.len();
 
         let default_pressure_value = 
             Pressure::new::<pascal>(0.0);
@@ -1149,21 +1155,21 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
 
 
 
-        for (index,fluid_component_pointer) in 
-            fluid_component_vector.iter().enumerate() {
+        for (index,fluid_component_collection_pointer) in 
+            fluid_component_collection_vector.iter().enumerate() {
                 
                 // first we get an immutable reference from
                 // the mutable reference
 
-                let fluid_component = 
-                    &*fluid_component_pointer;
+                let fluid_component_collection = 
+                    &*fluid_component_collection_pointer;
 
 
-                let fluid_component_pressure_change = 
-                    fluid_component.get_pressure_change_immutable(mass_flowrate);
+                let fluid_component_collection_pressure_change = 
+                    fluid_component_collection.get_pressure_change(mass_flowrate);
 
                 pressure_vector[index] = 
-                    fluid_component_pressure_change;
+                    fluid_component_collection_pressure_change;
 
             }
 
@@ -1179,7 +1185,8 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
     #[inline]
     fn obtain_pressure_loss_estimate_vector(
         mass_flowrate: MassRate,
-        fluid_component_vector: &Vec<&dyn FluidComponent>) -> Vec<Pressure> {
+        fluid_component_collection_vector: 
+        &Vec<&dyn FluidComponentCollectionMethods>) -> Vec<Pressure> {
 
         // first we obtain pressure changes at zero mass flow
         // over each branch
@@ -1194,7 +1201,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
         // equal to the fluid_component vector
 
         let new_vector_length =
-            fluid_component_vector.len();
+            fluid_component_collection_vector.len();
 
         let default_pressure_value = 
             Pressure::new::<pascal>(0.0);
@@ -1207,7 +1214,7 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
 
 
         for (index,fluid_component_pointer) in 
-            fluid_component_vector.iter().enumerate() {
+            fluid_component_collection_vector.iter().enumerate() {
                 
                 // first we get an immutable reference from
                 // the mutable reference
@@ -1216,11 +1223,11 @@ pub trait FluidComponentSuperCollectionParallelAssociatedFunctions {
                     &*fluid_component_pointer;
 
 
-                let fluid_component_pressure_change = 
-                    fluid_component.get_pressure_loss_immutable(mass_flowrate);
+                let fluid_component_pressure_loss = 
+                    fluid_component.get_pressure_loss(mass_flowrate);
 
                 pressure_vector[index] = 
-                    fluid_component_pressure_change;
+                    fluid_component_pressure_loss;
 
             }
 

@@ -997,11 +997,11 @@ pub trait FluidComponentCollectionParallelAssociatedFunctions {
                     &*fluid_component_pointer;
 
 
-                let fluid_component_pressure_change = 
+                let fluid_component_pressure_loss = 
                     fluid_component.get_pressure_loss_immutable(mass_flowrate);
 
                 pressure_vector[index] = 
-                    fluid_component_pressure_change;
+                    fluid_component_pressure_loss;
 
             }
 
