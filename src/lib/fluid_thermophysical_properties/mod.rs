@@ -5,6 +5,9 @@ use uom::si::f64::*;
 pub mod property_library;
 pub use property_library::*;
 
+/// contains tests and examples to use the fluid thermophysical properties
+pub mod tests_and_examples;
+
 
 // ideally i'd want an easy way to make a selection of which fluid i want
 // to use, perhaps via an enum or something,
@@ -90,8 +93,38 @@ pub trait ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions
 
     }
 
+    /// Prandtl number calculated by
+    /// mu cp / k
+    fn prandtl_number(fluid_temp: ThermodynamicTemperature,
+                      fluid_properties: &dyn FluidProperties) -> f64 {
+        // mu * cp/k
+
+        let prandtl = fluid_properties.viscosity(fluid_temp)
+            *fluid_properties.specific_heat_capacity(fluid_temp)
+            /fluid_properties.thermal_conductivity(fluid_temp);
+
+        return prandtl.value;
+    }
+
+    /// get fluid temperature 
+    /// this is a get function which forces the user
+    /// to remember to have a fluid temperature property
+
+    fn get_fluid_temp(&self) -> ThermodynamicTemperature;
+
+    /// set fluid temperature
+    /// this is a get function which forces the user
+    /// to remember to have a fluid temperature property
+
+    fn set_fluid_temp(&mut self, fluid_temp: ThermodynamicTemperature);
+
     /// a function to return a set FluidProperties Object
-    fn get_fluid_properties() -> &'trait_lifetime dyn FluidProperties;
+    fn get_fluid_properties(&self) -> &'trait_lifetime dyn FluidProperties;
+
+    /// a function to set a FluidProperties Object
+    fn set_fluid_properties(&mut self,
+                            fluid_properties: &'trait_lifetime dyn FluidProperties);
+
 }
 
 /// A trait (or interface) for getting fluid properties from
