@@ -77,13 +77,14 @@ impl FluidProperties for TherminolVP1Properties {
     ///
     /// use uom::si::f64::*;
     /// use uom::si::thermodynamic_temperature::kelvin;
-    /// use fluid_mechanics_rust::therminol_component::
-    /// dowtherm_a_properties::getDowthermAEnthalpy;
+    /// use fluid_mechanics_rust::fluid_thermophysical_properties::property_library::*;
+    /// use fluid_mechanics_rust::fluid_thermophysical_properties::FluidProperties;
     ///
     /// let temp1 = ThermodynamicTemperature::new::<kelvin>(303_f64);
     ///
-    /// let specific_enthalpy_1 = 
-    /// getDowthermAEnthalpy(temp1);
+    /// let therminol_properties = TherminolVP1Properties::new();
+    ///
+    /// let specific_enthalpy_1 = therminol_properties.enthalpy(temp1);
     ///
     ///
     /// let expected_enthalpy: f64 = 
@@ -250,6 +251,13 @@ impl FluidProperties for TherminolVP1Properties {
 }
 
 impl TherminolVP1Properties {
+
+
+    /// constructor
+
+    pub fn new() -> Self {
+        return Self {  };
+    }
     /// the correlation has temperature range from 20 C to 180 C,
     /// anything outside this and the code throws a panic
     ///
