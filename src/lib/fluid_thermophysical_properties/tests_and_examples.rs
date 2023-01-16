@@ -537,8 +537,8 @@ pub mod fluid_component_collection_test_and_examples {
         pub trait TherminolCustomComponentTraits<'trait_lifetime> :
             ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions<'trait_lifetime>
             + FluidComponent
-            + FluidCustomComponentCalcPressureLoss
-            + FluidCustomComponentCalcPressureChange
+            + FluidCustomComponentCalcPressureLoss<'trait_lifetime>
+            + FluidCustomComponentCalcPressureChange<'trait_lifetime>
         {}
         
         // first we create an therminol pipe struct
@@ -555,9 +555,11 @@ pub mod fluid_component_collection_test_and_examples {
             hydraulic_diameter: Length,
 
             pressure_loss: Pressure,
-            form_loss_k: f64,
             absolute_roughness: Length,
             name: String,
+
+            custom_k: &'pipe_lifetime dyn Fn(f64) -> f64,
+            custom_darcy: &'pipe_lifetime dyn Fn(f64,f64) ->f64,
 
         }
 
@@ -573,6 +575,64 @@ pub mod fluid_component_collection_test_and_examples {
             FluidCustomComponentCalcPressureLoss<'pipe_lifetime> 
                 for TherminolCustomComponent<'pipe_lifetime> {
 
+                    fn get_custom_component_absolute_roughness(
+                        &mut self) -> Length {
+
+                        return self.absolute_roughness;
+                    }
+
+                    fn get_custom_component_absolute_roughness_immutable(
+                        &self) -> Length {
+
+                        return self.absolute_roughness;
+                    }
+
+                    fn get_custom_darcy(&mut self) 
+                        -> &dyn Fn(f64, f64) -> f64 {
+
+                            return self.custom_darcy.clone();
+
+                        }
+
+
+                    fn get_custom_darcy_immutable(&self) 
+                        -> &dyn Fn(f64, f64) -> f64 {
+
+                            return self.custom_darcy.clone();
+
+                        }
+
+                    fn get_custom_k(&mut self) 
+                        -> &dyn Fn(f64) -> f64 {
+
+                            return self.custom_k.clone();
+
+                        }
+
+                    fn get_custom_k_immutable(&self) 
+                        -> &dyn Fn(f64) -> f64 {
+
+                            return self.custom_k.clone();
+
+                        }
+
+                    fn set_custom_k(
+                        &mut self,
+                        custom_k: &'pipe_lifetime dyn Fn(f64) -> f64){
+
+                        self.custom_k = custom_k;
+
+                    }
+
+                    fn set_custom_darcy(
+                        &mut self,
+                        custom_darcy: &'pipe_lifetime dyn Fn(f64,f64) -> f64){
+
+                        self.custom_darcy = custom_darcy;
+                    }
+
+
+
 
             }
 
@@ -580,76 +640,99 @@ pub mod fluid_component_collection_test_and_examples {
             FluidComponent for TherminolCustomComponent<'pipe_lifetime>{
             fn get_pressure_loss(&mut self) -> Pressure {
 
+                let fluid_mass_flowrate = 
+                    self.fluid_mass_flowrate;
 
-                // get pipe parameters and flow conditions
-                // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let mass_flowrate = self.fluid_mass_flowrate;
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let viscosity = self.get_fluid_viscosity();
-                let density = self.get_fluid_density();
-                let pipe_legnth = self.get_component_length();
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area();
 
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter();
 
-                // calculate the pressure loss
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity();
 
-                let pressure_loss = 
-                    Self::pipe_calc_pressure_loss(
-                        mass_flowrate,
-                        cross_sectional_area,
-                        hydraulic_diameter,
-                        viscosity,
-                        density,
-                        pipe_legnth,
-                        absolute_roughness,
-                        form_loss_k);
+                let fluid_density = 
+                    self.get_fluid_density();
 
-                // you can return the pressure loss straightaway
-                // or set the struct variable first and then
-                // return it
+                let component_length = 
+                    self.get_component_length();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness();
+
+                // i need to make some immutable borrows here...
+                let custom_darcy: &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
+
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
+
+                let pressure_loss =
+                    Self::
+                    fluid_custom_component_calc_pressure_loss(
+                    fluid_mass_flowrate, 
+                    cross_sectional_area, 
+                    hydraulic_diameter, 
+                    fluid_viscosity, 
+                    fluid_density, 
+                    component_length, 
+                    absolute_roughness, 
+                    custom_darcy, custom_k);
 
                 self.pressure_loss = pressure_loss;
 
-                return self.pressure_loss;
+                return pressure_loss;
+
+
             }
 
             fn get_pressure_loss_immutable(
                 &self,
                 mass_flowrate: MassRate) -> Pressure {
 
+                let fluid_mass_flowrate = 
+                    mass_flowrate;
 
-                // get pipe parameters and flow conditions
-                // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k_immutable();
-                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
-                let cross_sectional_area = self.get_cross_sectional_area_immutable();
-                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
-                let viscosity = self.get_fluid_viscosity_immutable();
-                let density = self.get_fluid_density_immutable();
-                let pipe_legnth = self.get_component_length_immutable();
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area_immutable();
 
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter_immutable();
 
-                // calculate the pressure loss
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity_immutable();
 
-                let pressure_loss = 
-                    Self::pipe_calc_pressure_loss(
-                        mass_flowrate,
-                        cross_sectional_area,
-                        hydraulic_diameter,
-                        viscosity,
-                        density,
-                        pipe_legnth,
-                        absolute_roughness,
-                        form_loss_k);
+                let fluid_density = 
+                    self.get_fluid_density_immutable();
 
-                // you can return the pressure loss straightaway
-                // or set the struct variable first and then
-                // return it
+                let component_length = 
+                    self.get_component_length_immutable();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness_immutable();
+
+                // i need to make some immutable borrows here...
+                let custom_darcy: &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
+
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
+
+                let pressure_loss =
+                    Self:: fluid_custom_component_calc_pressure_loss(
+                        fluid_mass_flowrate, 
+                        cross_sectional_area, 
+                        hydraulic_diameter, 
+                        fluid_viscosity, 
+                        fluid_density, 
+                        component_length, 
+                        absolute_roughness, 
+                        custom_darcy, custom_k);
 
 
                 return pressure_loss;
+
             }
             fn set_pressure_loss(&mut self, pressure_loss: Pressure){
                 self.pressure_loss = pressure_loss;
@@ -660,91 +743,166 @@ pub mod fluid_component_collection_test_and_examples {
             }
 
             fn get_mass_flowrate(&mut self) -> MassRate {
-                // get pipe parameters and flow conditions
-                // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k();
-                let absolute_roughness = self.get_pipe_absolute_roughness();
-                let cross_sectional_area = self.get_cross_sectional_area();
-                let hydraulic_diameter = self.get_hydraulic_diameter();
-                let fluid_viscosity = self.get_fluid_viscosity();
-                let fluid_density = self.get_fluid_density();
-                let pipe_length = self.get_component_length();
-                let pressure_loss = self.pressure_loss;
-                let incline_angle = self.get_incline_angle();
-                let internal_pressure_source = self.get_internal_pressure_source();
 
-                let pressure_change = 
-                    -pressure_loss 
-                    + internal_pressure_source 
-                    + self.get_hydrostatic_pressure_change();
 
-                let mass_flowrate = 
-                    Self::pipe_calculate_mass_flowrate_from_pressure_change(
+                //i'll have to get the pressure change
+                //
+                // pressure_change = 
+                // - pressure_change
+                // + hydrostatic pressure change
+                // + internal pressure source
+                //
+
+                // internal pressure source
+                let internal_pressure_source = 
+                    self.get_internal_pressure_source();
+
+                // hydrostatic pressure
+                let incline_angle = 
+                    self.get_incline_angle();
+
+                let hydrostatic_pressure_change =
+                    self.get_hydrostatic_pressure_change();
+
+                // pressure_loss term
+                //
+                //
+                let pressure_loss = 
+                    self.get_pressure_loss();
+
+                // now we get pressure change
+
+                let pressure_change =
+                    - pressure_loss
+                    + hydrostatic_pressure_change
+                    + internal_pressure_source;
+
+                let custom_darcy : &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
+
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
+
+
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area();
+
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter();
+
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity();
+
+                let fluid_density = 
+                    self.get_fluid_density();
+
+                let component_length = 
+                    self.get_component_length();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness();
+
+                let source_pressure = 
+                    self.get_internal_pressure_source();
+
+                let mass_flowrate =
+                    Self::
+                    fluid_custom_component_calc_mass_flowrate_from_pressure_change(
                         pressure_change, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
                         fluid_viscosity, 
                         fluid_density, 
-                        pipe_length, 
+                        component_length, 
                         absolute_roughness, 
-                        form_loss_k,
-                        incline_angle,
-                        internal_pressure_source);
+                        incline_angle, 
+                        source_pressure, 
+                        custom_darcy, 
+                        custom_k);
 
-                // you can return the mass flowrate straightaway
-                // or set the struct variable first and then
-                // return it
+                self.fluid_mass_flowrate = mass_flowrate;
 
-                self.set_mass_flowrate(mass_flowrate);
-
-                return self.fluid_mass_flowrate;
-
+                return mass_flowrate;
             }
 
             fn get_mass_flowrate_from_pressure_loss_immutable(
                 &self,
                 pressure_loss: Pressure) -> MassRate {
-                // get pipe parameters and flow conditions
-                // from the get methods
-                let form_loss_k = self.get_pipe_form_loss_k_immutable();
-                let absolute_roughness = self.get_pipe_absolute_roughness_immutable();
-                let cross_sectional_area = self.get_cross_sectional_area_immutable();
-                let hydraulic_diameter = self.get_hydraulic_diameter_immutable();
-                let fluid_viscosity = self.get_fluid_viscosity_immutable();
-                let fluid_density = self.get_fluid_density_immutable();
-                let pipe_length = self.get_component_length_immutable();
-                let incline_angle = self.get_incline_angle_immutable();
-                let internal_pressure_source = self.get_internal_pressure_source_immutable();
 
-                let pressure_change = 
-                    -pressure_loss 
-                    + internal_pressure_source 
-                    + <Self as FluidPipeCalcPressureChange>::
-                    get_hydrostatic_pressure_change(
-                        pipe_length,
-                        incline_angle,
-                        fluid_density);
 
-                let mass_flowrate = 
-                    Self::pipe_calculate_mass_flowrate_from_pressure_change(
+                //i'll have to get the pressure change
+                //
+                // pressure_change = 
+                // - pressure_change
+                // + hydrostatic pressure change
+                // + internal pressure source
+                //
+
+                // internal pressure source
+                let internal_pressure_source = 
+                    self.get_internal_pressure_source_immutable();
+
+                // hydrostatic pressure
+
+                let incline_angle = 
+                    self.get_incline_angle_immutable();
+
+
+                let hydrostatic_pressure_change =
+                    self.get_hydrostatic_pressure_change_immutable();
+
+
+                // now we get pressure change
+
+                let pressure_change =
+                    - pressure_loss
+                    + hydrostatic_pressure_change
+                    + internal_pressure_source;
+
+                let custom_darcy : &dyn Fn(f64, f64) -> f64 = 
+                    self.custom_darcy;
+
+                let custom_k : &dyn Fn(f64) -> f64 =
+                    self.custom_k;
+
+
+                let cross_sectional_area = 
+                    self.get_cross_sectional_area_immutable();
+
+                let hydraulic_diameter = 
+                    self.get_hydraulic_diameter_immutable();
+
+                let fluid_viscosity = 
+                    self.get_fluid_viscosity_immutable();
+
+                let fluid_density = 
+                    self.get_fluid_density_immutable();
+
+                let component_length = 
+                    self.get_component_length_immutable();
+
+                let absolute_roughness = 
+                    self.get_custom_component_absolute_roughness_immutable();
+
+                let source_pressure = 
+                    self.get_internal_pressure_source_immutable();
+
+                let mass_flowrate =
+                    Self::
+                    fluid_custom_component_calc_mass_flowrate_from_pressure_change(
                         pressure_change, 
                         cross_sectional_area, 
                         hydraulic_diameter, 
                         fluid_viscosity, 
                         fluid_density, 
-                        pipe_length, 
+                        component_length, 
                         absolute_roughness, 
-                        form_loss_k,
-                        incline_angle,
-                        internal_pressure_source);
-
-                // you can return the mass flowrate straightaway
-                // or set the struct variable first and then
-                // return it
-
+                        incline_angle, 
+                        source_pressure, 
+                        custom_darcy, 
+                        custom_k);
 
                 return mass_flowrate;
-
             }
 
                 fn get_cross_sectional_area(&mut self) -> Area {
@@ -931,9 +1089,10 @@ pub mod fluid_component_collection_test_and_examples {
                    incline_angle: Angle,
                    component_length: Length,
                    hydraulic_diameter: Length,
-                   form_loss_k: f64,
                    absolute_roughness: Length,
-                   therminol_properties_reference: &'pipe_lifetime TherminolVP1Properties) -> Self {
+                   therminol_properties_reference: &'pipe_lifetime TherminolVP1Properties,
+                   custom_k: &'pipe_lifetime dyn Fn(f64)-> f64 ,
+                   custom_darcy: &'pipe_lifetime dyn Fn(f64,f64) -> f64 ) -> Self {
 
                 return Self { 
                     name: "pipe_1".to_string(),
@@ -945,8 +1104,9 @@ pub mod fluid_component_collection_test_and_examples {
                     component_length: component_length ,
                     hydraulic_diameter: hydraulic_diameter ,
                     pressure_loss: Pressure::new::<pascal>(0.0),
-                    form_loss_k: form_loss_k ,
                     absolute_roughness: absolute_roughness,
+                    custom_k: custom_k,
+                    custom_darcy: custom_darcy,
                 };
 
             }
@@ -968,9 +1128,44 @@ pub mod fluid_component_collection_test_and_examples {
         let incline_angle = Angle::new::<degree>(0.0);
         let component_length  = Length::new::<meter>(0.5);
         let hydraulic_diameter = Length::new::<inch>(1.0);
-        let form_loss_k: f64 = 5.0;
         let absolute_roughness = Length::new::<millimeter>(0.002);
         let therminol_properties = TherminolVP1Properties::new();
+
+        fn custom_darcy(_reynolds_number: f64,
+                        _roughness_ratio:f64) -> f64 {
+
+            return 0.0;
+        }
+
+        fn custom_k(reynolds_number: f64) -> f64 {
+
+            // the correlation is:
+            // 18.0 + 93000/Re^1.35
+            //
+
+            if reynolds_number > 0.0 {
+
+                return 18.0 + 93000_f64/reynolds_number.powf(1.35);
+            }
+
+            if reynolds_number < 0.0 {
+
+                let abs_reynolds_number = reynolds_number.abs();
+                let fldk = 18.0 + 93000_f64/abs_reynolds_number.powf(1.35);
+
+                return -fldk;
+
+            }
+
+            // return no fldk = 0 for no flow, doesn't really matter anyway
+            // because Be_D = 0.5 fldk * Re^2
+            // Re = 0
+            // and we expect Be_D = 0
+            // so fldk can be 0 and it still makes physical sense
+            // ie Be_D = 0 when Re = 0
+            return 0.0;
+
+        }
 
         // let's make a new therminol pipe
 
@@ -979,9 +1174,10 @@ pub mod fluid_component_collection_test_and_examples {
                                incline_angle, 
                                component_length, 
                                hydraulic_diameter, 
-                               form_loss_k, 
                                absolute_roughness, 
-                               &therminol_properties);
+                               &therminol_properties,
+                               &custom_k,
+                               &custom_darcy);
 
         // pass 0.2 kg/s of therminol through
 
@@ -989,10 +1185,10 @@ pub mod fluid_component_collection_test_and_examples {
             therminol_pipe.get_pressure_change_immutable(
                 MassRate::new::<kilogram_per_second>(0.2));
 
-        // this should be equal to -413 Pa
+        // this should be equal to -1559 Pa
 
         approx::assert_relative_eq!(
-            -413_f64,
+            -1559_f64,
             pressure_change.value,
             max_relative = 0.001);
 
@@ -1000,7 +1196,7 @@ pub mod fluid_component_collection_test_and_examples {
 
         let mass_flowrate = 
             therminol_pipe.get_mass_flowrate_from_pressure_change_immutable(
-                Pressure::new::<pascal>(-413_f64));
+                Pressure::new::<pascal>(-1559_f64));
 
         approx::assert_relative_eq!(
             0.2,
