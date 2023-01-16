@@ -1,7 +1,3 @@
-use uom::si::f64::{Pressure, MassRate};
-use uom::si::mass_rate::kilogram_per_second;
-
-use crate::fluid_component_calculation::FluidComponent;
 use crate::fluid_component_collection::FluidComponentCollectionMethods;
 
 /// a fluid component super collection
@@ -13,7 +9,7 @@ use crate::fluid_component_collection::FluidComponentCollectionMethods;
 /// Update
 /// Delete
 pub trait FluidComponentSuperCollection<'trait_lifetime> : 
-FluidComponentCollectionMethods<'trait_lifetime>{
+FluidComponentCollectionMethods{
 
     /// returns a copy of the fluid component collection vector
     /// containing immutable elements

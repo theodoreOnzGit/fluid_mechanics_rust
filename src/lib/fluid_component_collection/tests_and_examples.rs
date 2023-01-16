@@ -1792,14 +1792,17 @@ pub mod fluid_component_collection_test_and_examples {
         }
 
         impl<'super_collection_lifetime> 
-            FluidComponentCollectionMethods for AirPipeParallelSuperCollection {
+            FluidComponentCollectionMethods
+                for AirPipeParallelSuperCollection<'super_collection_lifetime> {
 
         }
 
-        impl FluidComponentCollectionParallelAssociatedFunctions 
-            for AirPipeParallelSuperCollection{}
+        impl<'super_collection_lifetime> 
+            FluidComponentCollectionParallelAssociatedFunctions
+            for AirPipeParallelSuperCollection<'super_collection_lifetime>{}
 
-        impl AirPipeParallelSuperCollection {}
+        impl<'super_collection_lifetime> 
+            AirPipeParallelSuperCollection<'super_collection_lifetime> {}
 
         return;
 

@@ -3,7 +3,6 @@ use uom::si::f64::{Pressure, MassRate};
 use uom::si::mass_rate::kilogram_per_second;
 use uom::si::pressure::pascal;
 
-use crate::fluid_component_calculation::FluidComponent;
 use crate::fluid_component_collection::FluidComponentCollectionMethods;
 
 // the peroxide crate for root finders
@@ -251,39 +250,39 @@ pub trait FluidComponentSuperCollectionSeriesAssociatedFunctions {
 
         // then i want to compare it agains the specified pressure loss
         // for both forward and backward flow
-        let check_mass_flowrate_smaller_magnitude_than_specified = 
-            |mass_flowrate: MassRate| -> Result<bool, String> {
+        //let check_mass_flowrate_smaller_magnitude_than_specified = 
+        //    |mass_flowrate: MassRate| -> Result<bool, String> {
 
-                let pressure_loss_at_specified_forward_flow
-                    = check_flow_pressure_loss_pascals(mass_flowrate);
+        //        let pressure_loss_at_specified_forward_flow
+        //            = check_flow_pressure_loss_pascals(mass_flowrate);
 
-                let pressure_loss_at_specified_backward_flow
-                    = check_flow_pressure_loss_pascals(-mass_flowrate);
+        //        let pressure_loss_at_specified_backward_flow
+        //            = check_flow_pressure_loss_pascals(-mass_flowrate);
 
-                // i'll find the bigger pressure loss of the two
+        //        // i'll find the bigger pressure loss of the two
 
-                let max_pressure_loss_at_specified_flow = 
-                    f64::max(pressure_loss_at_specified_forward_flow.value.abs(),
-                             pressure_loss_at_specified_backward_flow.value.abs());
-
-
-                if user_specified_pressure_loss_pascals 
-                        < max_pressure_loss_at_specified_flow {
-
-                        return Ok(true);
-
-                    } else {
-
-                        return Ok(false);
-
-                    }
+        //        let max_pressure_loss_at_specified_flow = 
+        //            f64::max(pressure_loss_at_specified_forward_flow.value.abs(),
+        //                     pressure_loss_at_specified_backward_flow.value.abs());
 
 
-                // now of course, for check valve behaviour, flow is always
-                // zero when i introduce a pressure change in the backflow
-                // in such a case, we will likely get an error by executing the
-                // above code
-            };
+        //        if user_specified_pressure_loss_pascals 
+        //                < max_pressure_loss_at_specified_flow {
+
+        //                return Ok(true);
+
+        //            } else {
+
+        //                return Ok(false);
+
+        //            }
+
+
+        //        // now of course, for check valve behaviour, flow is always
+        //        // zero when i introduce a pressure change in the backflow
+        //        // in such a case, we will likely get an error by executing the
+        //        // above code
+        //    };
 
         // in such a case for check value behaviour, then i'll need to 
         // do something special
