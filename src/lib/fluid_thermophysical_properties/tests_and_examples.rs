@@ -6,13 +6,8 @@ pub mod fluid_component_collection_test_and_examples {
     use crate::fluid_component_calculation::FluidComponent;
     use crate::fluid_component_calculation::standard_pipe_calc
         ::{FluidPipeCalcPressureLoss, FluidPipeCalcPressureChange};
-    use crate::fluid_component_collection::{
-        FluidComponentCollection, FluidComponentCollectionMethods,
-        FluidComponentCollectionSeriesAssociatedFunctions, FluidComponentCollectionParallelAssociatedFunctions, FluidComponentSuperCollection, FluidComponentSuperCollectionParallelAssociatedFunctions};
-    use uom::si::dynamic_viscosity::{millipascal_second};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
-    use uom::si::mass_density::kilogram_per_cubic_meter;
     use uom::si::mass_rate::kilogram_per_second;
     use uom::si::pressure::{pascal};
     use uom::si::angle::degree;
