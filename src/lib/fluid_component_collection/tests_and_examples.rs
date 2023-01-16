@@ -1795,6 +1795,19 @@ pub mod fluid_component_collection_test_and_examples {
             FluidComponentCollectionMethods
                 for AirPipeParallelSuperCollection<'super_collection_lifetime> {
 
+                    fn get_pressure_change(
+                        &self,
+                        fluid_mass_flowrate: MassRate) -> Pressure {
+
+                        unimplemented!();
+                    }
+
+                    fn get_mass_flowrate_from_pressure_change(
+                        &self,
+                        pressure_change: Pressure)  -> MassRate {
+                        unimplemented!();
+                    }
+
         }
 
         impl<'super_collection_lifetime> 
