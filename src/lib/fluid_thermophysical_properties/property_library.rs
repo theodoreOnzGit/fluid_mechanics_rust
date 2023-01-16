@@ -69,6 +69,9 @@ impl FluidProperties for TherminolVP1Properties {
     /// H = 0
     /// C = -30924 (i used libre office to calculate this)
     ///
+    ///
+    /// [DOC TEST TO BE UPDATED]
+    ///
     /// Example use:
     /// ```rust
     ///
@@ -134,11 +137,11 @@ impl FluidProperties for TherminolVP1Properties {
         fluid_temp: ThermodynamicTemperature) -> ThermalConductivity{
 
         Self::therminol_vp_1_range_check(fluid_temp);
-        let thermalConductivityValue = 0.142 - 0.00016* fluid_temp
+        let thermal_conductivity_value = 0.142 - 0.00016* fluid_temp
             .get::<degree_celsius>();
 
         return ThermalConductivity::new::<watt_per_meter_kelvin>(
-            thermalConductivityValue);
+            thermal_conductivity_value);
     }
 
     /// function to obtain dowtherm A temperature 
@@ -168,6 +171,7 @@ impl FluidProperties for TherminolVP1Properties {
     ///
     /// As of Oct 2022, it is bisection
     ///
+    /// [DOC TEST TO BE UPDATED]
     /// Example: 
     ///
     /// ```rust

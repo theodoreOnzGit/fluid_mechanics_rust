@@ -1,12 +1,9 @@
 use uom::si::f64::*;
+
+/// This is a library containing all the properties which one can
+/// choose for the ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions
 pub mod property_library;
 pub use property_library::*;
-use uom::si::thermodynamic_temperature::degree_celsius;
-use uom::si::mass_density::kilogram_per_cubic_meter;
-use uom::si::dynamic_viscosity::pascal_second;
-use uom::si::thermal_conductivity::watt_per_meter_kelvin;
-use uom::si::specific_heat_capacity::joule_per_kilogram_kelvin;
-use uom::si::available_energy::joule_per_kilogram;
 
 
 // ideally i'd want an easy way to make a selection of which fluid i want
@@ -19,6 +16,14 @@ use uom::si::available_energy::joule_per_kilogram;
 //
 // This trait will then be "inherited" and available for immediate use
 // I can call it a FluidPropertyAssociatedFunctions kind of trait
+//
+// Strictly speaking, you DON'T need to use
+// 
+// ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions
+// trait to write code,
+//
+// but it may make it easier as you don't have to keep writing those
+// thermophysical properties down
 
 /// This trait makes it easier to set the fluid properties
 ///
