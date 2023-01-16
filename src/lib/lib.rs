@@ -26,6 +26,10 @@ pub mod therminol_component;
 /// for fluid components in series or parallel
 pub mod fluid_component_collection;
 
+/// contains traits dealing with fluid thermophysical
+/// properties, more generically
+pub mod fluid_thermophysical_properties;
+
 use uom::si::f64::*;
 
 
