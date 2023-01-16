@@ -1169,7 +1169,7 @@ pub mod fluid_component_collection_test_and_examples {
 
         // let's make a new therminol pipe
 
-        let therminol_pipe = 
+        let mut therminol_pipe = 
             TherminolCustomComponent::new(fluid_temp, 
                                incline_angle, 
                                component_length, 
@@ -1203,6 +1203,17 @@ pub mod fluid_component_collection_test_and_examples {
             mass_flowrate.value,
             max_relative = 0.001);
 
+        // you should also be able to set and get the name of pipes
+
+        // but this is purely up to you
+
+        let name = "my_therminol_pipe";
+
+        therminol_pipe.set_name(name);
+
+        let test_name = therminol_pipe.get_name();
+
+        assert_eq!(name, test_name);
 
 
 

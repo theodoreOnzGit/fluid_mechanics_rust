@@ -30,6 +30,10 @@ pub mod fluid_component_collection;
 /// properties, more generically
 pub mod fluid_thermophysical_properties;
 
+/// the prelude, meant to make starting your own fluid components easy to make
+pub mod prelude;
+
+
 use uom::si::f64::*;
 
 
