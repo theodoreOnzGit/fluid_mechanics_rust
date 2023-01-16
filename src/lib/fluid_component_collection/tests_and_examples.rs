@@ -8,7 +8,7 @@ pub mod fluid_component_collection_test_and_examples {
         ::{FluidPipeCalcPressureLoss};
     use crate::fluid_component_collection::{
         FluidComponentCollection, FluidComponentCollectionMethods,
-        FluidComponentCollectionSeriesAssociatedFunctions, FluidComponentCollectionParallelAssociatedFunctions, FluidComponentSuperCollection};
+        FluidComponentCollectionSeriesAssociatedFunctions, FluidComponentCollectionParallelAssociatedFunctions, FluidComponentSuperCollection, FluidComponentSuperCollectionParallelAssociatedFunctions};
     use uom::si::dynamic_viscosity::{millipascal_second};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
@@ -1799,23 +1799,56 @@ pub mod fluid_component_collection_test_and_examples {
                         &self,
                         fluid_mass_flowrate: MassRate) -> Pressure {
 
-                        unimplemented!();
+                        // gets pressure change from a mass flowrate
+                        // going through this super collection
+                        //
+
+                        let fluid_component_collection_vector = 
+                            self.get_immutable_vector();
+
+                        let pressure_change = 
+                            <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>
+                            ::calculate_pressure_change_from_mass_flowrate(
+                                fluid_mass_flowrate, 
+                                fluid_component_collection_vector);
+
+                        return pressure_change;
                     }
 
                     fn get_mass_flowrate_from_pressure_change(
                         &self,
                         pressure_change: Pressure)  -> MassRate {
-                        unimplemented!();
+
+                        let fluid_component_collection_vector = 
+                            self.get_immutable_vector();
+
+                        let mass_flowrate = 
+                            <Self as FluidComponentSuperCollectionParallelAssociatedFunctions>
+                            ::calculate_mass_flowrate_from_pressure_change(
+                                pressure_change, 
+                                fluid_component_collection_vector);
+
+                        return mass_flowrate;
+
                     }
 
         }
 
         impl<'super_collection_lifetime> 
-            FluidComponentCollectionParallelAssociatedFunctions
-            for AirPipeParallelSuperCollection<'super_collection_lifetime>{}
+            FluidComponentSuperCollectionParallelAssociatedFunctions
+            for AirPipeParallelSuperCollection<'super_collection_lifetime>{
+
+
+            }
 
         impl<'super_collection_lifetime> 
-            AirPipeParallelSuperCollection<'super_collection_lifetime> {}
+            AirPipeParallelSuperCollection<'super_collection_lifetime> {
+                
+                fn new() -> Self {
+                    // constructor returns an instance with an empty vector
+                    return Self { super_collection_vector_immutable: vec![] };
+                }
+            }
 
         return;
 
