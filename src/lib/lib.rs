@@ -21,6 +21,19 @@ pub mod fluid_component_calculation;
 /// dowtherm A components
 pub mod therminol_component;
 
+/// Contains traits which allow you to calculate 
+/// mass flowrate, pressure drop and pressure change
+/// for fluid components in series or parallel
+pub mod fluid_component_collection;
+
+/// contains traits dealing with fluid thermophysical
+/// properties, more generically
+pub mod fluid_thermophysical_properties;
+
+/// the prelude, meant to make starting your own fluid components easy to make
+pub mod prelude;
+
+
 use uom::si::f64::*;
 
 

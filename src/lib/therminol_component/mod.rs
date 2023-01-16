@@ -159,7 +159,6 @@ pub struct CustomComponentProperties{
 
 }
 
-
 /// A trait (or interface) for getting fluid properties from
 /// temperature or enthalpy
 ///
@@ -180,7 +179,9 @@ pub struct CustomComponentProperties{
 /// obtain fluid temperature after energy balance
 ///
 ///
-/// Now the enthalpy, specific heat capacity and
+/// Now the enthalpy, specific heat capacity and thermal
+/// conductivity may not be used in fluid mechanics, but they are useful
+/// for heat transfer
 ///
 pub trait FluidProperties {
     /// fluid density based on temperature,

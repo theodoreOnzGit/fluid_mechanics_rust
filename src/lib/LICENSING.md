@@ -1,99 +1,19 @@
-# Here's what i did to install the file
+I developed this library as part of my PhD thesis and used
+many free and open source libraries such as:
 
-## development environment
+1. Units of measure (uom)
+2. Peroxide
+3. Roots
 
-I use cargo watch:
 
-```powershell
-cargo install cargo-watch
-cargo watch -x run
-```
+# UOM license
+UOM is released under the Apache License or MIT license,
+I use the Apache license here.
 
-### vim-lsp-settings
-In neovim, vim-lsp-settings i use rust-analyzer.
+The UOM license is coprighted:
+Copyright (c) 2019 Mike Boutin
 
-However, when you run LspInstallServer, it says curl is
-not working due to some security issues.
-
-I had to download this in a unsecure manner.
-
-However, to do that on windows, i had to use:
-
-```cmd
-@echo off
-
-setlocal
-curl -k -L -o "rust-analyzer-windows.gz" "https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-pc-windows-msvc.gz"
-call "%~dp0\run_gzip.cmd" rust-analyzer-windows.gz
-
-move rust-analyzer-windows rust-analyzer.exe
-```
-
-Basically it was found in the filepath:"
-
-```powershell
-C:\Users\$env:UserName\AppData\Local\nvim-data\plugged\vim-lsp-settings\installer\install-rust-analyzer.cmd
-```
-And i edited the curl file to include the -k option.
-
-## cargo installation
-
-I installed
-
-```powershell
-cargo add uom
-cargo add peroxide
-cargo add roots
-```
-
-1. units of measure (uom) helps to provide unit safe 
-calculations.
-2. Peroxide is a numerical methods library we need for root 
-finding
-
-if you want the latest version of uom
-
-```powershell
-cargo add --git https://github.com/iliekturtles/uom uom
-```
-
-## combining library and binary
-
-https://dev.to/yjdoc2/make-a-combined-library-and-binary-project-in-rust-d4f
-
-I followed the instructions above and changed the cargo.toml:
-
-```toml
-[[bin]]
-name = "fluid_mechanics_rust"
-path = "src/bin.rs"
-```
-i then added a lib.rs file in the following filepath
-src/lib/lib.rs,
-and added the following to cargo.toml
-
-```toml
-[lib]
-name = "fluid_mechanics_rust"
-path = "src/lib/lib.rs"
-```
-
-## returning functions in rust
-
-I often use root finding algorithms in rust
-or C sharp, and for that i need a one input, one output function.
-
-I found this site useful:
-https://stackoverflow.com/questions/63967743/what-is-the-correct-syntax-to-return-a-function-in-rust
-
-## Licenses
-
-I used uom, peroxide and roots here.
-
-[PENDING LICENSE AGREEMENTS, PLS ADD LATER]
-
-### UOM license (APACHE)
-        Apache License
+     Apache License
                            Version 2.0, January 2004
                         https://www.apache.org/licenses/
 
@@ -295,35 +215,17 @@ I used uom, peroxide and roots here.
    See the License for the specific language governing permissions and
    limitations under the License.
 
-### Roots License (BSD 2-Clause)
 
+# Peroxide License
 
-Copyright (c) 2015, Mikhail Vorotilov
-All rights reserved.
+Peroxide is a great rust numerical library released under the MIT or
+Apache 2.0 license
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+It is a useful numerical library I used for root finding.
 
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-### Peroxide License
+It is copyrighted:
+Copyright (c) 2020 Tae Geun Kim
+and the Apache license is here:
 
                                  Apache License
                            Version 2.0, January 2004
@@ -526,3 +428,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+# Roots License
+
+The roots cargo package is very useful for root finding, and has
+an implementation of the Brent Dekker method.
+
+This package (roots) is released under BSD 2 clause:
+
+Copyright (c) 2015, Mikhail Vorotilov
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
