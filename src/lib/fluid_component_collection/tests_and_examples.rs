@@ -8,7 +8,7 @@ pub mod fluid_component_collection_test_and_examples {
         ::{FluidPipeCalcPressureLoss};
     use crate::fluid_component_collection::{
         FluidComponentCollection, FluidComponentCollectionMethods,
-        FluidComponentCollectionSeriesAssociatedFunctions, FluidComponentCollectionParallelAssociatedFunctions};
+        FluidComponentCollectionSeriesAssociatedFunctions, FluidComponentCollectionParallelAssociatedFunctions, FluidComponentSuperCollection};
     use uom::si::dynamic_viscosity::{millipascal_second};
     use uom::si::f64::*;
     use uom::si::length::{meter, inch, millimeter};
@@ -493,7 +493,7 @@ pub mod fluid_component_collection_test_and_examples {
         let pipe_pressure_change = air_pipe_series.
             get_pressure_change(pipe_airflow);
 
-        // the pressure losses are about -1144 Pa
+        // the pressure losses are about -174650 Pa
         approx::assert_relative_eq!(
             pipe_pressure_change.value,
             -174650.0,
@@ -1202,8 +1202,16 @@ pub mod fluid_component_collection_test_and_examples {
     ///
     /// First i make a typical fluid component, a set of air pipes
     /// perhaps 10 air pipes and i want to put them in series
+    ///
+    /// And basically i want to have three of those
     #[test]
     pub fn simple_fluid_collection_example_3 () {
+
+        // there are three steps to this
+        // 1) make a pipe structure
+        // 2) make a series collection of pipe structures
+        // 3) make 3 branches of series collections for the pipe structures
+        //
 
         
         // first we create an air pipe struct
@@ -1672,54 +1680,119 @@ pub mod fluid_component_collection_test_and_examples {
         let pipe_pressure_change = air_pipe_series.
             get_pressure_change(pipe_airflow);
 
-        // the pressure losses are about -1144 Pa
+        // the pressure losses are about -174650 Pa
         approx::assert_relative_eq!(
             pipe_pressure_change.value,
             -174650.0,
             max_relative=0.001);
 
-        // i will also test the get pressure loss function
+        // the next step is that i want to make a parallel collection of
+        // such pipes in series
+        // so i'll make two more pipe series first
+        // and I'll "recycle" the air pipe by using immutable references
+        // to them
 
-        let pipe_pressure_loss = air_pipe_series.
-            get_pressure_loss(pipe_airflow);
+        let mut air_pipe_series_2 = 
+            AirPipeCollectionSeries::new();
 
-        // in this case, there is no elevation or internal
-        // pressure source, so the pipe pressure losses should
-        // be the same as the inverse of the pressure change
-        assert_eq!(-pipe_pressure_change,
-                   pipe_pressure_loss);
+        // note that i cannot use air_pipe_vec anymore, it has been
+        // moved or used up by the earlier function 
+        // i'll instead use a new air pipe vector and push the same air pipes
 
-        // all right, so now we want to check if the same pressure loss
-        // will yield us 0.001 kg/s
+        let mut air_pipe_vec: Vec<&dyn FluidComponent> = vec![];
 
-        let test_pressure_loss = 
-            Pressure::new::<pascal>(174650.0);
+        air_pipe_vec.push(&air_pipe_1);
+        air_pipe_vec.push(&air_pipe_2);
+        air_pipe_vec.push(&air_pipe_3);
+        air_pipe_vec.push(&air_pipe_4);
+        air_pipe_vec.push(&air_pipe_5);
+        air_pipe_vec.push(&air_pipe_6);
+        air_pipe_vec.push(&air_pipe_7);
+        air_pipe_vec.push(&air_pipe_8);
+        air_pipe_vec.push(&air_pipe_9);
+        air_pipe_vec.push(&air_pipe_10);
 
-        let pipe_test_air_mass_flowrate = 
-            air_pipe_series.get_mass_flowrate_from_pressure_change(
-                -test_pressure_loss);
+        air_pipe_series_2.set_fluid_component_vector(air_pipe_vec);
+        
+        let mut air_pipe_series_3 = 
+            AirPipeCollectionSeries::new();
 
-        approx::assert_relative_eq!(
-            pipe_airflow.value,
-            pipe_test_air_mass_flowrate.value,
-            max_relative=0.001);
+        let mut air_pipe_vec: Vec<&dyn FluidComponent> = vec![];
+
+        air_pipe_vec.push(&air_pipe_1);
+        air_pipe_vec.push(&air_pipe_2);
+        air_pipe_vec.push(&air_pipe_3);
+        air_pipe_vec.push(&air_pipe_4);
+        air_pipe_vec.push(&air_pipe_5);
+        air_pipe_vec.push(&air_pipe_6);
+        air_pipe_vec.push(&air_pipe_7);
+        air_pipe_vec.push(&air_pipe_8);
+        air_pipe_vec.push(&air_pipe_9);
+        air_pipe_vec.push(&air_pipe_10);
+
+        air_pipe_series_3.set_fluid_component_vector(air_pipe_vec);
+
+        // now that this is okay, i will then need to put these air pipe
+        // series into a vector as well
+        // using immutable references in the vector
+        //
+        // The super vector is a vector of vectors
+
+        let mut air_pipe_super_vector: 
+            Vec<&dyn FluidComponentCollectionMethods> = vec![];
+
+        air_pipe_super_vector.push(&air_pipe_series);
+        air_pipe_super_vector.push(&air_pipe_series_2);
+        air_pipe_super_vector.push(&air_pipe_series_3);
+
+        // so we are going to make a new struct called
+        // AirPipeParallelSuperCollection
+        //
+        // There are two main traits to apply,
+        //
+        // (1) the FluidComponentSuperCollection trait
+        // (2) the FluidComponentCollectionParallelAssociatedFunctions trait
+        //
+        // the FluidComponentSuperCollection trait also includes 
+        // implementing the FluidComponentCollectionMethods trait
+        //
+        // so there are three traits in total but we only need remember two
+
+        struct AirPipeParallelSuperCollection<'super_collection_lifetime> {
+
+            // the struct only needs us implement a 
+            // super collection vector
+            // NOT references here
+            super_collection_vector_immutable: 
+                Vec<&'super_collection_lifetime dyn FluidComponentCollectionMethods>
+
+        }
+
+        impl FluidComponentSuperCollection for AirPipeParallelSuperCollection {
+
+            fn get_immutable_vector(&self) 
+                -> &Vec<&'trait_lifetime dyn FluidComponentCollectionMethods>{
+
+                    return &self.super_collection_vector_immutable;
+                }
+            fn set_vector(
+                &mut self,
+                fluid_component_vector: 
+                Vec<&'trait_lifetime dyn FluidComponentCollectionMethods>){
+
+                self.super_collection_vector_immutable = fluid_component_vector;
+
+            }
 
 
-        // the last thing to assert is whether the pressure loss of 1 pipe
-        // is equal to 1/10 of the pipes in series
+        }
 
-        let pressure_loss_1_pipe =
-            air_pipe_1.get_pressure_change_immutable(pipe_airflow);
+        impl FluidComponentCollectionMethods for AirPipeParallelSuperCollection {
 
-        let pressure_loss_10_pipe_series =
-            air_pipe_series.get_pressure_change(pipe_airflow);
+        }
 
-        approx::assert_relative_eq!(
-            pressure_loss_1_pipe.value,
-            pressure_loss_10_pipe_series.value/10.0,
-            max_relative=1e-3);
-
-
+        impl FluidComponentCollectionParallelAssociatedFunctions 
+            for AirPipeParallelSuperCollection{}
 
         return;
 
