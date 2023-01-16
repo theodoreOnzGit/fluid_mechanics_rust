@@ -1,62 +1,12 @@
 use uom::si::f64::*;
-
-
-/// A trait (or interface) for getting fluid properties from
-/// temperature or enthalpy
-///
-/// here is a trait (or interface for C# or java people), 
-/// however, traits only deal with methods, not properties.
-/// note that traits are also types
-///
-/// This trait (or interface for methods) ensures
-/// that density, dynamic viscosity,
-/// fluid enthalpy,
-/// specific heat capacity,
-/// thermal conductivity 
-///
-/// can be evaluated from temperature
-///
-/// Also, we can get temperature given fluid enthalpy
-/// this is because we may want in future to quickly
-/// obtain fluid temperature after energy balance
-///
-///
-/// Now the enthalpy, specific heat capacity and thermal
-/// conductivity may not be used in fluid mechanics, but they are useful
-/// for heat transfer
-///
-/// this is updated from the FluidProperties trait in therminol component,
-/// because i want it to be made into objects. Therefore, it takes
-/// an immutable reference to self
-///
-pub trait FluidProperties {
-    /// fluid density based on temperature,
-    fn density(&self,
-               fluid_temp: ThermodynamicTemperature) -> MassDensity;
-
-    /// fluid dynamic viscosity based on temperature,
-    fn viscosity(&self,
-                 fluid_temp: ThermodynamicTemperature) -> DynamicViscosity;
-
-    /// fluid enthalpy  based on temperature,
-    fn enthalpy(&self,
-                fluid_temp: ThermodynamicTemperature) -> AvailableEnergy;
-
-    /// fluid specific heat capacity  based on temperature,
-    fn specific_heat_capacity(
-        &self,
-        fluid_temp: ThermodynamicTemperature) -> SpecificHeatCapacity;
-
-    /// fluid thermal conductivity based on temperature,
-    fn thermal_conductivity(
-        &self,
-        fluid_temp: ThermodynamicTemperature) -> ThermalConductivity;
-
-    /// fluid temperature based on fluid enthalpy
-    fn get_temperature_from_enthalpy(
-        &self,
-        fluid_enthalpy: AvailableEnergy) -> ThermodynamicTemperature;
-}
+pub mod property_library;
+pub use property_library::*;
+use uom::si::thermodynamic_temperature::degree_celsius;
+use uom::si::mass_density::kilogram_per_cubic_meter;
+use uom::si::dynamic_viscosity::pascal_second;
+use uom::si::thermal_conductivity::watt_per_meter_kelvin;
+use uom::si::specific_heat_capacity::joule_per_kilogram_kelvin;
+use uom::si::available_energy::joule_per_kilogram;
 
 
 // ideally i'd want an easy way to make a selection of which fluid i want
@@ -138,4 +88,62 @@ pub trait ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions
     /// a function to return a set FluidProperties Object
     fn get_fluid_properties() -> &'trait_lifetime dyn FluidProperties;
 }
+
+/// A trait (or interface) for getting fluid properties from
+/// temperature or enthalpy
+///
+/// here is a trait (or interface for C# or java people), 
+/// however, traits only deal with methods, not properties.
+/// note that traits are also types
+///
+/// This trait (or interface for methods) ensures
+/// that density, dynamic viscosity,
+/// fluid enthalpy,
+/// specific heat capacity,
+/// thermal conductivity 
+///
+/// can be evaluated from temperature
+///
+/// Also, we can get temperature given fluid enthalpy
+/// this is because we may want in future to quickly
+/// obtain fluid temperature after energy balance
+///
+///
+/// Now the enthalpy, specific heat capacity and thermal
+/// conductivity may not be used in fluid mechanics, but they are useful
+/// for heat transfer
+///
+/// this is updated from the FluidProperties trait in therminol component,
+/// because i want it to be made into objects. Therefore, it takes
+/// an immutable reference to self
+///
+pub trait FluidProperties {
+    /// fluid density based on temperature,
+    fn density(&self,
+               fluid_temp: ThermodynamicTemperature) -> MassDensity;
+
+    /// fluid dynamic viscosity based on temperature,
+    fn viscosity(&self,
+                 fluid_temp: ThermodynamicTemperature) -> DynamicViscosity;
+
+    /// fluid enthalpy  based on temperature,
+    fn enthalpy(&self,
+                fluid_temp: ThermodynamicTemperature) -> AvailableEnergy;
+
+    /// fluid specific heat capacity  based on temperature,
+    fn specific_heat_capacity(
+        &self,
+        fluid_temp: ThermodynamicTemperature) -> SpecificHeatCapacity;
+
+    /// fluid thermal conductivity based on temperature,
+    fn thermal_conductivity(
+        &self,
+        fluid_temp: ThermodynamicTemperature) -> ThermalConductivity;
+
+    /// fluid temperature based on fluid enthalpy
+    fn get_temperature_from_enthalpy(
+        &self,
+        fluid_enthalpy: AvailableEnergy) -> ThermodynamicTemperature;
+}
+
 
