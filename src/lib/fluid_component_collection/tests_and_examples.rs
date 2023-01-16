@@ -1850,6 +1850,53 @@ pub mod fluid_component_collection_test_and_examples {
                 }
             }
 
+        // note that the air pipe parallel super collection must
+        // be instantiated as mutable
+        let mut air_pipe_parallel_super_collection = 
+            AirPipeParallelSuperCollection::new();
+
+        air_pipe_parallel_super_collection.set_vector(
+            air_pipe_super_vector);
+
+        // now based on previous tests of the air pipe,
+        // for a 0.1kg/s airflow 
+        // through this pipe series of 10 pipes 
+        // the pressure change are about -174650 Pa
+        //
+        // that means for the super collection, applying this
+        // pressure change to a super collections of three
+        // branches of 10 pipes each, the flowrate should be
+        // about 0.3 kg/s
+        //
+
+        let super_collection_mass_flowrate = 
+            air_pipe_parallel_super_collection.
+            get_mass_flowrate_from_pressure_change(
+                Pressure::new::<pascal>(-174650_f64));
+
+        // if this is set up correct, we expect about 0.3 kg/s of mass flowrate
+        approx::assert_relative_eq!(
+            0.3,
+            super_collection_mass_flowrate.value,
+            max_relative=0.001);
+
+
+        // now let's apply the mass flowrate of 0.3 kg/s and see if we get
+        // the same pressure change
+
+        let super_collection_pressure_change = 
+            air_pipe_parallel_super_collection.
+            get_pressure_change(
+                MassRate::new::<kilogram_per_second>(0.3));
+
+        // if this is set up correct, we expect about 
+        // -174650 Pa of pressure loss
+        approx::assert_relative_eq!(
+            -174650_f64,
+            super_collection_pressure_change.value,
+            max_relative=0.001);
+
+
         return;
 
     }
