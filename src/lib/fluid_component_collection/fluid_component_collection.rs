@@ -118,7 +118,7 @@ pub trait FluidComponentCollection<'trait_lifetime> : FluidComponentCollectionMe
 /// contains methods to get pressure loss 
 /// and pressure change and mass flowrate based on 
 /// current state of the fluid component collection
-pub trait FluidComponentCollectionMethods {
+pub trait FluidComponentCollectionMethods<'trait_lifetime> {
 
     /// calculates pressure loss when given a mass flowrate
     fn get_pressure_loss(

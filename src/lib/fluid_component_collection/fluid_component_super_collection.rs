@@ -12,7 +12,8 @@ use crate::fluid_component_collection::FluidComponentCollectionMethods;
 /// Read
 /// Update
 /// Delete
-pub trait FluidComponentSuperCollection<'trait_lifetime> : FluidComponentCollectionMethods{
+pub trait FluidComponentSuperCollection<'trait_lifetime> : 
+FluidComponentCollectionMethods<'trait_lifetime>{
 
     /// returns a copy of the fluid component collection vector
     /// containing immutable elements

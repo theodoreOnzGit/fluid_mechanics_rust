@@ -1768,17 +1768,21 @@ pub mod fluid_component_collection_test_and_examples {
 
         }
 
-        impl FluidComponentSuperCollection for AirPipeParallelSuperCollection {
+        impl<'super_collection_lifetime> 
+            FluidComponentSuperCollection<'super_collection_lifetime>
+                for AirPipeParallelSuperCollection<'super_collection_lifetime> {
 
             fn get_immutable_vector(&self) 
-                -> &Vec<&'trait_lifetime dyn FluidComponentCollectionMethods>{
+                -> &Vec<&'super_collection_lifetime dyn FluidComponentCollectionMethods>{
 
                     return &self.super_collection_vector_immutable;
                 }
+
+
             fn set_vector(
                 &mut self,
                 fluid_component_vector: 
-                Vec<&'trait_lifetime dyn FluidComponentCollectionMethods>){
+                Vec<&'super_collection_lifetime dyn FluidComponentCollectionMethods>){
 
                 self.super_collection_vector_immutable = fluid_component_vector;
 
@@ -1787,12 +1791,15 @@ pub mod fluid_component_collection_test_and_examples {
 
         }
 
-        impl FluidComponentCollectionMethods for AirPipeParallelSuperCollection {
+        impl<'super_collection_lifetime> 
+            FluidComponentCollectionMethods for AirPipeParallelSuperCollection {
 
         }
 
         impl FluidComponentCollectionParallelAssociatedFunctions 
             for AirPipeParallelSuperCollection{}
+
+        impl AirPipeParallelSuperCollection {}
 
         return;
 
