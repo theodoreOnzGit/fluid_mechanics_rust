@@ -70,7 +70,6 @@ impl FluidProperties for TherminolVP1Properties {
     /// C = -30924 (i used libre office to calculate this)
     ///
     ///
-    /// [DOC TEST TO BE UPDATED]
     ///
     /// Example use:
     /// ```rust
@@ -172,15 +171,13 @@ impl FluidProperties for TherminolVP1Properties {
     ///
     /// As of Oct 2022, it is bisection
     ///
-    /// [DOC TEST TO BE UPDATED]
     /// Example: 
     ///
     /// ```rust
     /// use uom::si::f64::*;
     /// use uom::si::thermodynamic_temperature::kelvin;
     /// use uom::si::available_energy::joule_per_kilogram;
-    /// use fluid_mechanics_rust::therminol_component::
-    /// dowtherm_a_properties::get_temperature_from_enthalpy;
+    /// use fluid_mechanics_rust::fluid_thermophysical_properties::*;
     ///
     ///
     /// let specific_enthalpy_1 = AvailableEnergy::new::
@@ -188,8 +185,10 @@ impl FluidProperties for TherminolVP1Properties {
     ///
     /// let temp_expected = ThermodynamicTemperature::new::
     /// <kelvin>(303_f64);
+    ///
+    /// let therminol_properties = TherminolVP1Properties::new();
     /// 
-    /// let temp_acutal = get_temperature_from_enthalpy(
+    /// let temp_acutal = therminol_properties.get_temperature_from_enthalpy(
     /// specific_enthalpy_1);
     ///
     ///
