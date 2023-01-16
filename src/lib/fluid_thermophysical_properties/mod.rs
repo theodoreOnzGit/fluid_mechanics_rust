@@ -70,8 +70,17 @@ pub trait FluidProperties {
 // This trait will then be "inherited" and available for immediate use
 // I can call it a FluidPropertyAssociatedFunctions kind of trait
 
-
-pub trait ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions {
+/// This trait makes it easier to set the fluid properties
+///
+/// The basic idea is that you just make an object that implements
+/// the FluidProperties trait,
+/// use that object as an argument to the function
+/// and then get the desired fluid property.
+///
+/// You one can pick this out from a library or something
+/// and basically you're all set
+pub trait ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions
+<'trait_lifetime>{
 
     /// fluid density based on temperature,
     /// it uses a static dispatch impl rather than &dyn because
@@ -125,5 +134,8 @@ pub trait ConstantCompositionSinglePhaseFluidPropertiesAssociatedFunctions {
         return fluid_properties.get_temperature_from_enthalpy(fluid_enthalpy);
 
     }
+
+    /// a function to return a set FluidProperties Object
+    fn get_fluid_properties() -> &'trait_lifetime dyn FluidProperties;
 }
 
