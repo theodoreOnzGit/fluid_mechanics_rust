@@ -8,9 +8,9 @@ use peroxide::prelude::*;
 // custom friction factor and K, rather messy but
 
 
-// this first function allows for custom fldk, 
-// ie both friction factor and form loss k are user defined
-// https://stackoverflow.com/questions/36390665/how-do-you-pass-a-rust-function-as-a-parameter
+/// this first function allows for custom fldk, 
+/// ie both friction factor and form loss k are user defined
+/// https://stackoverflow.com/questions/36390665/how-do-you-pass-a-rust-function-as-a-parameter
 #[allow(non_snake_case)]
 pub fn custom_fLDK(customDarcy: &dyn Fn(f64, f64) -> f64,
         ReynoldsNumber: f64,
@@ -35,9 +35,9 @@ pub fn custom_fLDK(customDarcy: &dyn Fn(f64, f64) -> f64,
     return fLDK;
 }
 
-// this is a special case of the fLDK component,
-// where we just specify a custom K but friction factor is based
-// on darcy friction factor
+/// this is a special case of the fLDK component,
+/// where we just specify a custom K but friction factor is based
+/// on darcy friction factor
 #[allow(non_snake_case)]
 pub fn custom_Kpipe(ReynoldsNumber: f64,
                     roughnessRatio: f64,
@@ -56,6 +56,12 @@ pub fn custom_Kpipe(ReynoldsNumber: f64,
 
 }
 
+
+/// This function is special,
+/// not really used, as often
+/// it assumes that the form losses, K for the pipe 
+/// take some functional form rather than staying constant
+///
 #[allow(non_snake_case)]
 pub fn custom_Kpipe_Be_D(ReynoldsNumber: f64,
                     roughnessRatio: f64,
@@ -79,6 +85,8 @@ pub fn custom_Kpipe_Be_D(ReynoldsNumber: f64,
 
 
 #[allow(non_snake_case)]
+/// this functions calculates the bejan number using the
+/// custom fLDK formula
 pub fn custom_fLDK_Be_D(customDarcy: &dyn Fn(f64, f64) -> f64, 
                         ReynoldsNumber: f64,
                         roughnessRatio: f64,
@@ -101,14 +109,14 @@ pub fn custom_fLDK_Be_D(customDarcy: &dyn Fn(f64, f64) -> f64,
 
 }
 
-// this code allos us to get Reynold's number from a Bejan
-// number for a custom pipe.
-// i make no assumptions about the symmetry of flow
-// ie. i don't make assumptions about whether
-// the pipe exhibits the same pressure loss
-// in forwards and backwards flow,
-// that is up to the user to decide when 
-// customDarcy and customK is put in
+/// this code allos us to get Reynold's number from a Bejan
+/// number for a custom pipe.
+/// i make no assumptions about the symmetry of flow
+/// ie. i don't make assumptions about whether
+/// the pipe exhibits the same pressure loss
+/// in forwards and backwards flow,
+/// that is up to the user to decide when 
+/// customDarcy and customK is put in
 #[allow(non_snake_case)]
 pub fn getRe(customDarcy: &dyn Fn(f64, f64) -> f64, 
              Be_D: f64,
