@@ -10,16 +10,22 @@ use uom::typenum::P2;
 // this set of functions here is simply to convert to and from
 // dimensionless numbers to SI units, and back
 
-// first and most important function here,
-// this function converts a quantity into float given the correct dimensions
-// if it's not dimensionless, it will throw a compile time error
+/// first and most important function here,
+/// this function converts a quantity into float given the correct dimensions
+/// if it's not dimensionless, it will throw a compile time error
 pub fn convert_dimensionless_number_to_float(dimensionless_number: Ratio) -> f64 {
     return dimensionless_number.value.into();
 }
 
 
+/// struct which contains associated functions to calculate Re
+///
+/// I might want to turn this into a trait or make a trait for this 
+/// in future
 pub struct CalcReynolds {}
+
 impl CalcReynolds {
+    /// calculates Re = rho * U * D /mu
     #[allow(non_snake_case)]
     pub fn from_velocity(fluidDensity: MassDensity,
                      velocity: Velocity, 
@@ -51,6 +57,7 @@ impl CalcReynolds {
 
 
     #[allow(non_snake_case)]
+    /// calculates Re = mass_flow/area * D_H/mu
     pub fn from_mass_rate(fluidMassFlowrate: MassRate,
                         crossSectionalArea: Area,
                         hydraulic_diameter: Length,
@@ -78,6 +85,8 @@ impl CalcReynolds {
 
     
     #[allow(non_snake_case)]
+    /// converts Re to mass flowrate using
+    /// Re = mass_flow/area * D_H/mu
     pub fn to_mass_rate(crossSectionalArea: Area,
                         Re: f64,
                         hydraulicDiameter: Length,
@@ -104,10 +113,19 @@ impl CalcReynolds {
     }
 }
 
+/// contains assoc functions which help calculate bejan
+/// number,
+///
+/// in our context, it is a form of dimensionless pressure
+///
+/// i might want to make traits out of this in future
 pub struct CalcBejan {}
 impl CalcBejan {
 
     #[allow(non_snake_case)]
+    /// calculates Bejan number from pressure
+    ///
+    /// Be_D = Delta P * rho * D_H^2 / mu^2
     pub fn from_pressure(fluidPressure: Pressure,
               hydraulicDiameter: Length,
               fluidDensity: MassDensity,
@@ -135,6 +153,10 @@ impl CalcBejan {
     }
 
     #[allow(non_snake_case)]
+    /// converts Bejan number to pressure
+    /// using:
+    ///
+    /// Be_D = Delta P * rho * D_H^2 / mu^2
     pub fn to_pressure(Be_D: f64,
                        hydraulicDiameter: Length,
                        fluidDensity: MassDensity,

@@ -8,9 +8,27 @@
 //! friction factor for laminar, turbulent and transitional flow.
 #![warn(missing_docs)]
 extern crate uom;
-mod churchill_friction_factor;
-mod custom_fldk;
-mod dimensionalisation;
+
+
+/// calculate darcy, fanning friction factor
+/// using churchill correlation
+pub mod churchill_friction_factor;
+
+/// contains functions and/or structs
+/// which help you calcualte a custom fLDK factor
+///
+/// ie 
+///
+/// (f L/D +K ) 
+///
+/// f is the darcy firction factor
+/// L/D is length to diameter ratio
+/// K is the form loss
+pub mod custom_fldk;
+/// contains functions and/or structs
+/// which help you dimensionalise and nondimensionalise variables
+/// eg Reynold's number
+pub mod dimensionalisation;
 /// Contains structs or classes which
 /// help you calculate pressure loss from mass 
 /// flowrate and vice versa for pipes and custom components

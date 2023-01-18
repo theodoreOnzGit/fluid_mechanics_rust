@@ -1245,3 +1245,4 @@ pub use uom::si::angle::degree;
 pub use uom::si::mass_density::kilogram_per_cubic_meter;
 pub use uom::si::thermodynamic_temperature::degree_celsius;
 pub use uom::si::dynamic_viscosity::{millipascal_second, pascal_second};
+pub use uom::si::area::square_meter;
