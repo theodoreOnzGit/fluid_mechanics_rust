@@ -6,6 +6,88 @@
 //! For pipe flow, the library makes use of Churchill's Friction
 //! Factor Correlation in order to calculate darcy or fanning
 //! friction factor for laminar, turbulent and transitional flow.
+//!
+//! The primary way you are intended to use this crate is with the
+//! use of its trait objects and associated functions so that you
+//! can create your own pipe classes.
+//!
+//! Several examples are given on how to use these functions and traits.
+//!
+//! Example classes are found in the therminol component folder
+//!
+//! The therminol component folder gives you some examples of how to use
+//! the churchill friction factor, custom fldk classes and dimensionalisation
+//! to and from Reynold's number.
+//!
+//! Whereas tests and examples in the fluid_component_calculation, 
+//! fluid_component_calculation and the fluid_component_super_collection,
+//! modules are examples for creating trait objects using the given
+//! traits in this folder
+//!
+//! This crate has heavy reliance on units of measure (uom) released under 
+//! Apache 2.0 license. So you'll need to get used to unit safe calculations
+//! with uom as well.
+//!
+//!
+//! 
+//!
+//!
+//! To get started, use:
+//! ```rust
+//! extern crate fluid_mechanics_rust;
+//! use fluid_mechanics_rust::prelude::*;
+//! ```
+//!
+//!
+//! This library was developed for use in my PhD thesis under supervision 
+//! of Professor Per F. Peterson. It is part of a thermal hydraulics
+//! library in Rust that is released under the GNU General Public License
+//! v 3.0. This is partly due to the fact that some of the libraries 
+//! inherit from GeN-Foam and OpenFOAM, both licensed under GNU General
+//! Public License v3.0.
+//!
+//! As such, the entire library is released under GNU GPL v3.0. It is a strong 
+//! copyleft license which means you cannot use it in proprietary software.
+//!
+//!
+//! License
+//!    This file is part of fluid_mechanics_rust, a partial library of the
+//!    thermal hydraulics library written in rust meant to help with the
+//!    fluid mechanics aspects of the calculations
+//!     
+//!    Copyright (C) 2022-2023  Theodore Kay Chen Ong, Singapore Nuclear
+//!    Research and Safety Initiative, Per F. Peterson, University of 
+//!    California, Berkeley Thermal Hydraulics Laboratory
+//!
+//!    fluid_mechanics_rust is free software; you can redistribute it and/or modify it
+//!    under the terms of the GNU General Public License as published by the
+//!    Free Software Foundation; either version 2 of the License, or (at your
+//!    option) any later version.
+//!
+//!    fluid_mechanics_rust is distributed in the hope that it will be useful, but WITHOUT
+//!    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//!    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//!    for more details.
+//!
+//!    This library is part of a thermal hydraulics library in rust
+//!    and contains some code copied from GeN-Foam, and OpenFOAM derivative.
+//!    This offering is not approved or endorsed by the OpenFOAM Foundation nor
+//!    OpenCFD Limited, producer and distributor of the OpenFOAM(R)software via
+//!    www.openfoam.com, and owner of the OPENFOAM(R) and OpenCFD(R) trademarks.
+//!    Nor is it endorsed by the authors and owners of GeN-Foam.
+//!
+//!    You should have received a copy of the GNU General Public License
+//!    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//!
+//! © All rights reserved. Theodore Kay Chen Ong,
+//! Singapore Nuclear Research and Safety Initiative,
+//! Per F. Peterson,
+//! University of California, Berkeley Thermal Hydraulics Laboratory
+//!
+//! Main author of the code: Theodore Kay Chen Ong, supervised by
+//! Professor Per F. Peterson
+//! 
+//!
 #![warn(missing_docs)]
 extern crate uom;
 
