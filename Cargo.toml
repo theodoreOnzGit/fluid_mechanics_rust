@@ -1,6 +1,6 @@
 [package]
 name = "fluid_mechanics_rust"
-version = "0.0.10"
+version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0"
 description = "A Fluid Mechanics Library with useful traits and functions in Rust (part of a thermal hydraulics library)"
