@@ -28,10 +28,18 @@ many free and open source libraries such as:
 1. Units of measure (uom)
 2. Peroxide
 3. Roots
+4. GeN-Foam and OpenFOAM
 
 They are released under Apache 2.0 and MIT (uom and peroxide)
 and roots is released under BSD 2 clause. The licensing notices
 is provided in the licensing file.
+
+This library is released as part of a larger thermal hydraulics
+library which has some code taken from GeN-Foam, an OpenFOAM
+derivative.
+OpenFOAM and GeN-Foam are released under GNU GPL v3.0. 
+As I am reliant on these libraries under the GNU GPL v3.0
+license, this software is also released under GNU GPL v3.0.
 
 ## Principles
 

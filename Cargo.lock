@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "fluid_mechanics_rust"
-version = "0.1.0"
+version = "0.0.10"
 dependencies = [
  "approx",
  "peroxide",
