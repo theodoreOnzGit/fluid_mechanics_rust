@@ -11,8 +11,6 @@ library modifies some code in GeN-Foam, an OpenFOAM based solver
 and both are released under GNU GPL v3.0 (or later). 
 Hence, this library is also released under GNU GPL v3.0 (or later).
 
-However, the other libraries 
-
 ## GNU GPL v3.0
 
                     GNU GENERAL PUBLIC LICENSE
