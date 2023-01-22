@@ -1,4 +1,3 @@
-
 // This library was developed for use in my PhD thesis under supervision 
 // of Professor Per F. Peterson. It is part of a thermal hydraulics
 // library in Rust that is released under the GNU General Public License
