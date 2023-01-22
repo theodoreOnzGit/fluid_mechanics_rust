@@ -19,6 +19,12 @@ use roots::SimpleConvergency;
 ///
 /// this assumes that all the components in the vector
 /// are connected in series
+///
+///
+/// note that the iterative methods of finding mass flowrate from pressure change
+/// for this is EXPERIMENTAL,
+/// convergence is not guaranteed. 
+/// Use at your own risk
 pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 
 
@@ -398,6 +404,12 @@ pub trait FluidComponentCollectionSeriesAssociatedFunctions {
 ///
 /// this assumes that all the components in the vector
 /// are connected in parallel
+///
+/// note that the iterative methods for finding pressure change across
+/// the parallel branches given a mass flowrate are EXPERIMENTAL
+/// use the associated functions at your own risk,
+///
+/// stability is not guarenteed
 pub trait FluidComponentCollectionParallelAssociatedFunctions {
 
 
