@@ -61,7 +61,8 @@ pub mod standard_pipe_calc;
 /// form losses specified by the user
 pub mod custom_component_calc;
 
-
+/// Contains structs
+pub mod error_traits;
 
 
 /// This is a generic fluid component trait,
