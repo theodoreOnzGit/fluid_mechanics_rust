@@ -10,8 +10,24 @@ use uom::si::pressure::pascal;
 
 pub trait FluidComponentError{
 
-    /// computes pressure deviation completely
-    fn get_pressure_deviation() -> Pressure;
+
+    /// returns (result,deviation) tuple for pressure
+    /// given mass flowrate deviation
+    fn mass_flow_to_pressure_result_error_tuple(
+        x_value: MassRate,
+        x_error: MassRate,
+        function: &dyn Fn(MassRate) -> Pressure) -> (Pressure, Pressure) {
+
+        let result = function(x_value);
+
+        let deviation = Self::partial_pressure_deviation_massrate(
+            x_value, 
+            x_error, 
+            function);
+
+        return (result, deviation);
+
+    }
 
     /// computes pressure deviation based on 
     /// square root of sum of squares
@@ -36,11 +52,6 @@ pub trait FluidComponentError{
         return pressure_error;
     }
 
-    /// does partial deviation based on
-    /// pressure errors
-    ///
-    fn partial_pressure_deviation_pressure_reading_error()
-        -> Pressure;
 
     /// does partial deviation for pressure 
     /// based on fldk value
@@ -70,6 +81,7 @@ pub trait FluidComponentError{
 
 
     }
+
 
     /// does partial deviation for pressure 
     /// based on mass flowrate
