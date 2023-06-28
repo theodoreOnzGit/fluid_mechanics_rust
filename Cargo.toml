@@ -1,6 +1,6 @@
 [package]
 name = "fluid_mechanics_rust"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "GPL-3.0"
 description = "A Fluid Mechanics Library with useful traits and functions in Rust (part of a thermal hydraulics library)"
@@ -15,7 +15,7 @@ categories = ["science"]
 approx = "0.5.1"
 peroxide = "0.31.6"
 roots = "0.0.8"
-uom = { git = "https://github.com/iliekturtles/uom", version = "0.33.0" }
+uom = "0.34.0"
 
 # library and binary key
 [[bin]]

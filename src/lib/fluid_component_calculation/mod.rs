@@ -61,10 +61,9 @@ pub mod standard_pipe_calc;
 /// form losses specified by the user
 pub mod custom_component_calc;
 
+/// Contains structs
+pub mod error_traits;
 
-
-use uom::si::f64::*;
-use uom::si::acceleration::meter_per_second_squared;
 
 /// This is a generic fluid component trait,
 /// which specifies that fluid components in general
